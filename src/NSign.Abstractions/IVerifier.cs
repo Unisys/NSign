@@ -7,7 +7,7 @@ namespace NSign
     /// <summary>
     /// An interface to help with verifying signatures on HTTP messages.
     /// </summary>
-    public interface ISignatureVerifier
+    public interface IVerifier
     {
         /// <summary>
         /// Verifies a signature defined by its inputSpec and input against the given expectedSignature asynchronously.
