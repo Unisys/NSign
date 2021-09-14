@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>NSign</RootNamespace>
+    <AssemblyName>NSign.Abstractions</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Unify Square</Authors>
+    <Company>Unify Square</Company>
+    <PackageDescription>Abstractions for signing and verification of signatures on HTTP messages.
+
+See also: https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/</PackageDescription>
+    <PackageTags>nsign sign signing verify http message request response</PackageTags>
+  </PropertyGroup>
+
+</Project>
