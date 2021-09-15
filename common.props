@@ -1,0 +1,23 @@
+﻿<Project>
+    <PropertyGroup>
+        <LibraryTargetFramework>netstandard2.1</LibraryTargetFramework>
+        <ApplicationTargetFramework>netcoreapp3.1</ApplicationTargetFramework>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Authors>Unify Square (a Unisys company)</Authors>
+        <Product>NSign</Product>
+        <Copyright>Copyright © Unify Square (a Unisys company)</Copyright>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <DebugType>Embedded</DebugType>
+        <EmbedAllSources>True</EmbedAllSources>
+        <Features>strict</Features>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <Deterministic>true</Deterministic>
+        <ContinuousIntegrationBuild>True</ContinuousIntegrationBuild>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    </PropertyGroup>
+</Project>
