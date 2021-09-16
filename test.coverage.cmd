@@ -25,7 +25,7 @@ rem Run the individual coverage reports through the reportgenerator tool to comb
 reportgenerator -reports:%TEMPRESULTS_DIR%\**\coverage.cobertura.xml -reporttypes:Html;Cobertura ^
     -targetdir:%COVERAGE_DIR% -assemblyfilters:-%TESTPROJECTS_PATTERN% %ADDTL_GENERATORPARAMS% -verbosity:Warning
 
-echo
+echo.
 echo Finished generating report to %COVERAGE_DIR%\index.html
 
 endlocal

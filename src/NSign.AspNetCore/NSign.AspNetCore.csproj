@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>$(AspNetCoreTargetFrameworks)</TargetFrameworks>
+    <RootNamespace>NSign</RootNamespace>
+    <AssemblyName>NSign.AspNetCore</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Description>NSign for ASP.NET Core services to verify HTTP requests and sign HTTP responses.</Description>
+    <PackageDescription>NSign for ASP.NET Core services to verify HTTP requests and sign HTTP responses.
+
+See also: https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/</PackageDescription>
+    <PackageTags>nsign;sign;signing;verify;http message;request;response;aspnetcore</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+        <_Parameter1>$(AssemblyName).UnitTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StructuredFieldValues" Version="0.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NSign.Abstractions\NSign.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

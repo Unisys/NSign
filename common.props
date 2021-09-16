@@ -2,6 +2,7 @@
     <PropertyGroup>
         <LibraryTargetFramework>netstandard2.1</LibraryTargetFramework>
         <ApplicationTargetFramework>netcoreapp3.1</ApplicationTargetFramework>
+        <AspNetCoreTargetFrameworks>netcoreapp3.1;net5.0</AspNetCoreTargetFrameworks>
     </PropertyGroup>
 
     <PropertyGroup>

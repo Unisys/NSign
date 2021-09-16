@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>$(LibraryTargetFramework)</TargetFramework>
+    <RootNamespace>NSign</RootNamespace>
+    <AssemblyName>NSign.SignatureProviders</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Description>NSign signature providers for signing and verifying signatures.</Description>
+    <PackageDescription>NSign signature providers for signing and verifying signatures.
+
+See also: https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/</PackageDescription>
+    <PackageTags>nsign;sign;signing;verify;http message;request;response;rsa;hmac;signature</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NSign.Abstractions\NSign.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+        <_Parameter1>$(AssemblyName).UnitTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>
