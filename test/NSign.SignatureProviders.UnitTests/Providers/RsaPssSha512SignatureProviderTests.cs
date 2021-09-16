@@ -75,7 +75,7 @@ namespace NSign.Providers
 
             Assert.Null(signatureParams.Algorithm);
             signingProvider.UpdateSignatureParams(signatureParams);
-            Assert.Equal("rsa-v1_5-sha256", signatureParams.Algorithm);
+            Assert.Equal("rsa-pss-sha512", signatureParams.Algorithm);
         }
 
         private static RsaPssSha512SignatureProvider Make(bool forSigning = false, string keyId = null)

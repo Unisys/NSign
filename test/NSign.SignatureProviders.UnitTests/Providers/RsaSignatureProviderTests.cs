@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -10,11 +8,8 @@ namespace NSign.Providers
 {
     public sealed class RsaSignatureProviderTests
     {
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData("  ")]
-        public void CtorThrowsOnMissingAlg(string alg)
+        [Fact]
+        public void CtorValidatesInput()
         {
             ArgumentNullException ex;
 

@@ -43,18 +43,15 @@ namespace NSign.Providers
         /// </param>
         public RsaSignatureProvider(X509Certificate2 certificate, string algorithmName, string keyId) : base(keyId)
         {
-            if (null == certificate)
-            {
-                throw new ArgumentNullException(nameof(certificate));
-            }
+            Certificate = certificate ?? throw new ArgumentNullException(nameof(certificate));
+
+            privateKey = (RSA)Certificate.PrivateKey;
+            publicKey = (RSA)Certificate.PublicKey.Key;
+
             if (String.IsNullOrWhiteSpace(algorithmName))
             {
                 throw new ArgumentNullException(nameof(algorithmName));
             }
-
-            Certificate = certificate;
-            privateKey = (RSA)Certificate.PrivateKey;
-            publicKey = (RSA)Certificate.PublicKey.Key;
             this.algorithmName = algorithmName;
         }
 
