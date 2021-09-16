@@ -93,7 +93,7 @@ namespace NSign.Signatures
                             ConsumeIdentifier();
                             return true;
                         }
-                        else if (IsIntegerChar(chr))
+                        else if (IsIntegerChar(chr, isFirst: true))
                         {
                             ConsumeInteger();
                             return true;
@@ -239,11 +239,16 @@ namespace NSign.Signatures
             /// <returns>
             /// True if the character is a valid integer character.
             /// </returns>
-            private static bool IsIntegerChar(int chr)
+            private static bool IsIntegerChar(int chr, bool isFirst = false)
             {
-                // TODO: The spec currently doesn't seem to mention valid formats or whether negative values are allowed;
-                //       once it's finalized, this might need to be updated.
-                return chr >= '0' && chr <= '9';
+                if (isFirst)
+                {
+                    return chr == '-' || (chr >= '0' && chr <= '9');
+                }
+                else
+                {
+                    return chr >= '0' && chr <= '9';
+                }
             }
 
             /// <summary>

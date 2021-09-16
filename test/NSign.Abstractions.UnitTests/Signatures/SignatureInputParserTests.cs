@@ -29,7 +29,7 @@ namespace NSign.Signatures
             string input =
                 @"(""@method"" ""@target-uri"" ""@authority"" ""@scheme"" ""@request-target"" ""@path"" ""@query"" " +
                 @"""@query-params"";name=""some-param"" ""@status"" ""@request-response"";key=""mySig"" ""my-header"" " +
-                @"""my-dict-header"";key=""blah"" ""@extension"");created=1234;expires=1534;nonce=9876;alg=""signature-alg"";keyid=""key-id""";
+                @"""my-dict-header"";key=""blah"" ""@extension"");created=1234;expires=-1534;nonce=9876;alg=""signature-alg"";keyid=""key-id""";
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
 
             SignatureInputParser.ParseAndUpdate(input, signatureParams);
@@ -50,7 +50,7 @@ namespace NSign.Signatures
                 (c) => Assert.Equal(new SpecialtyComponent("@extension"), c));
 
             Assert.Equal(1234L, signatureParams.Created.Value.ToUnixTimeSeconds());
-            Assert.Equal(1534L, signatureParams.Expires.Value.ToUnixTimeSeconds());
+            Assert.Equal(-1534L, signatureParams.Expires.Value.ToUnixTimeSeconds());
             Assert.Equal(9876UL, signatureParams.Nonce.Value);
             Assert.Equal("signature-alg", signatureParams.Algorithm);
             Assert.Equal("key-id", signatureParams.KeyId);
@@ -90,7 +90,7 @@ namespace NSign.Signatures
 
         [Theory]
         [InlineData(".", "Unexpected character '.' found at position 0.")]
-        [InlineData("(-", "Unexpected character '-' found at position 1.")]
+        [InlineData("(&", "Unexpected character '&' found at position 1.")]
         [InlineData("(#", "Unexpected character '#' found at position 1.")]
         public void ParsingThrowsUnexpectedInputException(string input, string expectedMessage)
         {
