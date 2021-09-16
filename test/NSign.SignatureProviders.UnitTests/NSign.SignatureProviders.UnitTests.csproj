@@ -25,4 +25,10 @@
     <ProjectReference Include="..\..\src\NSign.SignatureProviders\NSign.SignatureProviders.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="rsa-nsign.test.local.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
