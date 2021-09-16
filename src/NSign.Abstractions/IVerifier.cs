@@ -25,9 +25,9 @@ namespace NSign
         /// A CancellationToken value that tracks cancellation of the operation.
         /// </param>
         /// <returns>
-        /// A Task which results in a boolean that defines whether or not signature verification succeeded on completion.
+        /// A Task which results in a VerificationResult value that defines the outcome of the verification on completion.
         /// </returns>
-        Task<bool> VerifyAsync(
+        Task<VerificationResult> VerifyAsync(
             SignatureParamsComponent signatureParams,
             byte[] input,
             byte[] expectedSignature,
