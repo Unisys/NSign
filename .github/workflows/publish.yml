@@ -1,0 +1,56 @@
+name: Publish Packages
+
+on:
+  workflow_run:
+    workflows: ["Build and Test"]
+    branches: [ main ]
+    types:
+      - completed
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET 3.1
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.x
+    - name: Setup .NET 5.0
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Pack
+      run: dotnet pack -c Release --no-restore
+
+    - name: Publish NSign.Abstractions package
+      uses: brandedoutcast/publish-nuget@v2
+      with:
+        PROJECT_FILE_PATH: src/NSign.Abstractions/NSign.Abstractions.csproj
+        VERSION_FILE_PATH: common.props
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+
+    - name: Publish NSign.SignatureProviders package
+      uses: brandedoutcast/publish-nuget@v2
+      with:
+        PROJECT_FILE_PATH: src/NSign.SignatureProviders/NSign.SignatureProviders.csproj
+        VERSION_FILE_PATH: common.props
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+
+    - name: Publish NSign.AspNetCore package
+      uses: brandedoutcast/publish-nuget@v2
+      with:
+        PROJECT_FILE_PATH: src/NSign.AspNetCore/NSign.AspNetCore.csproj
+        VERSION_FILE_PATH: common.props
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+
+    #- name: Publish NSign.Client
+    #  uses: brandedoutcast/publish-nuget@v2
+    #  with:
+    #    PROJECT_FILE_PATH: src/NSign.Client/NSign.Client.csproj
+    #    VERSION_FILE_PATH: common.props
+    #    NUGET_KEY: ${{secrets.NUGET_API_KEY}}

@@ -8,8 +8,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Global", "Global", "{6F1B6271-3F7D-424A-8677-285C67222DF1}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		.github\workflows\build-test.yml = .github\workflows\build-test.yml
 		common.props = common.props
+		.github\workflows\publish.yml = .github\workflows\publish.yml
 		README.md = README.md
+		.github\workflows\pull-request-build-test.yml = .github\workflows\pull-request-build-test.yml
 		test.coverage.cmd = test.coverage.cmd
 	EndProjectSection
 EndProject

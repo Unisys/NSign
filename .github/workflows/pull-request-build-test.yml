@@ -1,7 +1,7 @@
-name: Build and Test
+name: Pull Request - Build and Test
 
 on:
-  push:
+  pull_request:
     branches: [ main ]
 
 jobs:

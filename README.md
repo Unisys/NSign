@@ -1,3 +1,8 @@
+![GitHub](https://img.shields.io/github/license/rogerk-unifysquare/nsign)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/rogerk-unifysquare/NSign/Build%20and%20Test)
+![GitHub issues](https://img.shields.io/github/issues/rogerk-unifysquare/NSign)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/rogerk-unifysquare/NSign)
+
 # NSign - HTTP message signatures and verification for .NET
 
 NSign (/ˈɛn.sən/) provides libraries to sign HTTP messages based on the most recent (Aug 2021) draft of the
