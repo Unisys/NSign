@@ -74,7 +74,7 @@ namespace NSign.Signatures
         /// </returns>
         private static string GetMessage(ISignatureComponent component)
         {
-            return $"The signature component '{component.ComponentName}' of does not exist but is required.";
+            return $"The signature component '{component.ComponentName}' does not exist but is required.";
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace NSign.Signatures
         /// </returns>
         private static string GetMessage(ISignatureComponentWithName component)
         {
-            return $"The signature component '{component.ComponentName};key=\"{component.Name}\"' does not exist but is required.";
+            return $"The signature component '{component.ComponentName};name=\"{component.Name}\"' does not exist but is required.";
         }
     }
 }

@@ -236,6 +236,9 @@ namespace NSign.Signatures
             /// <param name="chr">
             /// The character to check.
             /// </param>
+            /// <param name="isFirst">
+            /// A flag which indicates whether or not this is the first integer character to be tested in sequence.
+            /// </param>
             /// <returns>
             /// True if the character is a valid integer character.
             /// </returns>
