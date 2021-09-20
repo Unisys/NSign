@@ -46,7 +46,7 @@ namespace NSign.Client
                 ItExpr.Is<CancellationToken>(c => c == CancellationToken.None))
                 .ReturnsAsync(response);
 
-            await invoker.SendAsync(request, default);
+            Assert.Same(response, await invoker.SendAsync(request, default));
 
             mockInnerHandler.Protected().Verify<Task<HttpResponseMessage>>(
                 "SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
@@ -73,7 +73,7 @@ namespace NSign.Client
                 ItExpr.Is<CancellationToken>(c => c == CancellationToken.None))
                 .ReturnsAsync(response);
 
-            await invoker.SendAsync(request, default);
+            Assert.Same(response, await invoker.SendAsync(request, default));
 
             mockInnerHandler.Protected().Verify<Task<HttpResponseMessage>>(
                 "SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
@@ -95,7 +95,7 @@ namespace NSign.Client
                 ItExpr.Is<CancellationToken>(c => c == CancellationToken.None))
                 .ReturnsAsync(response);
 
-            await invoker.SendAsync(request, default);
+            Assert.Same(response, await invoker.SendAsync(request, default));
 
             mockInnerHandler.Protected().Verify<Task<HttpResponseMessage>>(
                 "SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
