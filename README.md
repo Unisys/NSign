@@ -28,4 +28,165 @@ Please note that initially the `NSign.AspNetCore` and `NSign.Client` libraries a
 It's planned however to add support for signing HTTP *response* messages in `NSign.AspNetCore` and verify signatures on
 them in `NSign.Client` at a later stage too.
 
-More information to follow ... stay tuned.
+## Usage
+
+Below are some usage examples of the `NSign.*` libraries. Sample code will be added to the repository at a later time.
+
+### Validate signed requests in AspNetCore Server (.Net Core 3.1 and .Net 5.0)
+
+The following excerpt of an ASP.NET Core's `Startup` class can be used to verify signatures on requests sent to `/webhooks`
+endpoints (and endpoints starting with `/webhooks/`). It also makes sure that signatures include the following request
+components in their input:
+- the request method
+- the requested target URI
+- the `content-type` header of the request
+- the `digest` header of the request
+- the timestamp when the signature was created (by default)
+- the expiration of the signature (by default)
+
+Then, after signature verification has succeeded, it will also make sure that the digest of the request body matches the
+digest from the header.
+
+```csharp
+namespace WebhooksEndpoint
+{
+    public class Startup
+    {
+        // ...
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services
+                .AddControllers()
+                .Services
+
+                .Configure<RequestSignatureVerificationOptions>(ConfigureSignatureVerification)
+                .AddDigestVerification()
+                .AddSignatureVerification(CreateRsaPssSha512())
+                ;
+        }
+
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.UseRouting();
+
+            app.UseAuthorization();
+            // Validate signatures (and digests) only for webhook requests.
+            app.UseWhen(IsWebhook, UseSignatureVerification);
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+        }
+        private void ConfigureSignatureVerification(RequestSignatureVerificationOptions options)
+        {
+            options.SignaturesToVerify.Add("sample");
+
+            options.RequiredSignatureComponents.Add(SignatureComponent.Method);
+            options.RequiredSignatureComponents.Add(SignatureComponent.RequestTargetUri);
+            options.RequiredSignatureComponents.Add(SignatureComponent.Digest);
+            options.RequiredSignatureComponents.Add(SignatureComponent.ContentType);
+        }
+
+        private static void UseSignatureVerification(IApplicationBuilder app)
+        {
+            app
+                .UseSignatureVerification()
+                .UseDigestVerification()
+                ;
+        }
+
+        public static IVerifier CreateRsaPssSha512()
+        {
+            return new RsaPssSha512SignatureProvider(GetCertificate(), "my-cert");
+        }
+
+        private static X509Certificate2 GetCertificate()
+        {
+            return new X509Certificate2(@"path\to\certificate.cer");
+        }
+
+        private static bool IsWebhook(HttpContext context)
+        {
+            return context.Request.Path.StartsWithSegments("/webhooks");
+        }
+    }
+}
+```
+
+### Service sending signed requests
+
+The following example shows a very simple console app setting up hosting with dependency injection. It will make sure to
+sign all requests made through the `HttpClient` named `WebhooksCaller` are updated with a `digest` header holding the
+SHA-256 hash of the request content, and a signature secured with the private key of the certificate in
+`path\to\certificate.pfx`. It ensures that signatures include number of mandatory fields, as well as optionally the
+`content-length` header of the request, and that signatures are valid for 5 minutes only.
+
+```csharp
+namespace WebhooksCaller
+{
+    internal static class Program
+    {
+        public static async Task Main(string[] args)
+        {
+            await CreateHostBuilder(args).RunConsoleAsync();
+        }
+
+        private static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureServices(ConfigureServices)
+            ;
+
+        private static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
+        {
+            services
+                .Configure<AddDigestOptions>(options => options.WithHash(AddDigestOptions.Hash.Sha256))
+                .Configure<RequestSigningOptions>(ConfigureRequestSigner)
+
+                .AddHttpClient<ICaller, Caller>("WebhooksCaller")
+                .ConfigureHttpClient(ConfigureCallerClient)
+                .AddDigestAndSigningHandlers()
+                .Services
+
+                .AddHostedService<CallerService>()
+
+                .AddSingleton<ISigner>(new RsaPssSha512SignatureProvider(
+                    new X509Certificate2(@"path\to\certificate.pfx", "PasswordForPfx"),
+                    "my-cert"))
+                ;
+        }
+
+        private static void ConfigureRequestSigner(RequestSigningOptions options)
+        {
+            options.SignatureName = "sample";
+            options
+                .WithMandatoryComponent(SignatureComponent.Method)
+                .WithMandatoryComponent(SignatureComponent.RequestTargetUri)
+                .WithMandatoryComponent(SignatureComponent.Scheme)
+                .WithMandatoryComponent(SignatureComponent.Query)
+                .WithMandatoryComponent(SignatureComponent.Digest)
+                .WithMandatoryComponent(SignatureComponent.ContentType)
+                .WithOptionalComponent(SignatureComponent.ContentLength)
+                .SetParameters = SetSignatureCreatedAndExpries
+                ;
+        }
+
+        private static void SetSignatureCreatedAndExpries(SignatureParamsComponent signatureParams)
+        {
+            signatureParams.WithCreatedNow().WithExpires(TimeSpan.FromMinutes(5));
+        }
+
+        private static void ConfigureCallerClient(HttpClient client)
+        {
+            client.BaseAddress = new Uri("https://localhost:5001/webhooks/my/endpoint");
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("NSignSample", "0.1-beta"));
+        }
+    }
+}
+```
