@@ -24,10 +24,6 @@ namespace NSign.Client
 
         public AddDigestHandlerTests()
         {
-            mockInnerHandler.Protected().Setup<Task<HttpResponseMessage>>("SendAsync",
-                ItExpr.Is<HttpRequestMessage>(r => r == request),
-                ItExpr.Is<CancellationToken>(c => c == CancellationToken.None))
-                .ReturnsAsync(response);
             mockInnerHandler.Protected().Setup("Dispose", ItExpr.Is<bool>(d => d == true));
 
             options.WithHash(AddDigestOptions.Hash.Sha256).WithHash(AddDigestOptions.Hash.Sha512);
@@ -142,7 +138,7 @@ namespace NSign.Client
 
         private static bool VerifyDigestHeader(HttpRequestMessage request, params string[] expectedValues)
         {
-            if (!request.Headers.TryGetValues("digest", out IEnumerable<string> values))
+            if (!request.Content.Headers.TryGetValues("digest", out IEnumerable<string> values))
             {
                 return false;
             }
