@@ -11,6 +11,7 @@
         <Authors>Unify Square (a Unisys company)</Authors>
         <Product>NSign</Product>
         <Copyright>Copyright © Unify Square (a Unisys company)</Copyright>
+        <PackageIcon>icon.png</PackageIcon>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <DebugType>Embedded</DebugType>
@@ -23,4 +24,8 @@
         <ContinuousIntegrationBuild>True</ContinuousIntegrationBuild>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
     </PropertyGroup>
+
+    <ItemGroup Label="NuSpec">
+        <None Include="..\..\icon.png" Pack="true" PackagePath="\" Visible="false" />
+    </ItemGroup>
 </Project>

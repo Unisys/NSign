@@ -5,7 +5,7 @@
 
 # NSign - HTTP message signatures and verification for .NET
 
-NSign (/ˈɛn.sən/) provides libraries to sign HTTP messages based on the most recent (Aug 2021) draft of the
+NSign (/ˈensaɪn/) provides libraries to sign HTTP messages based on the most recent (Aug 2021) draft of the
 [HTTP Message Signatures](https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/) to-be standard from
 the IETF. The key motivation for the standard is to have a standard way to sign and verify HTTP messages e.g. used in
 webhook-like scenarios where a provider needs to sign HTTP request messages before sending them to subscribers, and
@@ -19,10 +19,10 @@ interfaces and implementations are subject to change.
 
 | Library | Purpose | Nuget package |
 |---|---|---|
-| NSign.Abstractions | Abstractions (interfaces, object model, etc) for all NSign libraries | Coming soon ... |
-| NSign.Providers | Signature providers (signers and verifiers) for symmetric and asymmetric signatures | Coming soon ... |
-| NSign.AspNetCore | Middleware for verifying signatures on HTTP requests. | Coming soon ... |
-| NSign.Client | HTTP message pipeline handlers for signing HTTP request messages. | Coming soon ... |
+| NSign.Abstractions | Abstractions (interfaces, object model, etc) for all NSign libraries. | ![Nuget](https://img.shields.io/nuget/v/NSign.Abstractions) ![Nuget](https://img.shields.io/nuget/dt/NSign.Abstractions) |
+| NSign.SignatureProviders | Signature providers (signers and verifiers) for symmetric and asymmetric signatures. | ![Nuget](https://img.shields.io/nuget/v/NSign.SignatureProviders) ![Nuget](https://img.shields.io/nuget/dt/NSign.SignatureProviders) |
+| NSign.AspNetCore | Middleware for verifying signatures on HTTP requests. | ![Nuget](https://img.shields.io/nuget/v/NSign.AspNetCore) ![Nuget](https://img.shields.io/nuget/dt/NSign.AspNetCore) |
+| NSign.Client | HTTP message pipeline handlers for signing HTTP request messages. | ![Nuget](https://img.shields.io/nuget/v/NSign.Client) ![Nuget](https://img.shields.io/nuget/dt/NSign.Client) |
 
 Please note that initially the `NSign.AspNetCore` and `NSign.Client` libraries are targeting HTTP *request* messages only.
 It's planned however to add support for signing HTTP *response* messages in `NSign.AspNetCore` and verify signatures on
