@@ -19,10 +19,10 @@ interfaces and implementations are subject to change.
 
 | Library | Purpose | Nuget package |
 |---|---|---|
-| NSign.Abstractions | Abstractions (interfaces, object model, etc) for all NSign libraries. | ![Nuget](https://img.shields.io/nuget/v/NSign.Abstractions) ![Nuget](https://img.shields.io/nuget/dt/NSign.Abstractions) |
-| NSign.SignatureProviders | Signature providers (signers and verifiers) for symmetric and asymmetric signatures. | ![Nuget](https://img.shields.io/nuget/v/NSign.SignatureProviders) ![Nuget](https://img.shields.io/nuget/dt/NSign.SignatureProviders) |
-| NSign.AspNetCore | Middleware for verifying signatures on HTTP requests. | ![Nuget](https://img.shields.io/nuget/v/NSign.AspNetCore) ![Nuget](https://img.shields.io/nuget/dt/NSign.AspNetCore) |
-| NSign.Client | HTTP message pipeline handlers for signing HTTP request messages. | ![Nuget](https://img.shields.io/nuget/v/NSign.Client) ![Nuget](https://img.shields.io/nuget/dt/NSign.Client) |
+| NSign.Abstractions | Abstractions (interfaces, object model, etc) for all NSign libraries. | [![Nuget](https://img.shields.io/nuget/v/NSign.Abstractions)](https://nuget.org/packages/NSign.Abstractions) |
+| NSign.SignatureProviders | Signature providers (signers and verifiers) for symmetric and asymmetric signatures. | [![Nuget](https://img.shields.io/nuget/v/NSign.SignatureProviders)](https://nuget.org/packages/NSign.SignatureProviders) |
+| NSign.AspNetCore | Middleware for verifying signatures on HTTP requests. | [![Nuget](https://img.shields.io/nuget/v/NSign.AspNetCore)](https://nuget.org/packages/NSign.AspNetCore) |
+| NSign.Client | HTTP message pipeline handlers for signing HTTP request messages. | [![Nuget](https://img.shields.io/nuget/v/NSign.Client)](https://nuget.org/packages/NSign.Client) |
 
 Please note that initially the `NSign.AspNetCore` and `NSign.Client` libraries are targeting HTTP *request* messages only.
 It's planned however to add support for signing HTTP *response* messages in `NSign.AspNetCore` and verify signatures on
