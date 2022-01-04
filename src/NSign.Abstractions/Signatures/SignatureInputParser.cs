@@ -307,8 +307,8 @@ namespace NSign.Signatures
                     break;
 
                 case Constants.SignatureParams.Nonce:
-                    tokenizer.EnsureTokenOneOfOrThrow(TokenType.Integer);
-                    signatureParams.Nonce = UInt64.Parse(tokenizer.Token.Value);
+                    tokenizer.EnsureTokenOneOfOrThrow(TokenType.QuotedString);
+                    signatureParams.Nonce = new String(tokenizer.Token.Value);
                     break;
 
                 case Constants.SignatureParams.Alg:

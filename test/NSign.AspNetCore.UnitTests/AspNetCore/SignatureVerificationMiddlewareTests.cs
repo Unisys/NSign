@@ -138,7 +138,7 @@ namespace NSign.AspNetCore
             options.ExpiresRequired = false;
             options.VerifyNonce = (input) =>
             {
-                Assert.Equal(555UL, input.SignatureParameters.Nonce);
+                Assert.Equal("aaa555", input.SignatureParameters.Nonce);
                 nonceVerificationCalled = true;
                 return false;
             };
@@ -147,7 +147,7 @@ namespace NSign.AspNetCore
             options.RequiredSignatureComponents.Add(SignatureComponent.ContentType);
 
             httpContext.Request.Headers.Add("signature", "unittest=:Test:");
-            httpContext.Request.Headers.Add("signature-input", "unittest=();created=1234;nonce=555");
+            httpContext.Request.Headers.Add("signature-input", "unittest=();created=1234;nonce=\"aaa555\"");
 
             await middleware.InvokeAsync(httpContext, CountingMiddleware);
 
@@ -227,14 +227,14 @@ namespace NSign.AspNetCore
             options.RequiredSignatureComponents.Add(SignatureComponent.Method);
             options.VerifyNonce = (inputSpec) =>
             {
-                Assert.Equal(1234UL, inputSpec.SignatureParameters.Nonce.Value);
+                Assert.Equal("test", inputSpec.SignatureParameters.Nonce);
                 nonceVerified = true;
                 return true;
             };
 
             httpContext.Request.Headers.Add("signature", "unittest=:Test:");
             httpContext.Request.Headers.Add("signature-input",
-                $"unittest=(\"@method\");nonce=1234;created={now.ToUnixTimeSeconds()};expires={now.AddSeconds(5).ToUnixTimeSeconds()}");
+                $"unittest=(\"@method\");nonce=\"test\";created={now.ToUnixTimeSeconds()};expires={now.AddSeconds(5).ToUnixTimeSeconds()}");
 
             mockVerifier
                 .Setup(v => v.VerifyAsync(

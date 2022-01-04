@@ -2,11 +2,11 @@
     <PropertyGroup>
         <LibraryTargetFramework>netstandard2.1</LibraryTargetFramework>
         <ApplicationTargetFramework>netcoreapp3.1</ApplicationTargetFramework>
-        <AspNetCoreTargetFrameworks>netcoreapp3.1;net5.0</AspNetCoreTargetFrameworks>
+        <AspNetCoreTargetFrameworks>netcoreapp3.1;net5.0;net6.0</AspNetCoreTargetFrameworks>
     </PropertyGroup>
 
     <PropertyGroup>
-        <Version>0.1.1</Version>
+        <Version>0.2.0</Version>
 
         <Authors>Unify Square (a Unisys company)</Authors>
         <Product>NSign</Product>

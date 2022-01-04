@@ -239,7 +239,7 @@ namespace NSign.AspNetCore
                     inputSpec.Name, sigParams.OriginalValue);
                 return false;
             }
-            else if (context.Options.NonceRequired && !sigParams.Nonce.HasValue)
+            else if (context.Options.NonceRequired && String.IsNullOrWhiteSpace(sigParams.Nonce))
             {
                 logger.LogDebug("Verification failed ('nonce' parameter missing) for signature '{name}' with spec '{inputSpec}'.",
                     inputSpec.Name, sigParams.OriginalValue);
@@ -257,7 +257,7 @@ namespace NSign.AspNetCore
                     inputSpec.Name, sigParams.OriginalValue);
                 return false;
             }
-            else if (sigParams.Nonce.HasValue && null != context.Options.VerifyNonce &&
+            else if (null != sigParams.Nonce && null != context.Options.VerifyNonce &&
                 !context.Options.VerifyNonce(inputSpec))
             {
                 logger.LogDebug("Nonce verification failed for signature '{name}' with spec '{inputSpec}'.",

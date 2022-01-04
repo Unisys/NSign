@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Http;
+using NSign.Signatures;
+using System;
 using System.Text;
 using Xunit;
-using Moq;
-using Microsoft.AspNetCore.Http;
-using NSign.Signatures;
 
 namespace NSign.AspNetCore
 {
@@ -62,8 +60,8 @@ namespace NSign.AspNetCore
         [Theory]
         [InlineData(@"(""x-header"");created=123", "\"x-header\": the-value")]
         [InlineData(@"(""x-dict"");expires=123", "\"x-dict\": a=a, c=d, a=b")]
-        [InlineData(@"(""x-dict"";key=""a"");nonce=123", "\"x-dict\";key=\"a\": b")]
-        [InlineData(@"(""@method"");nonce=555", "\"@method\": POST")]
+        [InlineData(@"(""x-dict"";key=""a"");nonce=""123-abc""", "\"x-dict\";key=\"a\": b")]
+        [InlineData(@"(""@method"");nonce=""555-def""", "\"@method\": POST")]
         [InlineData(@"(""@target-uri"")", "\"@target-uri\": https://test:8443/sub/dir/endpoint/name/?a=b&a=c&x=")]
         [InlineData(@"(""@authority"");alg=""blah""", "\"@authority\": test:8443")]
         [InlineData(@"(""@scheme"")", "\"@scheme\": https")]
