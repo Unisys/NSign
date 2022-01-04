@@ -5,7 +5,7 @@
 
 # NSign - HTTP message signatures and verification for .NET
 
-NSign (/ˈensaɪn/) provides libraries to sign HTTP messages based on the most recent (Aug 2021) draft of the
+NSign (/ˈensaɪn/) provides libraries to sign HTTP messages based on recent drafts (currently: Dec 20th 2021) of the
 [HTTP Message Signatures](https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/) to-be standard from
 the IETF. The key motivation for the standard is to have a standard way to sign and verify HTTP messages e.g. used in
 webhook-like scenarios where a provider needs to sign HTTP request messages before sending them to subscribers, and
@@ -190,3 +190,8 @@ namespace WebhooksCaller
     }
 }
 ```
+
+## Missing Features
+
+- [ ] Support for ECDSA using curve P-256 DSS and SHA-256 (algorithm `ecdsa-p256-sha256`)
+- [ ] Support for `Accept-Signature`
