@@ -29,7 +29,8 @@ namespace NSign.Signatures
             string input =
                 @"(""@method"" ""@target-uri"" ""@authority"" ""@scheme"" ""@request-target"" ""@path"" ""@query"" " +
                 @"""@query-params"";name=""some-param"" ""@status"" ""@request-response"";key=""mySig"" ""my-header"" " +
-                @"""my-dict-header"";key=""blah"" ""@extension"");created=1234;expires=-1534;nonce=9876;alg=""signature-alg"";keyid=""key-id""";
+                @"""my-dict-header"";key=""blah"" ""@extension"");created=1234;expires=-1534;nonce=""the-nonce"";" +
+                @"alg=""signature-alg"";keyid=""key-id""";
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
 
             SignatureInputParser.ParseAndUpdate(input, signatureParams);
@@ -51,7 +52,7 @@ namespace NSign.Signatures
 
             Assert.Equal(1234L, signatureParams.Created.Value.ToUnixTimeSeconds());
             Assert.Equal(-1534L, signatureParams.Expires.Value.ToUnixTimeSeconds());
-            Assert.Equal(9876UL, signatureParams.Nonce.Value);
+            Assert.Equal("the-nonce", signatureParams.Nonce);
             Assert.Equal("signature-alg", signatureParams.Algorithm);
             Assert.Equal("key-id", signatureParams.KeyId);
         }
@@ -66,7 +67,7 @@ namespace NSign.Signatures
         [InlineData("()created=1234", "Expected token of type Semicolon, but found token 'created' of type Identifier at position 2.")]
         [InlineData(@"();created=""1234""", "Expected token of type Integer, but found token '1234' of type QuotedString at position 11.")]
         [InlineData(@"();expires=""1234""", "Expected token of type Integer, but found token '1234' of type QuotedString at position 11.")]
-        [InlineData(@"();nonce=""1234""", "Expected token of type Integer, but found token '1234' of type QuotedString at position 9.")]
+        [InlineData(@"();nonce=1234", "Expected token of type QuotedString, but found token '1234' of type Integer at position 9.")]
         [InlineData(@"();alg=1234", "Expected token of type QuotedString, but found token '1234' of type Integer at position 7.")]
         [InlineData(@"();keyid=1234", "Expected token of type QuotedString, but found token '1234' of type Integer at position 9.")]
         [InlineData(@"(""header"";555", "Expected token of type Identifier, but found token '555' of type Integer at position 10.")]

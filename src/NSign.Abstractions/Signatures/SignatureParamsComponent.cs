@@ -66,9 +66,9 @@ namespace NSign.Signatures
         public DateTimeOffset? Expires { get; set; }
 
         /// <summary>
-        /// Gets or sets a nullable long value that serves as the signature's nonce.
+        /// Gets or sets a string value that serves as the signature's nonce.
         /// </summary>
-        public ulong? Nonce { get; set; }
+        public string Nonce { get; set; }
 
         /// <summary>
         /// Gets or sets the string that defines the signing algorithm used.
@@ -172,7 +172,7 @@ namespace NSign.Signatures
         /// <returns>
         /// The SignatureParamsComponent on which the method was called.
         /// </returns>
-        public SignatureParamsComponent WithNonce(ulong? nonce)
+        public SignatureParamsComponent WithNonce(string nonce)
         {
             Nonce = nonce;
 

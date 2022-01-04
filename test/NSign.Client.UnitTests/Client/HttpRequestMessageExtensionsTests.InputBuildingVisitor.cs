@@ -161,13 +161,13 @@ namespace NSign.Client
                 .AddComponent(SignatureComponent.Authority)
                 .WithCreated(DateTimeOffset.UnixEpoch.AddMinutes(1))
                 .WithKeyId("my-key")
-                .WithNonce(1234);
+                .WithNonce("test-nonce");
             spec.SignatureParameters.Expires = DateTimeOffset.UnixEpoch.AddMinutes(6);
             spec.SignatureParameters.Algorithm = "my";
 
             byte[] input = request.GetSignatureInput(spec, out string inputStr);
             Assert.Equal(
-                "(\"@method\" \"content-type\" \"content-length\" \"@authority\");created=60;expires=360;nonce=1234;alg=\"my\";keyid=\"my-key\"",
+                "(\"@method\" \"content-type\" \"content-length\" \"@authority\");created=60;expires=360;nonce=\"test-nonce\";alg=\"my\";keyid=\"my-key\"",
                 inputStr);
             Assert.Equal(
                 "\"@method\": PATCH\n" +

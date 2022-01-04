@@ -152,9 +152,9 @@ namespace NSign.Client
                     sb.Append($";{Constants.SignatureParams.Expires}={signatureParamsComponent.Expires.Value.ToUnixTimeSeconds()}");
                 }
 
-                if (signatureParamsComponent.Nonce.HasValue)
+                if (null != signatureParamsComponent.Nonce)
                 {
-                    sb.Append($";{Constants.SignatureParams.Nonce}={signatureParamsComponent.Nonce.Value}");
+                    sb.Append($";{Constants.SignatureParams.Nonce}=\"{signatureParamsComponent.Nonce}\"");
                 }
 
                 if (null != signatureParamsComponent.Algorithm)
