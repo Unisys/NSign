@@ -78,10 +78,10 @@ namespace NSign.Client
         [InlineData("@status")]
         [InlineData("@request-response")]
         [InlineData("@blah")]
-        public void GetSignatureInputThrowsNotSupportedExceptionForUnsupportedSpecialtyComponents(string name)
+        public void GetSignatureInputThrowsNotSupportedExceptionForUnsupportedDerivedComponents(string name)
         {
             SignatureInputSpec spec = new SignatureInputSpec("foo");
-            spec.SignatureParameters.AddComponent(new SpecialtyComponent(name));
+            spec.SignatureParameters.AddComponent(new DerivedComponent(name));
             Assert.Throws<NotSupportedException>(() => request.GetSignatureInput(spec, out _));
         }
 
@@ -107,13 +107,13 @@ namespace NSign.Client
         [InlineData("@request-target", "/the/path/to/the/endpoint?my=param&another")]
         [InlineData("@path", "/the/path/to/the/endpoint")]
         [InlineData("@query", "?my=param&another")]
-        public void GetSignatureInputGetsCorrectSpecialtyComponentValue(string name, string expectedValue)
+        public void GetSignatureInputGetsCorrectDerivedComponentValue(string name, string expectedValue)
         {
             request.Method = HttpMethod.Put;
             request.RequestUri = new Uri("https://some.host.local:8443/the/path/to/the/endpoint?my=param&another");
 
             SignatureInputSpec spec = new SignatureInputSpec("blah");
-            spec.SignatureParameters.AddComponent(new SpecialtyComponent(name));
+            spec.SignatureParameters.AddComponent(new DerivedComponent(name));
             byte[] input = request.GetSignatureInput(spec, out string inputStr);
 
             Assert.Equal($"(\"{name}\")", inputStr);

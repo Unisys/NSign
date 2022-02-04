@@ -98,7 +98,7 @@ namespace NSign.Client
             options.WithOptionalComponent(SignatureComponent.ContentType);
             options.WithOptionalComponent(new HttpHeaderDictionaryStructuredComponent("missing-dict", "abc"));
             options.WithOptionalComponent(new QueryParamsComponent("missing"));
-            options.WithOptionalComponent(new SpecialtyComponent("@blah"));
+            options.WithOptionalComponent(new DerivedComponent("@blah"));
             options.UseUpdateSignatureParams = false;
 
             mockInnerHandler.Protected().Setup<Task<HttpResponseMessage>>("SendAsync",
@@ -148,13 +148,13 @@ namespace NSign.Client
         [InlineData("@query-params", "The '@query-params' component must have the 'name' parameter set.")]
         [InlineData("@status", "The '@status' component cannot be included in request signatures.")]
         [InlineData("@request-response", "The '@request-response' component must have the 'key' parameter set.")]
-        [InlineData("@blah", "Non-special signature component '@blah' cannot be retrieved.")]
-        public async Task SendAsyncThrowsNotSupportedExceptionForSpecialtyComponentsNotSupportedOnRequests(string name, string expectedMessage)
+        [InlineData("@blah", "Non-standard derived signature component '@blah' cannot be retrieved.")]
+        public async Task SendAsyncThrowsNotSupportedExceptionForDerivedComponentsNotSupportedOnRequests(string name, string expectedMessage)
         {
             using HttpMessageInvoker invoker = new HttpMessageInvoker(handler);
 
             options.ComponentsToInclude.Clear();
-            options.WithMandatoryComponent(new SpecialtyComponent(name));
+            options.WithMandatoryComponent(new DerivedComponent(name));
             options.UseUpdateSignatureParams = false;
 
             NotSupportedException ex = await Assert.ThrowsAsync<NotSupportedException>(

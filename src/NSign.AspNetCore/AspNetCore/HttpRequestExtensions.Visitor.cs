@@ -93,29 +93,29 @@ namespace NSign.AspNetCore
             }
 
             /// <inheritdoc/>
-            public void Visit(SpecialtyComponent specialityComponent)
+            public void Visit(DerivedComponent derivedComponent)
             {
-                string value = specialityComponent.ComponentName switch
+                string value = derivedComponent.ComponentName switch
                 {
-                    Constants.SpecialtyComponents.SignatureParams => throw new NotSupportedException("The '@signature-params' component cannot be included explicitly."),
-                    Constants.SpecialtyComponents.Method => request.Method,
+                    Constants.DerivedComponents.SignatureParams => throw new NotSupportedException("The '@signature-params' component cannot be included explicitly."),
+                    Constants.DerivedComponents.Method => request.Method,
                     // TODO: Need to figure out a way to deal with reverse proxies changing paths, i.e. getting the original path/prefix.
-                    Constants.SpecialtyComponents.TargetUri => $"{request.Scheme}://{request.Host}{request.PathBase}{request.Path}{request.QueryString}",
-                    Constants.SpecialtyComponents.Authority => request.Host.Value.ToLower(),
-                    Constants.SpecialtyComponents.Scheme => request.Scheme.ToLower(),
+                    Constants.DerivedComponents.TargetUri => $"{request.Scheme}://{request.Host}{request.PathBase}{request.Path}{request.QueryString}",
+                    Constants.DerivedComponents.Authority => request.Host.Value.ToLower(),
+                    Constants.DerivedComponents.Scheme => request.Scheme.ToLower(),
                     // TODO: Need to figure out a way to deal with reverse proxies changing paths, i.e. getting the original path/prefix.
-                    Constants.SpecialtyComponents.RequestTarget => $"{request.PathBase}{request.Path}{request.QueryString}",
+                    Constants.DerivedComponents.RequestTarget => $"{request.PathBase}{request.Path}{request.QueryString}",
                     // TODO: Need to figure out a way to deal with reverse proxies changing paths, i.e. getting the original path/prefix.
-                    Constants.SpecialtyComponents.Path => $"{request.PathBase}{request.Path}",
-                    Constants.SpecialtyComponents.Query => request.QueryString.Value,
-                    Constants.SpecialtyComponents.QueryParams => throw new NotSupportedException("The '@query-params' component must have the 'name' parameter set."),
-                    Constants.SpecialtyComponents.Status => throw new NotSupportedException("The '@status' component cannot be included in request signatures."),
-                    Constants.SpecialtyComponents.RequestResponse => throw new NotSupportedException("The '@request-response' component must have the 'key' parameter set."),
+                    Constants.DerivedComponents.Path => $"{request.PathBase}{request.Path}",
+                    Constants.DerivedComponents.Query => request.QueryString.Value,
+                    Constants.DerivedComponents.QueryParams => throw new NotSupportedException("The '@query-params' component must have the 'name' parameter set."),
+                    Constants.DerivedComponents.Status => throw new NotSupportedException("The '@status' component cannot be included in request signatures."),
+                    Constants.DerivedComponents.RequestResponse => throw new NotSupportedException("The '@request-response' component must have the 'key' parameter set."),
 
-                    _ => throw new NotSupportedException($"Non-special signature component '{specialityComponent.ComponentName}' cannot be retrieved."),
+                    _ => throw new NotSupportedException($"Non-standard derived signature component '{derivedComponent.ComponentName}' cannot be retrieved."),
                 };
 
-                AddInput(specialityComponent, value);
+                AddInput(derivedComponent, value);
             }
 
             /// <inheritdoc/>

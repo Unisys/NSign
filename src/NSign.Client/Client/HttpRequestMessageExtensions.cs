@@ -90,7 +90,7 @@ namespace NSign.Client
             public abstract void Visit(HttpHeaderDictionaryStructuredComponent httpHeaderDictionary);
 
             /// <inheritdoc/>
-            public abstract void Visit(SpecialtyComponent specialityComponent);
+            public abstract void Visit(DerivedComponent derived);
 
             /// <inheritdoc/>
             public abstract void Visit(SignatureParamsComponent signatureParams);

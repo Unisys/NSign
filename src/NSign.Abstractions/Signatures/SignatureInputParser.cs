@@ -124,7 +124,7 @@ namespace NSign.Signatures
 
             if (componentNameSpan[0] == '@')
             {
-                AddSpecialtyComponent(componentName, componentParam);
+                AddDerivedComponent(componentName, componentParam);
             }
             else
             {
@@ -168,7 +168,7 @@ namespace NSign.Signatures
         }
 
         /// <summary>
-        /// Adds the given specialty component to the component list of the signatureParams.
+        /// Adds the given derived component to the component list of the signatureParams.
         /// </summary>
         /// <param name="componentName">
         /// The name of the component to add.
@@ -176,11 +176,11 @@ namespace NSign.Signatures
         /// <param name="componentParam">
         /// The optional parameter of the component to add.
         /// </param>
-        private void AddSpecialtyComponent(string componentName, KeyValuePair<string, string>? componentParam)
+        private void AddDerivedComponent(string componentName, KeyValuePair<string, string>? componentParam)
         {
             switch (componentName)
             {
-                case Constants.SpecialtyComponents.QueryParams:
+                case Constants.DerivedComponents.QueryParams:
                     if (!componentParam.HasValue ||
                         !StringComparer.Ordinal.Equals(Constants.ComponentParameters.Name, componentParam.Value.Key))
                     {
@@ -189,7 +189,7 @@ namespace NSign.Signatures
                     signatureParams.AddComponent(new QueryParamsComponent(componentParam.Value.Value));
                     break;
 
-                case Constants.SpecialtyComponents.RequestResponse:
+                case Constants.DerivedComponents.RequestResponse:
                     if (!componentParam.HasValue ||
                         !StringComparer.Ordinal.Equals(Constants.ComponentParameters.Key, componentParam.Value.Key))
                     {
@@ -199,36 +199,36 @@ namespace NSign.Signatures
                     break;
 
                 // Handle known cases without parameters too, so we can reuse existing components rather than creating more.
-                case Constants.SpecialtyComponents.Authority:
+                case Constants.DerivedComponents.Authority:
                     signatureParams.AddComponent(SignatureComponent.Authority);
                     break;
-                case Constants.SpecialtyComponents.Method:
+                case Constants.DerivedComponents.Method:
                     signatureParams.AddComponent(SignatureComponent.Method);
                     break;
-                case Constants.SpecialtyComponents.Path:
+                case Constants.DerivedComponents.Path:
                     signatureParams.AddComponent(SignatureComponent.Path);
                     break;
-                case Constants.SpecialtyComponents.Query:
+                case Constants.DerivedComponents.Query:
                     signatureParams.AddComponent(SignatureComponent.Query);
                     break;
-                case Constants.SpecialtyComponents.RequestTarget:
+                case Constants.DerivedComponents.RequestTarget:
                     signatureParams.AddComponent(SignatureComponent.RequestTarget);
                     break;
-                case Constants.SpecialtyComponents.Scheme:
+                case Constants.DerivedComponents.Scheme:
                     signatureParams.AddComponent(SignatureComponent.Scheme);
                     break;
-                case Constants.SpecialtyComponents.Status:
+                case Constants.DerivedComponents.Status:
                     signatureParams.AddComponent(SignatureComponent.Status);
                     break;
-                case Constants.SpecialtyComponents.TargetUri:
+                case Constants.DerivedComponents.TargetUri:
                     signatureParams.AddComponent(SignatureComponent.RequestTargetUri);
                     break;
 
-                case Constants.SpecialtyComponents.SignatureParams:
+                case Constants.DerivedComponents.SignatureParams:
                     throw new SignatureInputException("The @signature-params component is not allowed.");
 
                 default:
-                    signatureParams.AddComponent(new SpecialtyComponent(componentName));
+                    signatureParams.AddComponent(new DerivedComponent(componentName));
                     break;
             }
         }

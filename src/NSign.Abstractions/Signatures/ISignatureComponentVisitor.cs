@@ -30,12 +30,12 @@
         void Visit(HttpHeaderDictionaryStructuredComponent httpHeaderDictionary);
 
         /// <summary>
-        /// Visits the given SpecialtyComponent.
+        /// Visits the given DerivedComponent.
         /// </summary>
-        /// <param name="specialty">
-        /// The SpecialtyComponent that is to be visited.
+        /// <param name="derived">
+        /// The DerivedComponent that is to be visited.
         /// </param>
-        void Visit(SpecialtyComponent specialty);
+        void Visit(DerivedComponent derived);
 
         /// <summary>
         /// Visits the given SignatureParamsComponent.

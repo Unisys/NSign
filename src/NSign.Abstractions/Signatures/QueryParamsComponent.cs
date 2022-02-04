@@ -4,10 +4,10 @@ using System.Diagnostics;
 namespace NSign.Signatures
 {
     /// <summary>
-    /// Represents the '@query-params' specialty signature component for a specific query parameter.
+    /// Represents the '@query-params' derived signature component for a specific query parameter.
     /// </summary>
     [DebuggerDisplay("Type={Type}, Component={ComponentName}, Name={Name}")]
-    public sealed class QueryParamsComponent : SpecialtyComponent, ISignatureComponentWithName, IEquatable<QueryParamsComponent>
+    public sealed class QueryParamsComponent : DerivedComponent, ISignatureComponentWithName, IEquatable<QueryParamsComponent>
     {
         /// <summary>
         /// Initializes a new instance of QueryParamsComponent.
@@ -15,7 +15,7 @@ namespace NSign.Signatures
         /// <param name="name">
         /// The name of the query parameter to use with this component.
         /// </param>
-        public QueryParamsComponent(string name) : base(Constants.SpecialtyComponents.QueryParams)
+        public QueryParamsComponent(string name) : base(Constants.DerivedComponents.QueryParams)
         {
             if (String.IsNullOrWhiteSpace(name))
             {

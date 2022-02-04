@@ -4,11 +4,11 @@ using System.Diagnostics;
 namespace NSign.Signatures
 {
     /// <summary>
-    /// Represents the '@request-response' specialty signature component for a specific signature identified by its key.
+    /// Represents the '@request-response' derived signature component for a specific signature identified by its key.
     /// </summary>
     [DebuggerDisplay("Type={Type}, Component={ComponentName}, Key={Key}")]
     public sealed class RequestResponseComponent :
-        SpecialtyComponent, ISignatureComponentWithKey, IEquatable<RequestResponseComponent>
+        DerivedComponent, ISignatureComponentWithKey, IEquatable<RequestResponseComponent>
     {
         /// <summary>
         /// Initializes a new instance RequestResponseComponent.
@@ -16,7 +16,7 @@ namespace NSign.Signatures
         /// <param name="key">
         /// The key of the signature and signature input to correlate.
         /// </param>
-        public RequestResponseComponent(string key) : base(Constants.SpecialtyComponents.RequestResponse)
+        public RequestResponseComponent(string key) : base(Constants.DerivedComponents.RequestResponse)
         {
             if (String.IsNullOrWhiteSpace(key))
             {

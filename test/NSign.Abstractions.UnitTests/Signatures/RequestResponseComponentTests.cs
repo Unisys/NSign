@@ -19,9 +19,9 @@ namespace NSign.Signatures
         }
 
         [Fact]
-        public void ComponentTypeIsSpecialty()
+        public void ComponentTypeIsDerived()
         {
-            Assert.Equal(SignatureComponentType.Specialty, requestResponse.Type);
+            Assert.Equal(SignatureComponentType.Derived, requestResponse.Type);
         }
 
         [Fact]

@@ -25,9 +25,9 @@ namespace NSign.Signatures
         }
 
         [Fact]
-        public void ComponentTypeIsSpecialty()
+        public void ComponentTypeIsDerived()
         {
-            Assert.Equal(SignatureComponentType.Specialty, signatureParams.Type);
+            Assert.Equal(SignatureComponentType.Derived, signatureParams.Type);
         }
 
         [Fact]
@@ -88,7 +88,7 @@ namespace NSign.Signatures
             ex = Assert.Throws<InvalidOperationException>(() => signatureParams.AddComponent(new SignatureParamsComponent()));
             Assert.Equal("Cannot add a '@signature-params' component to a SignatureParamsComponent.", ex.Message);
 
-            ex = Assert.Throws<InvalidOperationException>(() => signatureParams.AddComponent(new SpecialtyComponent("@signature-params")));
+            ex = Assert.Throws<InvalidOperationException>(() => signatureParams.AddComponent(new DerivedComponent("@signature-params")));
             Assert.Equal("Cannot add a '@signature-params' component to a SignatureParamsComponent.", ex.Message);
         }
     }

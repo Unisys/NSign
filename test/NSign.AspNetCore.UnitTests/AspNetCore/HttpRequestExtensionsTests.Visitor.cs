@@ -51,7 +51,7 @@ namespace NSign.AspNetCore
         [InlineData(@"(""@status"")")]
         [InlineData(@"(""@request-response"";key=""sig1"")")]
         [InlineData(@"(""@blah"")")]
-        public void VisitorThrowsForUnsupportedSpecialtyComponents(string input)
+        public void VisitorThrowsForUnsupportedDerivedComponents(string input)
         {
             SignatureInputSpec inputSpec = new SignatureInputSpec("test", input);
             Assert.Throws<NotSupportedException>(() => httpContext.Request.GetSignatureInput(inputSpec));

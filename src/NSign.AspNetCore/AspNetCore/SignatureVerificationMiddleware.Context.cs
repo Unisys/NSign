@@ -28,8 +28,8 @@ namespace NSign.AspNetCore
             /// <remarks>
             /// This regex does NOT exactly parse according to RFC 8941, in particular when it comes down to commas in
             /// sf-string structured values; this however shouldn't be a problem here since the allowed values (HTTP
-            /// headers and predefined predefined specialty components, as well as parameters and their values as per the
-            /// standard) wouldn't use them.
+            /// headers and predefined derived components, as well as parameters and their values as per the standard)
+            /// wouldn't use them.
             /// </remarks>
             private static readonly Regex SignatureInputParser = new Regex(
                 "(?<=^|,\\s*) (\\w+) = ([^,]*) (?=,\\s*|$)",

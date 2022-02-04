@@ -3,17 +3,17 @@
 namespace NSign.Signatures
 {
     /// <summary>
-    /// Represents a signature component based on a specialty field as per the standard.
+    /// Represents a signature component based on a derived field as per the standard.
     /// </summary>
-    public class SpecialtyComponent : SignatureComponent
+    public class DerivedComponent : SignatureComponent
     {
         /// <summary>
-        /// Initializes a new instance of SpecialtyComponent.
+        /// Initializes a new instance of DerivedComponent.
         /// </summary>
         /// <param name="name">
-        /// The name of the specialty component.
+        /// The name of the derived component.
         /// </param>
-        public SpecialtyComponent(string name) : base(SignatureComponentType.Specialty, ValidateNameOrThrow(name)) { }
+        public DerivedComponent(string name) : base(SignatureComponentType.Derived, ValidateNameOrThrow(name)) { }
 
         /// <inheritdoc/>
         public override void Accept(ISignatureComponentVisitor visitor)

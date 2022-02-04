@@ -4,15 +4,15 @@ using Xunit;
 
 namespace NSign.Signatures
 {
-    public sealed class SpecialtyComponentTests
+    public sealed class DerivedComponentTests
     {
-        private readonly SpecialtyComponent specialty = new SpecialtyComponent("@my-specialty");
+        private readonly DerivedComponent derived = new DerivedComponent("@my-derived");
 
         [Theory]
         [InlineData("header-component")]
         public void CtorThrowsForUnsupportedComponentName(string name)
         {
-            ArgumentOutOfRangeException aoorex = Assert.Throws<ArgumentOutOfRangeException>(() => new SpecialtyComponent(name));
+            ArgumentOutOfRangeException aoorex = Assert.Throws<ArgumentOutOfRangeException>(() => new DerivedComponent(name));
 
             Assert.Equal("name", aoorex.ParamName);
         }
@@ -22,21 +22,21 @@ namespace NSign.Signatures
         [InlineData("")]
         public void CtorThrowsForUnsupportedComponentNameFromBase(string name)
         {
-            ArgumentNullException aoorex = Assert.Throws<ArgumentNullException>(() => new SpecialtyComponent(name));
+            ArgumentNullException aoorex = Assert.Throws<ArgumentNullException>(() => new DerivedComponent(name));
 
             Assert.Equal("componentName", aoorex.ParamName);
         }
 
         [Fact]
-        public void ComponentTypeIsSpecialty()
+        public void ComponentTypeIsderived()
         {
-            Assert.Equal(SignatureComponentType.Specialty, specialty.Type);
+            Assert.Equal(SignatureComponentType.Derived, derived.Type);
         }
 
         [Fact]
         public void ComponentNameIsNormalized()
         {
-            Assert.Equal("@my-specialty", specialty.ComponentName);
+            Assert.Equal("@my-derived", derived.ComponentName);
         }
 
         [Fact]
@@ -44,11 +44,11 @@ namespace NSign.Signatures
         {
             Mock<ISignatureComponentVisitor> mockVisitor = new Mock<ISignatureComponentVisitor>(MockBehavior.Strict);
 
-            mockVisitor.Setup(v => v.Visit(It.Is<SpecialtyComponent>(c => c == specialty)));
+            mockVisitor.Setup(v => v.Visit(It.Is<DerivedComponent>(c => c == derived)));
 
-            specialty.Accept(mockVisitor.Object);
+            derived.Accept(mockVisitor.Object);
 
-            mockVisitor.Verify(v => v.Visit(It.IsAny<SpecialtyComponent>()), Times.Once);
+            mockVisitor.Verify(v => v.Visit(It.IsAny<DerivedComponent>()), Times.Once);
         }
     }
 }

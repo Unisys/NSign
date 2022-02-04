@@ -89,26 +89,26 @@ namespace NSign.Client
             }
 
             /// <inheritdoc/>
-            public override void Visit(SpecialtyComponent specialityComponent)
+            public override void Visit(DerivedComponent derived)
             {
-                string value = specialityComponent.ComponentName switch
+                string value = derived.ComponentName switch
                 {
-                    Constants.SpecialtyComponents.SignatureParams => throw new NotSupportedException("The '@signature-params' component cannot be included explicitly."),
-                    Constants.SpecialtyComponents.Method => request.Method.Method,
-                    Constants.SpecialtyComponents.TargetUri => request.RequestUri.OriginalString,
-                    Constants.SpecialtyComponents.Authority => request.RequestUri.Authority.ToLower(),
-                    Constants.SpecialtyComponents.Scheme => request.RequestUri.Scheme.ToLower(),
-                    Constants.SpecialtyComponents.RequestTarget => request.RequestUri.PathAndQuery,
-                    Constants.SpecialtyComponents.Path => request.RequestUri.AbsolutePath,
-                    Constants.SpecialtyComponents.Query => request.RequestUri.Query,
-                    Constants.SpecialtyComponents.QueryParams => throw new NotSupportedException("The '@query-params' component must have the 'name' parameter set."),
-                    Constants.SpecialtyComponents.Status => throw new NotSupportedException("The '@status' component cannot be included in request signatures."),
-                    Constants.SpecialtyComponents.RequestResponse => throw new NotSupportedException("The '@request-response' component must have the 'key' parameter set."),
+                    Constants.DerivedComponents.SignatureParams => throw new NotSupportedException("The '@signature-params' component cannot be included explicitly."),
+                    Constants.DerivedComponents.Method => request.Method.Method,
+                    Constants.DerivedComponents.TargetUri => request.RequestUri.OriginalString,
+                    Constants.DerivedComponents.Authority => request.RequestUri.Authority.ToLower(),
+                    Constants.DerivedComponents.Scheme => request.RequestUri.Scheme.ToLower(),
+                    Constants.DerivedComponents.RequestTarget => request.RequestUri.PathAndQuery,
+                    Constants.DerivedComponents.Path => request.RequestUri.AbsolutePath,
+                    Constants.DerivedComponents.Query => request.RequestUri.Query,
+                    Constants.DerivedComponents.QueryParams => throw new NotSupportedException("The '@query-params' component must have the 'name' parameter set."),
+                    Constants.DerivedComponents.Status => throw new NotSupportedException("The '@status' component cannot be included in request signatures."),
+                    Constants.DerivedComponents.RequestResponse => throw new NotSupportedException("The '@request-response' component must have the 'key' parameter set."),
 
-                    _ => throw new NotSupportedException($"Non-special signature component '{specialityComponent.ComponentName}' cannot be retrieved."),
+                    _ => throw new NotSupportedException($"Non-standard derived signature component '{derived.ComponentName}' cannot be retrieved."),
                 };
 
-                AddInput(specialityComponent, value);
+                AddInput(derived, value);
             }
 
             /// <inheritdoc/>

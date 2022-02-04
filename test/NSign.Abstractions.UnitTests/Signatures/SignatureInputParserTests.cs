@@ -48,7 +48,7 @@ namespace NSign.Signatures
                 (c) => Assert.Equal(new RequestResponseComponent("mySig"), c),
                 (c) => Assert.Equal(new HttpHeaderComponent("My-Header"), c),
                 (c) => Assert.Equal(new HttpHeaderDictionaryStructuredComponent("My-Dict-Header", "blah"), c),
-                (c) => Assert.Equal(new SpecialtyComponent("@extension"), c));
+                (c) => Assert.Equal(new DerivedComponent("@extension"), c));
 
             Assert.Equal(1234L, signatureParams.Created.Value.ToUnixTimeSeconds());
             Assert.Equal(-1534L, signatureParams.Expires.Value.ToUnixTimeSeconds());

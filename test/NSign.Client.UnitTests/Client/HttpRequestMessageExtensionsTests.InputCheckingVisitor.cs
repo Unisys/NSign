@@ -62,7 +62,7 @@ namespace NSign.Client
             Assert.False(request.HasSignatureComponent(new QueryParamsComponent("non-param")));
 
             Assert.True(request.HasSignatureComponent(SignatureComponent.Query));
-            Assert.False(request.HasSignatureComponent(new SpecialtyComponent("@foo")));
+            Assert.False(request.HasSignatureComponent(new DerivedComponent("@foo")));
 
             Assert.True(request.HasSignatureComponent(new HttpHeaderComponent("content-length")));
             request.Content = null;
@@ -77,11 +77,11 @@ namespace NSign.Client
         [InlineData("@query-params")]
         [InlineData("@status")]
         [InlineData("@request-response")]
-        public void HasSignatureComponentThrowsNotSupportedExceptionForUnsupportedSpecialtyComponents(string name)
+        public void HasSignatureComponentThrowsNotSupportedExceptionForUnsupportedDerivedComponents(string name)
         {
             NotSupportedException ex = Assert.Throws<NotSupportedException>(
-                () => request.HasSignatureComponent(new SpecialtyComponent(name)));
-            Assert.Equal($"Speciality component '{name}' must be added through the corresponding class.", ex.Message);
+                () => request.HasSignatureComponent(new DerivedComponent(name)));
+            Assert.Equal($"Derived component '{name}' must be added through the corresponding class.", ex.Message);
         }
 
         [Fact]

@@ -12,44 +12,44 @@ namespace NSign.Signatures
         #region Consts
 
         /// <summary>
-        /// Represents the '@method' specialty component.
+        /// Represents the '@method' derived component.
         /// </summary>
-        public static readonly SpecialtyComponent Method = new SpecialtyComponent(Constants.SpecialtyComponents.Method);
+        public static readonly DerivedComponent Method = new DerivedComponent(Constants.DerivedComponents.Method);
 
         /// <summary>
-        /// Represents the '@target-uri' specialty component.
+        /// Represents the '@target-uri' derived component.
         /// </summary>
-        public static readonly SpecialtyComponent RequestTargetUri = new SpecialtyComponent(Constants.SpecialtyComponents.TargetUri);
+        public static readonly DerivedComponent RequestTargetUri = new DerivedComponent(Constants.DerivedComponents.TargetUri);
 
         /// <summary>
-        /// Represents the '@authority' specialty component.
+        /// Represents the '@authority' derived component.
         /// </summary>
-        public static readonly SpecialtyComponent Authority = new SpecialtyComponent(Constants.SpecialtyComponents.Authority);
+        public static readonly DerivedComponent Authority = new DerivedComponent(Constants.DerivedComponents.Authority);
 
         /// <summary>
-        /// Represents the '@scheme' specialty component.
+        /// Represents the '@scheme' derived component.
         /// </summary>
-        public static readonly SpecialtyComponent Scheme = new SpecialtyComponent(Constants.SpecialtyComponents.Scheme);
+        public static readonly DerivedComponent Scheme = new DerivedComponent(Constants.DerivedComponents.Scheme);
 
         /// <summary>
-        /// Represents the '@request-target' specialty component.
+        /// Represents the '@request-target' derived component.
         /// </summary>
-        public static readonly SpecialtyComponent RequestTarget = new SpecialtyComponent(Constants.SpecialtyComponents.RequestTarget);
+        public static readonly DerivedComponent RequestTarget = new DerivedComponent(Constants.DerivedComponents.RequestTarget);
 
         /// <summary>
-        /// Represents the '@path' specialty component.
+        /// Represents the '@path' derived component.
         /// </summary>
-        public static readonly SpecialtyComponent Path = new SpecialtyComponent(Constants.SpecialtyComponents.Path);
+        public static readonly DerivedComponent Path = new DerivedComponent(Constants.DerivedComponents.Path);
 
         /// <summary>
-        /// Represents the '@query' specialty component.
+        /// Represents the '@query' derived component.
         /// </summary>
-        public static readonly SpecialtyComponent Query = new SpecialtyComponent(Constants.SpecialtyComponents.Query);
+        public static readonly DerivedComponent Query = new DerivedComponent(Constants.DerivedComponents.Query);
 
         /// <summary>
-        /// Represents the '@status' specialty component.
+        /// Represents the '@status' derived component.
         /// </summary>
-        public static readonly SpecialtyComponent Status = new SpecialtyComponent(Constants.SpecialtyComponents.Status);
+        public static readonly DerivedComponent Status = new DerivedComponent(Constants.DerivedComponents.Status);
 
         /// <summary>
         /// Represents the 'Digest' HTTP header component.
@@ -81,7 +81,7 @@ namespace NSign.Signatures
         /// </param>
         protected SignatureComponent(SignatureComponentType type, string componentName)
         {
-            if (SignatureComponentType.HttpHeader != type && SignatureComponentType.Specialty != type)
+            if (SignatureComponentType.HttpHeader != type && SignatureComponentType.Derived != type)
             {
                 throw new ArgumentOutOfRangeException(nameof(type));
             }

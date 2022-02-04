@@ -16,8 +16,8 @@
         HttpHeader,
 
         /// <summary>
-        /// The component is a specialty field.
+        /// The component is a derived component.
         /// </summary>
-        Specialty,
+        Derived,
     }
 }

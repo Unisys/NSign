@@ -37,63 +37,63 @@
         }
 
         /// <summary>
-        /// Constants for HTTP message signing specialty components.
+        /// Constants for HTTP message signing derived components.
         /// </summary>
-        public static class SpecialtyComponents
+        public static class DerivedComponents
         {
             /// <summary>
-            /// The name of the specialty component holding signature parameters.
+            /// The name of the derived component holding signature parameters.
             /// </summary>
             public const string SignatureParams = "@signature-params";
 
             /// <summary>
-            /// The name of the specialty component holding the HTTP method of the message's associated request.
+            /// The name of the derived component holding the HTTP method of the message's associated request.
             /// </summary>
             public const string Method = "@method";
 
             /// <summary>
-            /// The name of the specialty component holding the full target URI of the message's associated request.
+            /// The name of the derived component holding the full target URI of the message's associated request.
             /// </summary>
             public const string TargetUri = "@target-uri";
 
             /// <summary>
-            /// The name of the specialty component holding the authority (host and port) of the message's associated request.
+            /// The name of the derived component holding the authority (host and port) of the message's associated request.
             /// </summary>
             public const string Authority = "@authority";
 
             /// <summary>
-            /// The name of the specialty component holding the schema of the message's associated request.
+            /// The name of the derived component holding the schema of the message's associated request.
             /// </summary>
             public const string Scheme = "@scheme";
 
             /// <summary>
-            /// The name of the specialty component holding the target (path and query) of the message's associated request.
+            /// The name of the derived component holding the target (path and query) of the message's associated request.
             /// </summary>
             public const string RequestTarget = "@request-target";
 
             /// <summary>
-            /// The name of the specialty component holding the path of the message's associated request.
+            /// The name of the derived component holding the path of the message's associated request.
             /// </summary>
             public const string Path = "@path";
 
             /// <summary>
-            /// The name of the specialty component holding the query of the message's associated request.
+            /// The name of the derived component holding the query of the message's associated request.
             /// </summary>
             public const string Query = "@query";
 
             /// <summary>
-            /// The name of the specialty component holding the dictionary-structured query parameters of the message's associated
+            /// The name of the derived component holding the dictionary-structured query parameters of the message's associated
             /// request.
             /// </summary>
             public const string QueryParams = "@query-params";
 
             /// <summary>
-            /// The name of the specialty component holding the status of the message's associated response.
+            /// The name of the derived component holding the status of the message's associated response.
             /// </summary>
             public const string Status = "@status";
 
             /// <summary>
-            /// The name of the specialty component holding the request-response signature binding.
+            /// The name of the derived component holding the request-response signature binding.
             /// </summary>
             public const string RequestResponse = "@request-response";
         }
