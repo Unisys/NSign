@@ -59,6 +59,7 @@ namespace NSign.AspNetCore
 
         [Theory]
         [InlineData(@"(""x-header"");created=123", "\"x-header\": the-value")]
+        [InlineData(@"(""x-empty"");created=123", "\"x-empty\": ")]
         [InlineData(@"(""x-dict"");expires=123", "\"x-dict\": a=a, c=d, a=b")]
         [InlineData(@"(""x-dict"";key=""a"");nonce=""123-abc""", "\"x-dict\";key=\"a\": b")]
         [InlineData(@"(""@method"");nonce=""555-def""", "\"@method\": POST")]
@@ -74,6 +75,7 @@ namespace NSign.AspNetCore
         {
             httpContext.Request.Headers.Add("x-header", "the-value");
             httpContext.Request.Headers.Add("x-dict", "a=a, c=d, a=b");
+            httpContext.Request.Headers.Add("x-empty", "");
             httpContext.Request.Method = "POST";
             httpContext.Request.Scheme = "https";
             httpContext.Request.Host = new HostString("test:8443");
