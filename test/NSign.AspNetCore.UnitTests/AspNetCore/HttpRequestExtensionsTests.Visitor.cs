@@ -63,13 +63,13 @@ namespace NSign.AspNetCore
         [InlineData(@"(""x-dict"");expires=123", "\"x-dict\": a=a, c=d, a=b")]
         [InlineData(@"(""x-dict"";key=""a"");nonce=""123-abc""", "\"x-dict\";key=\"a\": b")]
         [InlineData(@"(""@method"");nonce=""555-def""", "\"@method\": POST")]
-        [InlineData(@"(""@target-uri"")", "\"@target-uri\": https://test:8443/sub/dir/endpoint/name/?a=b&a=c&x=")]
+        [InlineData(@"(""@target-uri"")", "\"@target-uri\": https://test:8443/sub/dir/endpoint/name/?a=b&A=C&x=")]
         [InlineData(@"(""@authority"");alg=""blah""", "\"@authority\": test:8443")]
         [InlineData(@"(""@scheme"")", "\"@scheme\": https")]
-        [InlineData(@"(""@request-target"")", "\"@request-target\": /sub/dir/endpoint/name/?a=b&a=c&x=")]
+        [InlineData(@"(""@request-target"")", "\"@request-target\": /sub/dir/endpoint/name/?a=b&A=C&x=")]
         [InlineData(@"(""@path"")", "\"@path\": /sub/dir/endpoint/name/")]
-        [InlineData(@"(""@query"")", "\"@query\": ?a=b&a=c&x=")]
-        [InlineData(@"(""@query-params"";name=""a"")", "\"@query-params\";name=\"a\": b\n\"@query-params\";name=\"a\": c")]
+        [InlineData(@"(""@query"")", "\"@query\": ?a=b&A=C&x=")]
+        [InlineData(@"(""@query-params"";name=""a"")", "\"@query-params\";name=\"a\": b\n\"@query-params\";name=\"a\": C")]
         [InlineData(@"(""@query-params"";name=""x"")", "\"@query-params\";name=\"x\": ")]
         public void VisitorProducesCorrectInputString(string rawInputSpec, string expectedInputMinusSignatureParams)
         {
@@ -81,7 +81,7 @@ namespace NSign.AspNetCore
             httpContext.Request.Host = new HostString("test:8443");
             httpContext.Request.PathBase = "/sub/dir";
             httpContext.Request.Path = "/endpoint/name/";
-            httpContext.Request.QueryString = new QueryString("?a=b&a=c&x=");
+            httpContext.Request.QueryString = new QueryString("?a=b&A=C&x=");
 
             SignatureInputSpec inputSpec = new SignatureInputSpec("test", rawInputSpec);
             byte[] input = httpContext.Request.GetSignatureInput(inputSpec);
