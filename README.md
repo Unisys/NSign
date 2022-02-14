@@ -12,8 +12,10 @@ webhook-like scenarios where a provider needs to sign HTTP request messages befo
 subscribers need to verify incoming messages' signatures for authentication. Signatures can however also be applied to
 HTTP response messages for a client to verify on receipt.
 
-__*Disclaimer*__: Since the standard is currently in draft state, much like the standard itself, the libraries and its
-interfaces and implementations are subject to change.
+>__*Disclaimer*__
+>
+>Since the standard is currently in draft state, much like the standard itself, the libraries and its interfaces and
+>implementations are subject to change.
 
 ## Libraries and Nuget packages
 
@@ -32,7 +34,7 @@ them in `NSign.Client` at a later stage too.
 
 Below are some usage examples of the `NSign.*` libraries. Sample code will be added to the repository at a later time.
 
-### Validate signed requests in AspNetCore Server (.Net Core 3.1 and .Net 5.0)
+### Validate signed requests in AspNetCore Server (.Net Core 3.1 and .Net 5.0/6.0)
 
 The following excerpt of an ASP.NET Core's `Startup` class can be used to verify signatures on requests sent to `/webhooks`
 endpoints (and endpoints starting with `/webhooks/`). It also makes sure that signatures include the following request

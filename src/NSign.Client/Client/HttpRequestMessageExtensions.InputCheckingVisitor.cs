@@ -55,30 +55,30 @@ namespace NSign.Client
             }
 
             /// <inheritdoc/>
-            public override void Visit(SpecialtyComponent specialityComponent)
+            public override void Visit(DerivedComponent derived)
             {
                 if (!Found)
                 {
                     return;
                 }
 
-                switch (specialityComponent.ComponentName)
+                switch (derived.ComponentName)
                 {
-                    case Constants.SpecialtyComponents.Method:
-                    case Constants.SpecialtyComponents.TargetUri:
-                    case Constants.SpecialtyComponents.Authority:
-                    case Constants.SpecialtyComponents.Scheme:
-                    case Constants.SpecialtyComponents.RequestTarget:
-                    case Constants.SpecialtyComponents.Path:
-                    case Constants.SpecialtyComponents.Query:
+                    case Constants.DerivedComponents.Method:
+                    case Constants.DerivedComponents.TargetUri:
+                    case Constants.DerivedComponents.Authority:
+                    case Constants.DerivedComponents.Scheme:
+                    case Constants.DerivedComponents.RequestTarget:
+                    case Constants.DerivedComponents.Path:
+                    case Constants.DerivedComponents.Query:
                         break;
 
-                    case Constants.SpecialtyComponents.SignatureParams:
-                    case Constants.SpecialtyComponents.QueryParams:
-                    case Constants.SpecialtyComponents.Status:
-                    case Constants.SpecialtyComponents.RequestResponse:
+                    case Constants.DerivedComponents.SignatureParams:
+                    case Constants.DerivedComponents.QueryParams:
+                    case Constants.DerivedComponents.Status:
+                    case Constants.DerivedComponents.RequestResponse:
                         throw new NotSupportedException(
-                            $"Speciality component '{specialityComponent.ComponentName}' must be added through the corresponding class.");
+                            $"Derived component '{derived.ComponentName}' must be added through the corresponding class.");
 
                     default:
                         Found = false;

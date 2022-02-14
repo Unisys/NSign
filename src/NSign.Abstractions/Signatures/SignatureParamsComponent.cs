@@ -5,9 +5,9 @@ using System.Collections.ObjectModel;
 namespace NSign.Signatures
 {
     /// <summary>
-    /// Represents the '@signature-params' specialty signature component.
+    /// Represents the '@signature-params' derived signature component.
     /// </summary>
-    public sealed class SignatureParamsComponent : SpecialtyComponent
+    public sealed class SignatureParamsComponent : DerivedComponent
     {
         /// <summary>
         /// The Collection of SignatureComponent objects that should be included in the signature.
@@ -19,7 +19,7 @@ namespace NSign.Signatures
         /// <summary>
         /// Initializes a new instance of SignatureParamsComponent.
         /// </summary>
-        public SignatureParamsComponent() : base(Constants.SpecialtyComponents.SignatureParams)
+        public SignatureParamsComponent() : base(Constants.DerivedComponents.SignatureParams)
         {
             components = new Collection<SignatureComponent>();
         }
@@ -94,7 +94,7 @@ namespace NSign.Signatures
         public SignatureParamsComponent AddComponent(SignatureComponent component)
         {
             if (component is SignatureParamsComponent ||
-                component.ComponentName.Equals(Constants.SpecialtyComponents.SignatureParams))
+                component.ComponentName.Equals(Constants.DerivedComponents.SignatureParams))
             {
                 throw new InvalidOperationException("Cannot add a '@signature-params' component to a SignatureParamsComponent.");
             }
