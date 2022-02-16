@@ -25,13 +25,6 @@ namespace NSign.Providers
         { }
 
         /// <inheritdoc/>
-        public override void UpdateSignatureParams(SignatureParamsComponent signatureParams)
-        {
-            base.UpdateSignatureParams(signatureParams);
-            signatureParams.Algorithm = Constants.SignatureAlgorithms.RsaPkcs15Sha256;
-        }
-
-        /// <inheritdoc/>
         protected override HashAlgorithmName SignatureHash => HashAlgorithmName.SHA256;
 
         /// <inheritdoc/>

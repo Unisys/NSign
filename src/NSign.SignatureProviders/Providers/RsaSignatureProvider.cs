@@ -45,8 +45,12 @@ namespace NSign.Providers
         {
             Certificate = certificate ?? throw new ArgumentNullException(nameof(certificate));
 
-            privateKey = (RSA)Certificate.PrivateKey;
-            publicKey = (RSA)Certificate.PublicKey.Key;
+            privateKey = Certificate.GetRSAPrivateKey();
+            publicKey = Certificate.GetRSAPublicKey();
+            if (null == publicKey)
+            {
+                throw new ArgumentException("The certificate does not use RSA keys.", nameof(certificate));
+            }
 
             if (String.IsNullOrWhiteSpace(algorithmName))
             {
@@ -119,6 +123,17 @@ namespace NSign.Providers
             }
 
             return Task.FromResult(result);
+        }
+
+        /// <inheritdoc/>
+        public override void UpdateSignatureParams(SignatureParamsComponent signatureParams)
+        {
+            base.UpdateSignatureParams(signatureParams);
+
+            if (!String.IsNullOrWhiteSpace(algorithmName))
+            {
+                signatureParams.Algorithm = algorithmName;
+            }
         }
 
         /// <summary>

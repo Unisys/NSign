@@ -11,10 +11,15 @@ namespace NSign.Providers
         [Fact]
         public void CtorValidatesInput()
         {
-            ArgumentNullException ex;
+            ArgumentException ex;
 
             ex = Assert.Throws<ArgumentNullException>(() => new TestRsa(null, null, null));
             Assert.Equal("certificate", ex.ParamName);
+
+            ex = Assert.Throws<ArgumentException>(
+                () => new TestRsa(Certificates.GetCertificate("ecdsa-p256-nsign.test.local.cer"), null, null));
+            Assert.Equal("certificate", ex.ParamName);
+            Assert.Equal("The certificate does not use RSA keys. (Parameter 'certificate')", ex.Message);
 
             ex = Assert.Throws<ArgumentNullException>(
                 () => new TestRsa(Certificates.GetCertificate("rsa-nsign.test.local.cer"), null, null));
