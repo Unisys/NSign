@@ -41,16 +41,48 @@ namespace NSign.Providers
         /// The value for the KeyId parameter of signatures produced with this provider or null if the value should not
         /// be set / is not important.
         /// </param>
-        public RsaSignatureProvider(X509Certificate2 certificate, string algorithmName, string keyId) : base(keyId)
+        public RsaSignatureProvider(X509Certificate2 certificate, string algorithmName, string keyId) :
+            this(
+                // Also check that the certificate is not null.
+                (certificate ?? throw new ArgumentNullException(nameof(certificate))).GetRSAPrivateKey(),
+                // Also check that the certificate uses RSA keys.
+                certificate.GetRSAPublicKey() ??
+                    throw new ArgumentException("The certificate does not use RSA keys.", nameof(certificate)),
+                algorithmName,
+                keyId)
         {
-            Certificate = certificate ?? throw new ArgumentNullException(nameof(certificate));
+            Certificate = certificate;
+        }
 
-            privateKey = Certificate.GetRSAPrivateKey();
-            publicKey = Certificate.GetRSAPublicKey();
+        /// <summary>
+        /// Initializes a new instance of RsaSignatureProvider.
+        /// </summary>
+        /// <param name="privateKey">
+        /// The <see cref="RSA"/> object that represents the private key or null if signing with this provider is not
+        /// needed.
+        /// </param>
+        /// <param name="publicKey">
+        /// The <see cref="RSA"/> object that represents the public key to use for signature verification.
+        /// </param>
+        /// <param name="algorithmName">
+        /// The name of the asymmetric signature algorithm provided by this instance.
+        /// </param>
+        /// <param name="keyId">
+        /// The value for the KeyId parameter of signatures produced with this provider or null if the value should not
+        /// be set / is not important.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if the <paramref name="publicKey"/> is null.
+        /// </exception>
+        public RsaSignatureProvider(RSA privateKey, RSA publicKey, string algorithmName, string keyId) : base(keyId)
+        {
             if (null == publicKey)
             {
-                throw new ArgumentException("The certificate does not use RSA keys.", nameof(certificate));
+                throw new ArgumentNullException(nameof(publicKey));
             }
+
+            this.privateKey = privateKey;
+            this.publicKey = publicKey;
 
             if (String.IsNullOrWhiteSpace(algorithmName))
             {

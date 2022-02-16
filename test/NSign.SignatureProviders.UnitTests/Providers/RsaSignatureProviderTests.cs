@@ -27,6 +27,20 @@ namespace NSign.Providers
         }
 
         [Fact]
+        public void CtorWithKeysValidatesInput()
+        {
+            ArgumentException ex;
+            RSA publicKey = RSA.Create();
+
+            ex = Assert.Throws<ArgumentNullException>(() => new TestRsa(null, null, null, null));
+            Assert.Equal("publicKey", ex.ParamName);
+
+            ex = Assert.Throws<ArgumentNullException>(
+                () => new TestRsa(null, publicKey, null, null));
+            Assert.Equal("algorithmName", ex.ParamName);
+        }
+
+        [Fact]
         public async Task SignAsyncThrowsWhenPrivateKeyMissing()
         {
             TestRsa provider = Make(false);
@@ -41,6 +55,7 @@ namespace NSign.Providers
         {
             using TestRsa signingProvider = Make(true);
             using TestRsa verifyingProvider = Make(false);
+            using TestRsa providerWithPublicKey = new TestRsa(null, RSA.Create(), "test-rsa", null);
         }
 
         private static TestRsa Make(bool forSigning = false, string keyId = null)
@@ -63,6 +78,10 @@ namespace NSign.Providers
         {
             public TestRsa(X509Certificate2 certificate, string algorithmName, string keyId)
                 : base(certificate, algorithmName, keyId)
+            { }
+
+            public TestRsa(RSA privateKey, RSA publicKey, string algorithmName, string keyId)
+                : base(privateKey, publicKey, algorithmName, keyId)
             { }
 
             protected override HashAlgorithmName SignatureHash => throw new NotImplementedException();
