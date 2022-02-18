@@ -8,19 +8,19 @@ using System.Threading.Tasks;
 namespace NSign.Providers
 {
     /// <summary>
-    /// Base class for RSA (asymmetric) signature providers.
+    /// Base class for ECDSA (asymmetric) signature providers.
     /// </summary>
-    public abstract class RsaSignatureProvider : SignatureProvider, IDisposable
+    public abstract class ECDsaSignatureProvider : SignatureProvider, IDisposable
     {
         /// <summary>
         /// The private key used to sign.
         /// </summary>
-        private readonly RSA privateKey;
+        private readonly ECDsa privateKey;
 
         /// <summary>
         /// The public key used to verify signatures.
         /// </summary>
-        private readonly RSA publicKey;
+        private readonly ECDsa publicKey;
 
         /// <summary>
         /// The name of the symmetric signature algorithm provided by this instance.
@@ -41,48 +41,14 @@ namespace NSign.Providers
         /// The value for the KeyId parameter of signatures produced with this provider or null if the value should not
         /// be set / is not important.
         /// </param>
-        public RsaSignatureProvider(X509Certificate2 certificate, string algorithmName, string keyId) :
-            this(
-                // Also check that the certificate is not null.
-                (certificate ?? throw new ArgumentNullException(nameof(certificate))).GetRSAPrivateKey(),
-                // Also check that the certificate uses RSA keys.
-                certificate.GetRSAPublicKey() ??
-                    throw new ArgumentException("The certificate does not use RSA keys.", nameof(certificate)),
-                algorithmName,
-                keyId)
+        public ECDsaSignatureProvider(X509Certificate2 certificate, string algorithmName, string keyId) : base(keyId)
         {
-            Certificate = certificate;
-        }
+            Certificate = certificate ?? throw new ArgumentNullException(nameof(certificate));
 
-        /// <summary>
-        /// Initializes a new instance of RsaSignatureProvider.
-        /// </summary>
-        /// <param name="privateKey">
-        /// The <see cref="RSA"/> object that represents the private key or null if signing with this provider is not
-        /// needed.
-        /// </param>
-        /// <param name="publicKey">
-        /// The <see cref="RSA"/> object that represents the public key to use for signature verification.
-        /// </param>
-        /// <param name="algorithmName">
-        /// The name of the asymmetric signature algorithm provided by this instance.
-        /// </param>
-        /// <param name="keyId">
-        /// The value for the KeyId parameter of signatures produced with this provider or null if the value should not
-        /// be set / is not important.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown if the <paramref name="publicKey"/> is null.
-        /// </exception>
-        public RsaSignatureProvider(RSA privateKey, RSA publicKey, string algorithmName, string keyId) : base(keyId)
-        {
-            if (null == publicKey)
-            {
-                throw new ArgumentNullException(nameof(publicKey));
-            }
-
-            this.privateKey = privateKey;
-            this.publicKey = publicKey;
+            privateKey = Certificate.GetECDsaPrivateKey();
+            publicKey = Certificate.GetECDsaPublicKey();
+            // Give derived classes a chance to reject the certificate because the curve doesn't match.
+            CheckKeyAlgorithm(publicKey, nameof(certificate));
 
             if (String.IsNullOrWhiteSpace(algorithmName))
             {
@@ -128,7 +94,7 @@ namespace NSign.Providers
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            return Task.FromResult(privateKey.SignData(input, SignatureHash, SignaturePadding));
+            return Task.FromResult(privateKey.SignData(input, SignatureHash));
         }
 
         /// <inheritdoc/>
@@ -149,7 +115,7 @@ namespace NSign.Providers
             }
 
             VerificationResult result = VerificationResult.SignatureMismatch;
-            if (publicKey.VerifyData(input, expectedSignature, SignatureHash, SignaturePadding))
+            if (publicKey.VerifyData(input, expectedSignature, SignatureHash))
             {
                 result = VerificationResult.SuccessfullyVerified;
             }
@@ -174,8 +140,24 @@ namespace NSign.Providers
         protected abstract HashAlgorithmName SignatureHash { get; }
 
         /// <summary>
-        /// Gets the <see cref="RSASignaturePadding"/> object identifying the signature padding mode to use for the signatures.
+        /// Checks if the given public key matches the parameters required by this signature provider.
         /// </summary>
-        protected abstract RSASignaturePadding SignaturePadding { get; }
+        /// <param name="publicKey">
+        /// The ECDsa object representing the public key of the certificate.
+        /// </param>
+        /// <param name="parameterName">
+        /// The name of the parameter which held the certificate the given public key is from.
+        /// </param>
+        /// <remarks>
+        /// The base implementation (<see cref="CheckKeyAlgorithm"/>) only checks that there is a valid ECDsa key. It
+        /// does not check for a specific elliptic curve or other parameters of the key.
+        /// </remarks>
+        protected virtual void CheckKeyAlgorithm(ECDsa publicKey, string parameterName)
+        {
+            if (null == publicKey)
+            {
+                throw new ArgumentException("The certificate does not use elliptic curve keys.", parameterName);
+            }
+        }
     }
 }

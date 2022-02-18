@@ -1,5 +1,4 @@
-﻿using NSign.Signatures;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace NSign.Providers
@@ -24,12 +23,23 @@ namespace NSign.Providers
             : base(certificate, Constants.SignatureAlgorithms.RsaPkcs15Sha256, keyId)
         { }
 
-        /// <inheritdoc/>
-        public override void UpdateSignatureParams(SignatureParamsComponent signatureParams)
-        {
-            base.UpdateSignatureParams(signatureParams);
-            signatureParams.Algorithm = Constants.SignatureAlgorithms.RsaPkcs15Sha256;
-        }
+        /// <summary>
+        /// Initializes a new instance of RsaPkcs15Sha256SignatureProvider.
+        /// </summary>
+        /// <param name="privateKey">
+        /// The <see cref="RSA"/> object that represents the private key or null if signing with this provider is not
+        /// needed.
+        /// </param>
+        /// <param name="publicKey">
+        /// The <see cref="RSA"/> object that represents the public key to use for signature verification.
+        /// </param>
+        /// <param name="keyId">
+        /// The value for the KeyId parameter of signatures produced with this provider or null if the value should not
+        /// be set / is not important.
+        /// </param>
+        public RsaPkcs15Sha256SignatureProvider(RSA privateKey, RSA publicKey, string keyId)
+            : base(privateKey, publicKey, Constants.SignatureAlgorithms.RsaPkcs15Sha256, keyId)
+        { }
 
         /// <inheritdoc/>
         protected override HashAlgorithmName SignatureHash => HashAlgorithmName.SHA256;

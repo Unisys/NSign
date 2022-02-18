@@ -302,6 +302,12 @@ namespace NSign.AspNetCore
         {
             byte[] expectedSignature = signatureContext.Signature;
             byte[] input = context.Request.GetSignatureInput(inputSpec);
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.LogDebug("Verifying signature '{sigName}' input spec '{inputSpec}' against signature '{sig}'.",
+                    signatureContext.Name, signatureContext.InputSpec, Convert.ToBase64String(signatureContext.Signature));
+                logger.LogDebug("Input generated from request: '{input}'.", System.Text.Encoding.UTF8.GetString(input));
+            }
 
             try
             {

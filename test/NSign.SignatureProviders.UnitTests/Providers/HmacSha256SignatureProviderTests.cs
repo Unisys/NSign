@@ -10,6 +10,50 @@ namespace NSign.Providers
     public sealed class HmacSha256SignatureProviderTests
     {
         private readonly Random rng = new Random();
+        private static readonly byte[] defaultKey = Encoding.ASCII.GetBytes("mykey");
+        private static readonly byte[] sharedKeyFromStandard =
+            Convert.FromBase64String("uzvJfB4u3N0Jy4T7NZ75MDVcr8zSTInedJtkgcu46YW4XByzNJjxBdtjUkdJPBtbmHhIDi6pcl8jsasjlTMtDQ==");
+
+        #region From standard
+
+        [Fact]
+        public async Task Standard_B_2_5_Sign()
+        {
+            HmacSha256SignatureProvider provider = Make("test-shared-secret", sharedKeyFromStandard);
+
+            string input =
+                "\"date\": Tue, 20 Apr 2021 02:07:55 GMT\n" +
+                "\"@authority\": example.com\n" +
+                "\"content-type\": application/json\n" +
+                "\"@signature-params\": (\"date\" \"@authority\" \"content-type\");created=1618884473;keyid=\"test-shared-secret\"";
+
+            byte[] signature = await provider.SignAsync(Encoding.ASCII.GetBytes(input), default);
+            string sigBase64 = Convert.ToBase64String(signature);
+            Assert.Equal("pxcQw6G3AjtMBQjwo8XzkZf/bws5LelbaMk5rGIGtE8=", sigBase64);
+        }
+
+        [Fact]
+        public async Task Standard_B_2_5_Verify()
+        {
+            HmacSha256SignatureProvider provider = Make("test-shared-secret", sharedKeyFromStandard);
+
+            string input =
+                "\"date\": Tue, 20 Apr 2021 02:07:55 GMT\n" +
+                "\"@authority\": example.com\n" +
+                "\"content-type\": application/json\n" +
+                "\"@signature-params\": (\"date\" \"@authority\" \"content-type\");created=1618884473;keyid=\"test-shared-secret\"";
+            SignatureParamsComponent sigParams = new SignatureParamsComponent(
+                "(\"date\" \"@authority\" \"content-type\");created=1618884473;keyid=\"test-shared-secret\"");
+
+            VerificationResult result = await provider.VerifyAsync(
+                sigParams,
+                Encoding.ASCII.GetBytes(input),
+                Convert.FromBase64String("pxcQw6G3AjtMBQjwo8XzkZf/bws5LelbaMk5rGIGtE8="),
+                default);
+            Assert.Equal(VerificationResult.SuccessfullyVerified, result);
+        }
+
+        #endregion
 
         [Theory]
         [InlineData(null)]
@@ -80,9 +124,14 @@ namespace NSign.Providers
             return new HmacSha256SignatureProvider(Encoding.ASCII.GetBytes("mykey"));
         }
 
-        private static HmacSha256SignatureProvider Make(string keyId = null)
+        private static HmacSha256SignatureProvider Make(string keyId = null, byte[] keyBytes = null)
         {
-            return new HmacSha256SignatureProvider(Encoding.ASCII.GetBytes("mykey"), keyId);
+            if (null == keyBytes)
+            {
+                keyBytes = defaultKey;
+            }
+
+            return new HmacSha256SignatureProvider(keyBytes, keyId);
         }
     }
 }
