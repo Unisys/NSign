@@ -84,23 +84,19 @@ namespace NSign.Providers
         #endregion
 
         [Theory]
-        [InlineData(
-            "ecdsa-p192-nsign.test.local",
-            "A certificate with elliptic curve P-256 (oid: 1.2.840.10045.3.1.7) is expected, but curve 'nistP192' (oid: ) was provided.")]
-        [InlineData(
-            "ecdsa-p384-nsign.test.local",
-            "A certificate with elliptic curve P-256 (oid: 1.2.840.10045.3.1.7) is expected, but curve 'nistP384' (oid: 1.3.132.0.34) was provided.")]
+        [InlineData("ecdsa-p192-nsign.test.local", "P192")]
+        [InlineData("ecdsa-p384-nsign.test.local", "P384")]
         [InlineData("rsa-nsign.test.local", "The certificate does not use elliptic curve keys.")]
-        public void CtorFailsForNonP256Curve(string cert, string expectedMessage)
+        public void CtorFailsForNonP256Curve(string cert, string expectedCurve)
         {
             ArgumentException ex;
             ex = Assert.Throws<ArgumentException>(() => Make(true, certName: cert));
             Assert.Equal("certificate", ex.ParamName);
-            Assert.Equal($"{expectedMessage} (Parameter 'certificate')", ex.Message);
+            Assert.Contains(expectedCurve, ex.Message);
 
             ex = Assert.Throws<ArgumentException>(() => Make(false, certName: cert));
             Assert.Equal("certificate", ex.ParamName);
-            Assert.Equal($"{expectedMessage} (Parameter 'certificate')", ex.Message);
+            Assert.Contains(expectedCurve, ex.Message);
         }
 
         [Theory]
