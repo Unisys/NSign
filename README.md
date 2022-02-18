@@ -195,5 +195,6 @@ namespace WebhooksCaller
 
 ## Missing Features
 
-- [ ] Support for ECDSA using curve P-256 DSS and SHA-256 (algorithm `ecdsa-p256-sha256`)
+- [ ] Support for EdDSA using curve edwards25519 (algorithm `ed25519`)
+- [ ] Support for JSON Web Signature algorithms
 - [ ] Support for `Accept-Signature`
