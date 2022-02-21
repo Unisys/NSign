@@ -32,7 +32,7 @@ jobs:
       run: dotnet pack -c Release --no-restore -o .
 
     - name: Publish Nuget packages
-      run: dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json --skip-duplicate -n 1 -k ${{secrets.NUGET_API_KEY}}
+      run: dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json --skip-duplicate -n -k ${{secrets.NUGET_API_KEY}}
     - name: Tag release
       # Extract the version from the common.props' Version tag.
       run: |
