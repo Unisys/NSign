@@ -29,32 +29,16 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
     - name: Pack
-      run: dotnet pack -c Release --no-restore
+      run: dotnet pack -c Release --no-restore -o .
 
-    - name: Publish NSign.Abstractions package
-      uses: brandedoutcast/publish-nuget@v2
-      with:
-        PROJECT_FILE_PATH: src/NSign.Abstractions/NSign.Abstractions.csproj
-        VERSION_FILE_PATH: common.props
-        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
-
-    - name: Publish NSign.SignatureProviders package
-      uses: brandedoutcast/publish-nuget@v2
-      with:
-        PROJECT_FILE_PATH: src/NSign.SignatureProviders/NSign.SignatureProviders.csproj
-        VERSION_FILE_PATH: common.props
-        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
-
-    - name: Publish NSign.AspNetCore package
-      uses: brandedoutcast/publish-nuget@v2
-      with:
-        PROJECT_FILE_PATH: src/NSign.AspNetCore/NSign.AspNetCore.csproj
-        VERSION_FILE_PATH: common.props
-        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
-
-    - name: Publish NSign.Client
-      uses: brandedoutcast/publish-nuget@v2
-      with:
-        PROJECT_FILE_PATH: src/NSign.Client/NSign.Client.csproj
-        VERSION_FILE_PATH: common.props
-        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+    - name: Publish Nuget packages
+      run: dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json --skip-duplicate -n 1 -k ${{secrets.NUGET_API_KEY}}
+    - name: Tag release
+      # Extract the version from the common.props' Version tag.
+      run: |
+        version=$(cat common.props | grep -Eo '<Version>(.*)</Version>' | sed -r 's|<Version>(.*)</Version>|\1|')
+        tagName=v$version
+        echo "Tagging version $version as '$tagName'"
+        git tag $tagName
+        git push origin $tagName
+        echo 'Successfully tagged.'
