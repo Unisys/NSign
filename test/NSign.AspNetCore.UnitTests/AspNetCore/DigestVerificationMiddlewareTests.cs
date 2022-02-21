@@ -37,6 +37,18 @@ namespace NSign.AspNetCore
             Assert.Equal(0, Interlocked.Read(ref numCallsToNext));
         }
 
+        [Fact]
+        public async Task MissingDigestHeaderDoesNotCauseMissingHeaderResponseStatusWhenDigestIsOptional()
+        {
+            options.MissingHeaderResponseStatus = 456;
+            options.Behavior |= VerificationBehavior.Optional;
+
+            await middleware.InvokeAsync(httpContext, CountingMiddleware);
+
+            Assert.Equal(200, httpContext.Response.StatusCode);
+            Assert.Equal(1, Interlocked.Read(ref numCallsToNext));
+        }
+
         [Theory]
         [InlineData(
             new string[]
