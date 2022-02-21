@@ -43,6 +43,11 @@ namespace NSign.AspNetCore
             /// Require only a single algorithm's digest to match.
             /// </summary>
             RequireOnlySingleMatch = 0x10,
+
+            /// <summary>
+            /// The 'Digest' header is not required; it's verified only when present.
+            /// </summary>
+            Optional = 0x0100,
         }
     }
 }

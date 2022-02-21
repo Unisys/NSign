@@ -71,7 +71,18 @@ namespace NSign.AspNetCore
 
             if (!context.Request.Headers.TryGetValue(Constants.Headers.Digest, out StringValues values))
             {
-                context.Response.StatusCode = options.MissingHeaderResponseStatus;
+                logger.LogDebug("There is not 'Digest' header in the request.");
+                if (!options.Behavior.HasFlag(DigestVerificationOptions.VerificationBehavior.Optional))
+                {
+                    // Terminate the request with the corresponding status code.
+                    context.Response.StatusCode = options.MissingHeaderResponseStatus;
+                }
+                else
+                {
+                    // Just move on to the next handler in the pipeline.
+                    await next(context);
+                }
+
                 return;
             }
 
