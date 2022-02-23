@@ -67,9 +67,9 @@ namespace NSign.AspNetCore
                 Constants.DerivedComponents.QueryParams
                     => throw new NotSupportedException("The '@query-params' component value cannot be retrieved like this."),
                 Constants.DerivedComponents.Status
-                    => throw new NotSupportedException("The '@status' component value cannot be retrieved like this."),
+                    => throw new NotSupportedException("The '@status' component value cannot be retrieved for request messages."),
                 Constants.DerivedComponents.RequestResponse
-                    => throw new NotSupportedException("The '@request-response' component value cannot be retrieved like this."),
+                    => throw new NotSupportedException("The '@request-response' component value cannot be retrieved for request messages."),
 
                 _ => throw new NotSupportedException($"Non-standard derived signature component '{derivedComponent.ComponentName}' cannot be retrieved."),
             };
