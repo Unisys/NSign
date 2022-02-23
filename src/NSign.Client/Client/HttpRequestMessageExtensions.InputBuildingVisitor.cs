@@ -93,19 +93,26 @@ namespace NSign.Client
             {
                 string value = derived.ComponentName switch
                 {
-                    Constants.DerivedComponents.SignatureParams => throw new NotSupportedException("The '@signature-params' component cannot be included explicitly."),
+                    Constants.DerivedComponents.SignatureParams =>
+                        throw new NotSupportedException("The '@signature-params' component cannot be included explicitly."),
                     Constants.DerivedComponents.Method => request.Method.Method,
                     Constants.DerivedComponents.TargetUri => request.RequestUri.OriginalString,
                     Constants.DerivedComponents.Authority => request.RequestUri.Authority.ToLower(),
                     Constants.DerivedComponents.Scheme => request.RequestUri.Scheme.ToLower(),
                     Constants.DerivedComponents.RequestTarget => request.RequestUri.PathAndQuery,
                     Constants.DerivedComponents.Path => request.RequestUri.AbsolutePath,
-                    Constants.DerivedComponents.Query => request.RequestUri.Query,
-                    Constants.DerivedComponents.QueryParams => throw new NotSupportedException("The '@query-params' component must have the 'name' parameter set."),
-                    Constants.DerivedComponents.Status => throw new NotSupportedException("The '@status' component cannot be included in request signatures."),
-                    Constants.DerivedComponents.RequestResponse => throw new NotSupportedException("The '@request-response' component must have the 'key' parameter set."),
+                    Constants.DerivedComponents.Query =>
+                        String.IsNullOrWhiteSpace(request.RequestUri.Query) ?
+                            "?" : request.RequestUri.Query,
+                    Constants.DerivedComponents.QueryParams =>
+                        throw new NotSupportedException("The '@query-params' component must have the 'name' parameter set."),
+                    Constants.DerivedComponents.Status =>
+                        throw new NotSupportedException("The '@status' component cannot be included in request signatures."),
+                    Constants.DerivedComponents.RequestResponse =>
+                        throw new NotSupportedException("The '@request-response' component must have the 'key' parameter set."),
 
-                    _ => throw new NotSupportedException($"Non-standard derived signature component '{derived.ComponentName}' cannot be retrieved."),
+                    _ =>
+                        throw new NotSupportedException($"Non-standard derived signature component '{derived.ComponentName}' cannot be retrieved."),
                 };
 
                 AddInput(derived, value);

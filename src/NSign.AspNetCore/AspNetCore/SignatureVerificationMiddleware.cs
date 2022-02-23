@@ -92,14 +92,22 @@ namespace NSign.AspNetCore
                 logger.LogDebug("No signature was verified.");
                 httpContext.Response.StatusCode = context.Options.MissingSignatureResponseStatus;
             }
-            else if (results.Any(SignatureInputError))
+            else if (results.Any(VerificationResultPredicates.SignatureInputError))
             {
-                logger.LogDebug("Signatures {signatures} had input errors.", String.Join("|", results.Where(SignatureInputError)));
+                if (logger.IsEnabled(LogLevel.Debug))
+                {
+                    logger.LogDebug("Signatures {signatures} had input errors.",
+                        String.Join("|", results.Where(VerificationResultPredicates.SignatureInputError)));
+                }
                 httpContext.Response.StatusCode = context.Options.SignatureInputErrorResponseStatus;
             }
-            else if (results.Any(VerificationFailed))
+            else if (results.Any(VerificationResultPredicates.VerificationFailed))
             {
-                logger.LogDebug("Signatures {signatures} failed verification.", String.Join("|", results.Where(VerificationFailed)));
+                if (logger.IsEnabled(LogLevel.Debug))
+                {
+                    logger.LogDebug("Signatures {signatures} failed verification.",
+                        String.Join("|", results.Where(VerificationResultPredicates.VerificationFailed)));
+                }
                 httpContext.Response.StatusCode = context.Options.VerificationErrorResponseStatus;
             }
             else
@@ -306,7 +314,7 @@ namespace NSign.AspNetCore
             {
                 logger.LogDebug("Verifying signature '{sigName}' input spec '{inputSpec}' against signature '{sig}'.",
                     signatureContext.Name, signatureContext.InputSpec, Convert.ToBase64String(signatureContext.Signature));
-                logger.LogDebug("Input generated from request: '{input}'.", System.Text.Encoding.UTF8.GetString(input));
+                logger.LogDebug("Signature input generated from request: '{input}'.", System.Text.Encoding.UTF8.GetString(input));
             }
 
             try
@@ -324,36 +332,6 @@ namespace NSign.AspNetCore
                 logger.LogError(ex, "Verification failed with an unhandled exception.");
                 throw;
             }
-        }
-
-        /// <summary>
-        /// Checks if a verification has a failing result.
-        /// </summary>
-        /// <param name="result">
-        /// The KeyValuePair of string and VerificationResult to check.
-        /// </param>
-        /// <returns>
-        /// True if the verification has failed, or false otherwise.
-        /// </returns>
-        private static bool VerificationFailed(KeyValuePair<string, VerificationResult> result)
-        {
-            return result.Value != VerificationResult.SuccessfullyVerified;
-        }
-
-        /// <summary>
-        /// Checks if a verification has a result indicating issues with signature input.
-        /// </summary>
-        /// <param name="result">
-        /// The KeyValuePair of string and VerificationResult to check.
-        /// </param>
-        /// <returns>
-        /// True if there was an issue with signature input, or false otherwise.
-        /// </returns>
-        private static bool SignatureInputError(KeyValuePair<string, VerificationResult> result)
-        {
-            return result.Value == VerificationResult.SignatureInputMalformed ||
-                result.Value == VerificationResult.SignatureInputNotFound ||
-                result.Value == VerificationResult.SignatureInputComponentMissing;
         }
     }
 }

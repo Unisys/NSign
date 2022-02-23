@@ -121,6 +121,21 @@ namespace NSign.Client
         }
 
         [Theory]
+        [InlineData("")]
+        [InlineData("?")]
+        public void GetSignatureInputGetsCorrectQueryForEmptyQuery(string query)
+        {
+            request.RequestUri = new Uri("https://some.host.local:8443/the/path/to/the/endpoint" + query);
+
+            SignatureInputSpec spec = new SignatureInputSpec("blah");
+            spec.SignatureParameters.AddComponent(SignatureComponent.Query);
+            byte[] input = request.GetSignatureInput(spec, out string inputStr);
+
+            Assert.Equal($"(\"@query\")", inputStr);
+            Assert.Equal($"\"@query\": ?\n\"@signature-params\": {inputStr}", Encoding.ASCII.GetString(input));
+        }
+
+        [Theory]
         [InlineData("My", new string[] { "param", })]
         [InlineData("a", new string[] { "b", "cc", })]
         [InlineData("another", new string[] { "", })]

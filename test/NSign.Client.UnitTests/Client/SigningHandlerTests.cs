@@ -19,7 +19,7 @@ namespace NSign.Client
         private readonly HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:8080/UnitTests/");
         private readonly HttpResponseMessage response = new HttpResponseMessage();
         private readonly Mock<ISigner> mockSigner = new Mock<ISigner>(MockBehavior.Strict);
-        private readonly RequestSigningOptions options = new RequestSigningOptions();
+        private readonly MessageSigningOptions options = new MessageSigningOptions();
         private readonly SigningHandler handler;
 
         public SigningHandlerTests()
@@ -34,7 +34,7 @@ namespace NSign.Client
             handler = new SigningHandler(
                 new NullLogger<SigningHandler>(),
                 mockSigner.Object,
-                new OptionsWrapper<RequestSigningOptions>(options))
+                new OptionsWrapper<MessageSigningOptions>(options))
             {
                 InnerHandler = mockInnerHandler.Object,
             };

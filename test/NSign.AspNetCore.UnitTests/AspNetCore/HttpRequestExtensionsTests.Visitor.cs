@@ -89,6 +89,21 @@ namespace NSign.AspNetCore
             Assert.Equal($"{expectedInputMinusSignatureParams}\n\"@signature-params\": {rawInputSpec}", GetString(input));
         }
 
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("?")]
+        public void VisitorProducesCorrectInputStringForEmptyQuery(string query)
+        {
+            httpContext.Request.QueryString = new QueryString(query);
+
+            string rawInputSpec = "(\"@query\")";
+            SignatureInputSpec inputSpec = new SignatureInputSpec("test", rawInputSpec);
+            byte[] input = httpContext.Request.GetSignatureInput(inputSpec);
+
+            Assert.Equal($"\"@query\": ?\n\"@signature-params\": {rawInputSpec}", GetString(input));
+        }
+
         private static string GetString(byte[] input)
         {
             return Encoding.ASCII.GetString(input);

@@ -6,9 +6,9 @@ using System.Collections.ObjectModel;
 namespace NSign
 {
     /// <summary>
-    /// Options class to control signature creation on HTTP request messages.
+    /// Options class to control signature creation on HTTP messages.
     /// </summary>
-    public class RequestSigningOptions
+    public class MessageSigningOptions
     {
         /// <summary>
         /// Gets or sets the name of the signature to add.
@@ -36,15 +36,15 @@ namespace NSign
 
         /// <summary>
         /// Adds the given component as a mandatory component for signature creation. If the component is missing on a
-        /// request to sign, signing the request <b>will fail</b> and so will the request pipeline.
+        /// message to sign, signing the message <b>will fail</b> and so will the request/response pipeline.
         /// </summary>
         /// <param name="component">
         /// The <see cref="SignatureComponent"/> object to add as a mandatory component.
         /// </param>
         /// <returns>
-        /// The <see cref="RequestSigningOptions"/> instance.
+        /// The <see cref="MessageSigningOptions"/> instance.
         /// </returns>
-        public RequestSigningOptions WithMandatoryComponent(SignatureComponent component)
+        public MessageSigningOptions WithMandatoryComponent(SignatureComponent component)
         {
             ComponentsToInclude.Add(new ComponentSpec(component, mandatory: true));
 
@@ -53,15 +53,15 @@ namespace NSign
 
         /// <summary>
         /// Adds the given component as an optional component for signature creation. If the component is missing on a
-        /// request to sign, signing the request will <b>not</b> fail.
+        /// message to sign, signing the message will <b>not</b> fail.
         /// </summary>
         /// <param name="component">
         /// The <see cref="SignatureComponent"/> object to add as an optional component.
         /// </param>
         /// <returns>
-        /// The <see cref="RequestSigningOptions"/> instance.
+        /// The <see cref="MessageSigningOptions"/> instance.
         /// </returns>
-        public RequestSigningOptions WithOptionalComponent(SignatureComponent component)
+        public MessageSigningOptions WithOptionalComponent(SignatureComponent component)
         {
             ComponentsToInclude.Add(new ComponentSpec(component, mandatory: false));
 
@@ -86,7 +86,8 @@ namespace NSign
             {
                 if (component is SignatureParamsComponent)
                 {
-                    throw new NotSupportedException("A SignatureParamsComponent cannot be added explicitly; it is always added automatically.");
+                    throw new NotSupportedException(
+                        "A SignatureParamsComponent cannot be added explicitly; it is always added automatically.");
                 }
 
                 Component = component;
