@@ -26,7 +26,7 @@ namespace NSign.AspNetCore
             mockLogger.Setup(l => l.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
 
             middleware = new SignatureVerificationMiddleware(
-                mockLogger.Object,// new NullLogger<SignatureVerificationMiddleware>(),
+                mockLogger.Object,
                 mockVerifier.Object,
                 new OptionsWrapper<RequestSignatureVerificationOptions>(options));
         }
