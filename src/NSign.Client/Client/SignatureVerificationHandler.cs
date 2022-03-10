@@ -1,75 +1,76 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Primitives;
 using NSign.Signatures;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NSign.AspNetCore
+namespace NSign.Client
 {
     /// <summary>
-    /// Implements an AspNetCore middleware that verifies signatures passed in 'signature' headers in combination with
-    /// signature input specs from 'signature-input' headers.
+    /// Implements a <see cref="DelegatingHandler"/> that verifies signatures passed in 'signature' headers in combination
+    /// with signature input specs from 'signature-input' headers for <see cref="HttpClient"/> request/response pipelines.
     /// </summary>
-    public sealed partial class SignatureVerificationMiddleware : IMiddleware
+    public sealed partial class SignatureVerificationHandler : DelegatingHandler
     {
         #region Fields
 
         /// <summary>
         /// The ILogger to use.
         /// </summary>
-        private readonly ILogger<SignatureVerificationMiddleware> logger;
+        private readonly ILogger<SignatureVerificationHandler> logger;
 
         /// <summary>
-        /// The IVerifier to use for signature verification.
+        /// The <see cref="IVerifier"/> to use to verify incoming response messages.
         /// </summary>
-        private readonly IVerifier signatureVerifier;
+        private readonly IVerifier verifier;
 
         /// <summary>
-        /// An IOptions of RequestSignatureVerificationOptions object holding the current options to use for signature
-        /// verification.
+        /// An IOptions of SignatureVerificationOptions object holding the current options to use for signature verification.
         /// </summary>
-        private readonly IOptions<RequestSignatureVerificationOptions> options;
+        private readonly IOptions<SignatureVerificationOptions> options;
 
         #endregion
 
         /// <summary>
-        /// Initializes a new instance of SignatureVerificationMiddleware.
+        /// Initializes a new instance of SignatureVerificationHandler.
         /// </summary>
         /// <param name="logger">
         /// The ILogger to use.
         /// </param>
-        /// <param name="signatureVerifier">
-        /// The IVerifier to use for signature verification.
+        /// <param name="verifier">
+        /// The <see cref="IVerifier"/> to use to verify incoming response messages.
         /// </param>
         /// <param name="options">
-        /// An IOptions of RequestSignatureVerificationOptions object holding the current options to use for signature
-        /// verification.
+        /// An IOptions of SignatureVerificationOptions object holding the current options to use for signature verification.
         /// </param>
-        public SignatureVerificationMiddleware(
-            ILogger<SignatureVerificationMiddleware> logger,
-            IVerifier signatureVerifier,
-            IOptions<RequestSignatureVerificationOptions> options)
+        public SignatureVerificationHandler(
+            ILogger<SignatureVerificationHandler> logger,
+            IVerifier verifier,
+            IOptions<SignatureVerificationOptions> options)
         {
             this.logger = logger;
-            this.signatureVerifier = signatureVerifier;
+            this.verifier = verifier;
             this.options = options;
         }
 
+        #region DelegatingHandler Implementation
+
         /// <inheritdoc/>
-        public async Task InvokeAsync(HttpContext httpContext, RequestDelegate next)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            Context context = CreateContext(httpContext.Request);
+            // Send the request as usual. We're not interested in modifying it or anything, we merely record it so we can
+            // use it later on for verification of signatures in the response, if any.
+            HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
+            Context context = CreateContext(request, response);
 
             if (!context.HasSignatures)
             {
-                httpContext.Response.StatusCode = context.Options.MissingSignatureResponseStatus;
-                return;
+                throw new SignatureMissingException();
             }
 
             // Go through all signatures that have been found, verify them and track results.
@@ -91,53 +92,64 @@ namespace NSign.AspNetCore
             if (results.Count <= 0)
             {
                 logger.LogDebug("No signature was verified.");
-                httpContext.Response.StatusCode = context.Options.MissingSignatureResponseStatus;
+                throw new SignatureMissingException();
             }
             else if (results.Any(VerificationResultPredicates.SignatureInputError))
             {
+                List<string> sigNames = results
+                    .Where(VerificationResultPredicates.SignatureInputError)
+                    .Select(_ => _.Key)
+                    .ToList();
                 if (logger.IsEnabled(LogLevel.Debug))
                 {
-                    logger.LogDebug("Signatures {signatures} had input errors.",
-                        String.Join("|",
-                            results.Where(VerificationResultPredicates.SignatureInputError).Select(_ => _.Key)));
+                    logger.LogDebug("Signatures [{signatures}] have input errors.", String.Join("|", sigNames));
                 }
-                httpContext.Response.StatusCode = context.Options.SignatureInputErrorResponseStatus;
+
+                throw new SignatureInputException(sigNames);
             }
             else if (results.Any(VerificationResultPredicates.VerificationFailed))
             {
+                List<string> sigNames = results
+                    .Where(VerificationResultPredicates.VerificationFailed)
+                    .Select(_ => _.Key)
+                    .ToList();
                 if (logger.IsEnabled(LogLevel.Debug))
                 {
-                    logger.LogDebug("Signatures {signatures} failed verification.",
-                        String.Join("|",
-                            results.Where(VerificationResultPredicates.VerificationFailed).Select(_ => _.Key)));
+                    logger.LogDebug("Signatures [{signatures}] failed verification.", String.Join("|", sigNames));
                 }
-                httpContext.Response.StatusCode = context.Options.VerificationErrorResponseStatus;
+
+                throw new SignatureVerificationFailedException(sigNames);
             }
-            else
-            {
-                await next(httpContext);
-            }
+
+            return response;
         }
 
+        #endregion
+
+        #region Private Methods
+
         /// <summary>
-        /// Creates a new context for signature verification of the given request.
+        /// Creates a new verification context for the given request and response messages.
         /// </summary>
         /// <param name="request">
-        /// The HttpRequest for which the context is to be created.
+        /// The HttpRequest that caused the response the context is for.
+        /// </param>
+        /// <param name="response">
+        /// The HttpResponse the context is for.
         /// </param>
         /// <returns>
-        /// A Context value.
+        /// A new instance of <see cref="Context"/> for signature verification.
         /// </returns>
-        private Context CreateContext(HttpRequest request)
+        private Context CreateContext(HttpRequestMessage request, HttpResponseMessage response)
         {
-            if (request.Headers.TryGetValue(Constants.Headers.Signature, out StringValues signatureHeaders) &&
-                request.Headers.TryGetValue(Constants.Headers.SignatureInput, out StringValues inputHeaders))
+            if (response.Headers.TryGetValues(Constants.Headers.Signature, out IEnumerable<string> signatureHeaders) &&
+                response.Headers.TryGetValues(Constants.Headers.SignatureInput, out IEnumerable<string> inputHeaders))
             {
-                return new Context(signatureHeaders, inputHeaders, request, options.Value);
+                return new Context(signatureHeaders, inputHeaders, request, response, options.Value);
             }
             else
             {
-                return new Context(StringValues.Empty, StringValues.Empty, request, options.Value);
+                return new Context(Enumerable.Empty<string>(), Enumerable.Empty<string>(), request, response, options.Value);
             }
         }
 
@@ -312,17 +324,17 @@ namespace NSign.AspNetCore
             SignatureInputSpec inputSpec)
         {
             byte[] expectedSignature = signatureContext.Signature;
-            byte[] input = context.Request.GetSignatureInput(inputSpec);
+            byte[] input = context.GetSignatureInput(inputSpec);
             if (logger.IsEnabled(LogLevel.Debug))
             {
                 logger.LogDebug("Verifying signature '{sigName}' input spec '{inputSpec}' against signature '{sig}'.",
                     signatureContext.Name, signatureContext.InputSpec, Convert.ToBase64String(signatureContext.Signature));
-                logger.LogDebug("Signature input generated from request: '{input}'.", System.Text.Encoding.UTF8.GetString(input));
+                logger.LogDebug("Signature input generated from request/response: '{input}'.", System.Text.Encoding.UTF8.GetString(input));
             }
 
             try
             {
-                VerificationResult result = await signatureVerifier.VerifyAsync(
+                VerificationResult result = await verifier.VerifyAsync(
                     inputSpec.SignatureParameters,
                     input,
                     expectedSignature,
@@ -336,5 +348,7 @@ namespace NSign.AspNetCore
                 throw;
             }
         }
+
+        #endregion
     }
 }

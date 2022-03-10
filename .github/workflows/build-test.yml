@@ -28,4 +28,19 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --verbosity normal --collect:'XPlat Code Coverage' --results-directory ./coverage/temp
+
+    - name: Generate lcov
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.0.4
+      with:
+        reports: coverage/temp/**/coverage.cobertura.xml
+        targetdir: coverage/report/
+        reporttypes: lcov
+        assemblyfilters: -*UnitTests*
+
+    - name: Upload to Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: coverage/report/lcov.info
+        flag-name: Unit

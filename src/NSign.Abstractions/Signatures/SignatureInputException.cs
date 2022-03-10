@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace NSign.Signatures
@@ -15,6 +16,16 @@ namespace NSign.Signatures
         /// The exception message.
         /// </param>
         public SignatureInputException(string message) : base(message)
+        { }
+
+        /// <summary>
+        /// Initializes a new SignatureInputException.
+        /// </summary>
+        /// <param name="signatureNames">
+        /// The names of the signatures that have input exceptions.
+        /// </param>
+        public SignatureInputException(IEnumerable<string> signatureNames) :
+            base($"Some signatures have input errors: {String.Join(", ", signatureNames)}.")
         { }
 
         /// <summary>

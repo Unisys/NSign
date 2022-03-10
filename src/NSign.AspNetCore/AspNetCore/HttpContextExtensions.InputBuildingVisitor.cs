@@ -1,16 +1,15 @@
-﻿using NSign.Http;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
+using NSign.Http;
 using NSign.Signatures;
 using StructuredFieldValues;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Net.Http;
 using System.Text;
-using System.Web;
 
-namespace NSign.Client
+namespace NSign.AspNetCore
 {
-    partial class HttpRequestMessageExtensions
+    partial class HttpContextExtensions
     {
         /// <summary>
         /// Implements the InputVisitorBase class to assist with building strings for signature input.
@@ -25,10 +24,10 @@ namespace NSign.Client
             /// <summary>
             /// Initializes a new instance of InputBuildingVisitor.
             /// </summary>
-            /// <param name="request">
-            /// The HttpRequestMessage defining the context for this visitor.
+            /// <param name="context">
+            /// The HttpContext defining the context for this visitor.
             /// </param>
-            public InputBuildingVisitor(HttpRequestMessage request) : base(request) { }
+            public InputBuildingVisitor(HttpContext context) : base(context) { }
 
             /// <summary>
             /// The signature input as built by the visitor.
@@ -50,7 +49,7 @@ namespace NSign.Client
             /// <inheritdoc/>
             public override void Visit(HttpHeaderComponent httpHeader)
             {
-                if (TryGetHeaderValues(httpHeader.ComponentName, out IEnumerable<string> values))
+                if (TryGetHeaderValues(httpHeader.ComponentName, out StringValues values))
                 {
                     AddInput(httpHeader, String.Join(", ", values));
                 }
@@ -63,27 +62,15 @@ namespace NSign.Client
             /// <inheritdoc/>
             public override void Visit(HttpHeaderDictionaryStructuredComponent httpHeaderDictionary)
             {
-                if (TryGetHeaderValues(httpHeaderDictionary.ComponentName, out IEnumerable<string> values))
+                if (TryGetHeaderValues(httpHeaderDictionary.ComponentName, out StringValues values) &&
+                    TryGetDictValue(values, httpHeaderDictionary.Key, out ParsedItem? lastValue))
                 {
-                    ParsedItem? lastValue = null;
-
-                    foreach (string value in values)
-                    {
-                        if (null == SfvParser.ParseDictionary(value, out IReadOnlyDictionary<string, ParsedItem> actualDict) &&
-                            actualDict.TryGetValue(httpHeaderDictionary.Key, out ParsedItem valueForKey))
-                        {
-                            lastValue = valueForKey;
-                        }
-                    }
-
-                    if (lastValue.HasValue)
-                    {
-                        AddInputWithKey(httpHeaderDictionary,
-                                        lastValue.Value.Value.SerializeAsString() +
-                                        lastValue.Value.Parameters.SerializeAsParameters());
-                        return;
-                    }
+                    AddInputWithKey(httpHeaderDictionary,
+                                    lastValue.Value.Value.SerializeAsString() +
+                                    lastValue.Value.Parameters.SerializeAsParameters());
+                    return;
                 }
+
 
                 throw new SignatureComponentMissingException(httpHeaderDictionary);
             }
@@ -91,7 +78,15 @@ namespace NSign.Client
             /// <inheritdoc/>
             public override void Visit(DerivedComponent derived)
             {
-                string value = request.GetDerivedComponentValue(derived);
+                string value = derived.ComponentName switch
+                {
+                    Constants.DerivedComponents.Status => context.Response.StatusCode.ToString(),
+                    Constants.DerivedComponents.SignatureParams => throw new NotSupportedException("The '@signature-params' component cannot be included explicitly."),
+                    Constants.DerivedComponents.QueryParams => throw new NotSupportedException("The '@query-params' component must have the 'name' parameter set."),
+                    Constants.DerivedComponents.RequestResponse => throw new NotSupportedException("The '@request-response' component must have the 'key' parameter set."),
+
+                    _ => context.Request.GetDerivedComponentValue(derived),
+                };
 
                 AddInput(derived, value);
             }
@@ -159,12 +154,7 @@ namespace NSign.Client
             /// <inheritdoc/>
             public override void Visit(QueryParamsComponent queryParams)
             {
-                string[] values = request.GetQueryParamValues(queryParams);
-
-                if (null == values)
-                {
-                    throw new SignatureComponentMissingException(queryParams);
-                }
+                StringValues values = context.Request.GetQueryParamValues(queryParams);
 
                 foreach (string value in values)
                 {
@@ -175,7 +165,16 @@ namespace NSign.Client
             /// <inheritdoc/>
             public override void Visit(RequestResponseComponent requestResponse)
             {
-                throw new NotSupportedException();
+                if (context.Request.Headers.TryGetValue(Constants.Headers.Signature, out StringValues values) &&
+                    TryGetDictValue(values, requestResponse.Key, out ParsedItem? lastValue))
+                {
+                    AddInputWithKey(requestResponse,
+                           lastValue.Value.Value.SerializeAsString() +
+                           lastValue.Value.Parameters.SerializeAsParameters());
+                    return;
+                }
+
+                throw new SignatureComponentMissingException(requestResponse);
             }
 
             #region Private Methods
@@ -241,7 +240,39 @@ namespace NSign.Client
                 signatureInput.Append($"\"{componentSpec}\": {value}");
             }
 
+            /// <summary>
+            /// Tries to get a dictionary entry from a set of structured dictionary header values.
+            /// </summary>
+            /// <param name="values">
+            /// The <see cref="StringValues"/> value representing all the values for the header.
+            /// </param>
+            /// <param name="key">
+            /// The key of the entry in the structured dictionary header to get the value for.
+            /// </param>
+            /// <param name="lastValue">
+            /// On success, holds the last found value for the given key.
+            /// </param>
+            /// <returns>
+            /// True if successful, or false otherwise.
+            /// </returns>
+            private static bool TryGetDictValue(StringValues values, string key, out ParsedItem? lastValue)
+            {
+                lastValue = null;
+
+                foreach (string value in values)
+                {
+                    if (null == SfvParser.ParseDictionary(value, out IReadOnlyDictionary<string, ParsedItem> actualDict) &&
+                        actualDict.TryGetValue(key, out ParsedItem valueForKey))
+                    {
+                        lastValue = valueForKey;
+                    }
+                }
+
+                return lastValue.HasValue;
+            }
+
             #endregion
         }
+
     }
 }

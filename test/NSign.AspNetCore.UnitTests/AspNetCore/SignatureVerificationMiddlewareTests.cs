@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using NSign.Signatures;
@@ -21,8 +21,12 @@ namespace NSign.AspNetCore
 
         public SignatureVerificationMiddlewareTests()
         {
+            Mock<ILogger<SignatureVerificationMiddleware>> mockLogger =
+                new Mock<ILogger<SignatureVerificationMiddleware>>(MockBehavior.Loose);
+            mockLogger.Setup(l => l.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
+
             middleware = new SignatureVerificationMiddleware(
-                new NullLogger<SignatureVerificationMiddleware>(),
+                mockLogger.Object,
                 mockVerifier.Object,
                 new OptionsWrapper<RequestSignatureVerificationOptions>(options));
         }

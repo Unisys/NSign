@@ -1,18 +1,18 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Primitives;
-using NSign.Signatures;
+﻿using NSign.Signatures;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Text.RegularExpressions;
 
-namespace NSign.AspNetCore
+namespace NSign.Client
 {
-    partial class SignatureVerificationMiddleware
+    partial class SignatureVerificationHandler
     {
         /// <summary>
-        /// Holds the signature verification context of a single HTTP request.
+        /// Holds the signature verification context of a single HTTP request/response pipeline.
         /// </summary>
         private readonly struct Context
         {
@@ -40,25 +40,30 @@ namespace NSign.AspNetCore
             /// Initializes a new instance of Context.
             /// </summary>
             /// <param name="signatureValues">
-            /// A StringValues value identifying all the values from all 'signature' headers in the request.
+            /// An IEnumerable&lt;string&gt; identifying all the values from all 'signature' headers in the request.
             /// </param>
             /// <param name="signatureInputValues">
-            /// A StringValues value identifying all the values from all 'signature-input' headers in the request.
+            /// An IEnumerable&lt;string&gt; identifying all the values from all 'signature-input' headers in the request.
             /// </param>
             /// <param name="request">
-            /// The HttpRequest this context is for.
+            /// The HttpRequest that caused the response this context is for.
+            /// </param>
+            /// <param name="response">
+            /// The HttpResponse this context is for.
             /// </param>
             /// <param name="options">
-            /// The RequestSignatureVerificationOptions object describing the options for signature verification.
+            /// The SignatureVerificationOptions object describing the options for signature verification.
             /// </param>
             public Context(
-                StringValues signatureValues,
-                StringValues signatureInputValues,
-                HttpRequest request,
-                RequestSignatureVerificationOptions options)
+                IEnumerable<string> signatureValues,
+                IEnumerable<string> signatureInputValues,
+                HttpRequestMessage request,
+                HttpResponseMessage response,
+                SignatureVerificationOptions options)
             {
                 Signatures = ParseHeaders(signatureValues, signatureInputValues).ToImmutableList();
                 Request = request;
+                Response = response;
                 Options = options;
             }
 
@@ -74,14 +79,37 @@ namespace NSign.AspNetCore
             public ImmutableList<SignatureContext> Signatures { get; }
 
             /// <summary>
-            /// Gets the HttpRequest object this context is for.
+            /// Gets the HttpRequestMessage object this context is for.
             /// </summary>
-            public HttpRequest Request { get; }
+            public HttpRequestMessage Request { get; }
+
+            /// <summary>
+            /// Gets the HttpResponseMessage object this context is for.
+            /// </summary>
+            public HttpResponseMessage Response { get; }
 
             /// <summary>
             /// Gets the RequestSignatureVerificationOptions object describing the options for signature verification.
             /// </summary>
-            public RequestSignatureVerificationOptions Options { get; }
+            public SignatureVerificationOptions Options { get; }
+
+            /// <summary>
+            /// Gets a byte array representing the actual input for signature verification for this context.
+            /// </summary>
+            /// <param name="inputSpec">
+            /// The SignatureInputSpec object representing the input spec that defines how to build the signature input.
+            /// </param>
+            /// <returns>
+            /// A byte array representing the input for signature verification.
+            /// </returns>
+            public byte[] GetSignatureInput(SignatureInputSpec inputSpec)
+            {
+                Visitor visitor = new Visitor(Request, Response);
+
+                inputSpec.SignatureParameters.Accept(visitor);
+
+                return Encoding.ASCII.GetBytes(visitor.SignatureInput);
+            }
 
             #region Private Methods
 
@@ -90,17 +118,17 @@ namespace NSign.AspNetCore
             /// input specs for evaluation.
             /// </summary>
             /// <param name="signatureValues">
-            /// A StringValues value identifying all the values from all 'signature' headers in the request.
+            /// An IEnumerable&lt;string&gt; identifying all the values from all 'signature' headers in the request.
             /// </param>
             /// <param name="signatureInputValues">
-            /// A StringValues value identifying all the values from all 'signature-input' headers in the request.
+            /// An IEnumerable&lt;string&gt; identifying all the values from all 'signature-input' headers in the request.
             /// </param>
             /// <returns>
             /// An IEnumerable of SignatureContext values representing all the signatures' details found in the headers.
             /// </returns>
             private static IEnumerable<SignatureContext> ParseHeaders(
-                StringValues signatureValues,
-                StringValues signatureInputValues)
+                IEnumerable<string> signatureValues,
+                IEnumerable<string> signatureInputValues)
             {
                 Dictionary<string, byte[]> signatures = ParseSignatures(signatureValues);
                 Dictionary<string, string> inputs = ParseSignatureInputs(signatureInputValues);
@@ -116,13 +144,13 @@ namespace NSign.AspNetCore
             /// Parses the values from 'signature' headers.
             /// </summary>
             /// <param name="signatureValues">
-            /// A StringValues value identifying all the values from all 'signature' headers in the request.
+            /// An IEnumerable&lt;string&gt; identifying all the values from all 'signature' headers in the request.
             /// </param>
             /// <returns>
             /// A Dictionary of string and array of byte representing all the identified signatures with their name and
             /// signature hash.
             /// </returns>
-            private static Dictionary<string, byte[]> ParseSignatures(StringValues signatureValues)
+            private static Dictionary<string, byte[]> ParseSignatures(IEnumerable<string> signatureValues)
             {
                 Dictionary<string, byte[]> signatures = new Dictionary<string, byte[]>();
 
@@ -149,13 +177,13 @@ namespace NSign.AspNetCore
             /// which is deferred until when it is actually needed.
             /// </summary>
             /// <param name="signatureInputValues">
-            /// A StringValues value identifying all the values from all 'signature-input' headers in the request.
+            /// An IEnumerable&lt;string&gt; identifying all the values from all 'signature-input' headers in the request.
             /// </param>
             /// <returns>
             /// A Dictionary of string and string representing all the identified signature inputs with their name and
             /// unparsed input spec.
             /// </returns>
-            private static Dictionary<string, string> ParseSignatureInputs(StringValues signatureInputValues)
+            private static Dictionary<string, string> ParseSignatureInputs(IEnumerable<string> signatureInputValues)
             {
                 Dictionary<string, string> inputs = new Dictionary<string, string>();
 

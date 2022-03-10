@@ -1,88 +1,93 @@
-﻿using Moq;
+﻿using Microsoft.AspNetCore.Http;
+using Moq;
 using NSign.Signatures;
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Mime;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
-namespace NSign.Client
+namespace NSign.AspNetCore
 {
-    partial class HttpRequestMessageExtensionsTests
+    partial class HttpContextExtensionsTests
     {
         [Fact]
         public void GetSignatureInputThrowsForMissingComponents()
         {
-            request.Headers.Add("my-header", "@");
-            request.RequestUri = new Uri("http://localhost/?Blah");
+            HttpRequest request = httpContext.Request;
+            request.Host = new HostString("localhost");
+            request.PathBase = "/Base";
+            request.Path = "/The/Path";
+            request.QueryString = new QueryString("?Blah=Blotz");
+
+            HttpResponse response = httpContext.Response;
+            response.Headers.Add("my-header", "@");
+
             SignatureComponentMissingException ex;
 
             SignatureInputSpec spec = MakeSignatureInput(SignatureComponent.ContentType);
-            ex = Assert.Throws<SignatureComponentMissingException>(() => request.GetSignatureInput(spec, out _));
+            ex = Assert.Throws<SignatureComponentMissingException>(() => httpContext.GetSignatureInput(spec, out _));
             Assert.Equal("The signature component 'content-type' does not exist but is required.", ex.Message);
 
             spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("blah", "a"));
-            ex = Assert.Throws<SignatureComponentMissingException>(() => request.GetSignatureInput(spec, out _));
+            ex = Assert.Throws<SignatureComponentMissingException>(() => httpContext.GetSignatureInput(spec, out _));
             Assert.Equal("The signature component 'blah;key=\"a\"' does not exist but is required.", ex.Message);
 
             spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("my-header", "a"));
-            ex = Assert.Throws<SignatureComponentMissingException>(() => request.GetSignatureInput(spec, out _));
+            ex = Assert.Throws<SignatureComponentMissingException>(() => httpContext.GetSignatureInput(spec, out _));
             Assert.Equal("The signature component 'my-header;key=\"a\"' does not exist but is required.", ex.Message);
 
-            spec = MakeSignatureInput(new QueryParamsComponent("Blah"));
-            ex = Assert.Throws<SignatureComponentMissingException>(() => request.GetSignatureInput(spec, out _));
-            Assert.Equal("The signature component '@query-params;name=\"blah\"' does not exist but is required.", ex.Message);
-
             spec = MakeSignatureInput(new QueryParamsComponent("blotz"));
-            ex = Assert.Throws<SignatureComponentMissingException>(() => request.GetSignatureInput(spec, out _));
+            ex = Assert.Throws<SignatureComponentMissingException>(() => httpContext.GetSignatureInput(spec, out _));
             Assert.Equal("The signature component '@query-params;name=\"blotz\"' does not exist but is required.", ex.Message);
         }
 
         [Fact]
         public void GetSignatureInputGetsCorrectHttpHeaders()
         {
-            request.Headers.Add("my-header", "blah");
-            request.Headers.Add("my-generic-dict", "a=b, b=c, b=z, c");
+            HttpResponse response = httpContext.Response;
+            response.Headers.Add("my-header", "blah");
+            response.Headers.Add("my-generic-dict", "a=b, b=c, b=z, c");
+
             SignatureInputSpec spec;
             string inputStr;
             byte[] input;
 
             // Simple HTTP header.
             spec = MakeSignatureInput(new HttpHeaderComponent("my-header"));
-            input = request.GetSignatureInput(spec, out inputStr);
+            input = httpContext.GetSignatureInput(spec, out inputStr);
             Assert.Equal("(\"my-header\")", inputStr);
             Assert.Equal("\"my-header\": blah\n\"@signature-params\": (\"my-header\")", Encoding.ASCII.GetString(input));
 
             // Simple HTTP header that happens to be dictionary structured.
             spec = MakeSignatureInput(new HttpHeaderComponent("my-generic-dict"));
-            input = request.GetSignatureInput(spec, out inputStr);
+            input = httpContext.GetSignatureInput(spec, out inputStr);
             Assert.Equal("(\"my-generic-dict\")", inputStr);
             Assert.Equal("\"my-generic-dict\": a=b, b=c, b=z, c\n\"@signature-params\": (\"my-generic-dict\")", Encoding.ASCII.GetString(input));
 
             // Dictionary-structured HTTP header.
             spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("my-generic-dict", "b"));
-            input = request.GetSignatureInput(spec, out inputStr);
+            input = httpContext.GetSignatureInput(spec, out inputStr);
             Assert.Equal("(\"my-generic-dict\";key=\"b\")", inputStr);
             Assert.Equal("\"my-generic-dict\";key=\"b\": z\n\"@signature-params\": (\"my-generic-dict\";key=\"b\")", Encoding.ASCII.GetString(input));
 
             // Dictionary-structured HTTP header with implicit 'true' value.
             spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("my-generic-dict", "c"));
-            input = request.GetSignatureInput(spec, out inputStr);
+            input = httpContext.GetSignatureInput(spec, out inputStr);
             Assert.Equal("(\"my-generic-dict\";key=\"c\")", inputStr);
             Assert.Equal("\"my-generic-dict\";key=\"c\": ?1\n\"@signature-params\": (\"my-generic-dict\";key=\"c\")", Encoding.ASCII.GetString(input));
         }
 
         [Theory]
         [InlineData("@query-params")]
-        [InlineData("@status")]
         [InlineData("@request-response")]
         [InlineData("@blah")]
         public void GetSignatureInputThrowsNotSupportedExceptionForUnsupportedDerivedComponents(string name)
         {
             SignatureInputSpec spec = new SignatureInputSpec("foo");
             spec.SignatureParameters.AddComponent(new DerivedComponent(name));
-            Assert.Throws<NotSupportedException>(() => request.GetSignatureInput(spec, out _));
+            Assert.Throws<NotSupportedException>(() => httpContext.GetSignatureInput(spec, out _));
         }
 
         [Fact]
@@ -95,7 +100,7 @@ namespace NSign.Client
                 .Callback((ISignatureComponentVisitor visitor) => visitor.Visit(mockComp.Object));
 
             spec.SignatureParameters.AddComponent(mockComp.Object);
-            NotSupportedException ex = Assert.Throws<NotSupportedException>(() => request.GetSignatureInput(spec, out _));
+            NotSupportedException ex = Assert.Throws<NotSupportedException>(() => httpContext.GetSignatureInput(spec, out _));
             Assert.Equal("Custom classes derived from SignatureComponent are not supported; component 'test-component'.", ex.Message);
         }
 
@@ -109,12 +114,17 @@ namespace NSign.Client
         [InlineData("@query", "?My=Param&another")]
         public void GetSignatureInputGetsCorrectDerivedComponentValue(string name, string expectedValue)
         {
-            request.Method = HttpMethod.Put;
-            request.RequestUri = new Uri("https://some.host.local:8443/the/path/to/the/endpoint?My=Param&another");
+            HttpRequest request = httpContext.Request;
+            request.Method = "PUT";
+            request.Scheme = "https";
+            request.Host = new HostString("some.host.local", 8443);
+            request.PathBase = "/the/path";
+            request.Path = "/to/the/endpoint";
+            request.QueryString = new QueryString("?My=Param&another");
 
             SignatureInputSpec spec = new SignatureInputSpec("blah");
             spec.SignatureParameters.AddComponent(new DerivedComponent(name));
-            byte[] input = request.GetSignatureInput(spec, out string inputStr);
+            byte[] input = httpContext.GetSignatureInput(spec, out string inputStr);
 
             Assert.Equal($"(\"{name}\")", inputStr);
             Assert.Equal($"\"{name}\": {expectedValue}\n\"@signature-params\": {inputStr}", Encoding.ASCII.GetString(input));
@@ -125,11 +135,16 @@ namespace NSign.Client
         [InlineData("?")]
         public void GetSignatureInputGetsCorrectQueryForEmptyQuery(string query)
         {
-            request.RequestUri = new Uri("https://some.host.local:8443/the/path/to/the/endpoint" + query);
+            HttpRequest request = httpContext.Request;
+            request.Scheme = "https";
+            request.Host = new HostString("some.host.local", 8443);
+            request.PathBase = "/the/path";
+            request.Path = "/to/the/endpoint";
+            request.QueryString = new QueryString(query);
 
             SignatureInputSpec spec = new SignatureInputSpec("blah");
             spec.SignatureParameters.AddComponent(SignatureComponent.Query);
-            byte[] input = request.GetSignatureInput(spec, out string inputStr);
+            byte[] input = httpContext.GetSignatureInput(spec, out string inputStr);
 
             Assert.Equal($"(\"@query\")", inputStr);
             Assert.Equal($"\"@query\": ?\n\"@signature-params\": {inputStr}", Encoding.ASCII.GetString(input));
@@ -141,12 +156,17 @@ namespace NSign.Client
         [InlineData("another", new string[] { "", })]
         public void GetSignatureInputGetsCorrectQueryParamsValue(string paramName, string[] expectedValues)
         {
-            request.Method = HttpMethod.Put;
-            request.RequestUri = new Uri("https://some.host.local:8443/the/path/to/the/endpoint?a=b&my=param&A=cc&another=");
+            HttpRequest request = httpContext.Request;
+            request.Method = "PUT";
+            request.Scheme = "https";
+            request.Host = new HostString("some.host.local", 8443);
+            request.PathBase = "/the/path";
+            request.Path = "/to/the/endpoint";
+            request.QueryString = new QueryString("?a=b&my=param&A=cc&another=");
 
             SignatureInputSpec spec = new SignatureInputSpec("blah");
             spec.SignatureParameters.AddComponent(new QueryParamsComponent(paramName));
-            byte[] input = request.GetSignatureInput(spec, out string inputStr);
+            byte[] input = httpContext.GetSignatureInput(spec, out string inputStr);
 
             Assert.Equal($"(\"@query-params\";name=\"{paramName.ToLower()}\")", inputStr);
             string expectedValue = String.Join("", expectedValues.Select(v => $"\"@query-params\";name=\"{paramName.ToLower()}\": {v}\n"));
@@ -158,19 +178,36 @@ namespace NSign.Client
         {
             SignatureInputSpec spec = new SignatureInputSpec("test");
             spec.SignatureParameters.AddComponent(new RequestResponseComponent("another"));
-            Assert.Throws<NotSupportedException>(() => request.GetSignatureInput(spec, out _));
+            SignatureComponentMissingException ex = Assert.Throws<SignatureComponentMissingException>(
+                () => httpContext.GetSignatureInput(spec, out _));
+            Assert.Equal("The signature component '@request-response;key=\"another\"' does not exist but is required.", ex.Message);
         }
 
-        [Fact]
-        public void GetSignatureInputWorks()
+        [Theory]
+        [InlineData(200)]
+        [InlineData(404)]
+        [InlineData(503)]
+        public void GetSignatureInputWorks(int status)
         {
-            request.Method = HttpMethod.Patch;
-            request.RequestUri = new Uri("https://some.host.local:8443/the/path/to/the/endpoint?a=b&my=param&A=cc&another=");
-            request.Content = new StringContent("blah blah", Encoding.UTF8, MediaTypeNames.Text.Plain);
+            HttpRequest request = httpContext.Request;
+            request.Method = "PATCH";
+            request.Scheme = "https";
+            request.Host = new HostString("some.host.local", 8443);
+            request.PathBase = "/the/path";
+            request.Path = "/to/the/endpoint";
+            request.QueryString = new QueryString("?a=b&my=param&A=cc&another=");
+            request.Headers.Add("signature", "test=:dGVzdA==:");
+
+            HttpResponse response = httpContext.Response;
+            response.Headers.ContentType = "text/test; charset=utf-8";
+            response.Headers.ContentLength = 2345;
+            response.StatusCode = status;
+
             SignatureInputSpec spec = new SignatureInputSpec("test");
 
             spec.SignatureParameters
-                .AddComponent(SignatureComponent.Method)
+                .AddComponent(SignatureComponent.Status)
+                .AddComponent(new RequestResponseComponent("test"))
                 .AddComponent(SignatureComponent.ContentType)
                 .AddComponent(SignatureComponent.ContentLength)
                 .AddComponent(SignatureComponent.Authority)
@@ -180,14 +217,15 @@ namespace NSign.Client
             spec.SignatureParameters.Expires = DateTimeOffset.UnixEpoch.AddMinutes(6);
             spec.SignatureParameters.Algorithm = "my";
 
-            byte[] input = request.GetSignatureInput(spec, out string inputStr);
+            byte[] input = httpContext.GetSignatureInput(spec, out string inputStr);
             Assert.Equal(
-                "(\"@method\" \"content-type\" \"content-length\" \"@authority\");created=60;expires=360;nonce=\"test-nonce\";alg=\"my\";keyid=\"my-key\"",
+                "(\"@status\" \"@request-response\";key=\"test\" \"content-type\" \"content-length\" \"@authority\");created=60;expires=360;nonce=\"test-nonce\";alg=\"my\";keyid=\"my-key\"",
                 inputStr);
             Assert.Equal(
-                "\"@method\": PATCH\n" +
-                "\"content-type\": text/plain; charset=utf-8\n" +
-                "\"content-length\": 9\n" +
+                $"\"@status\": {status}\n" +
+                "\"@request-response\";key=\"test\": :dGVzdA==:\n" +
+                "\"content-type\": text/test; charset=utf-8\n" +
+                "\"content-length\": 2345\n" +
                 "\"@authority\": some.host.local:8443\n" +
                 $"\"@signature-params\": {inputStr}", Encoding.ASCII.GetString(input));
         }

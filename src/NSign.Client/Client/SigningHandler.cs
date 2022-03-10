@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-using static NSign.RequestSigningOptions;
+using static NSign.MessageSigningOptions;
 
 namespace NSign.Client
 {
@@ -27,9 +27,9 @@ namespace NSign.Client
         private readonly ISigner signer;
 
         /// <summary>
-        /// The IOptions of <see cref="RequestSigningOptions"/> to define how to sign requests.
+        /// The IOptions of <see cref="MessageSigningOptions"/> to define how to sign requests.
         /// </summary>
-        private readonly IOptions<RequestSigningOptions> options;
+        private readonly IOptions<MessageSigningOptions> options;
 
         /// <summary>
         /// Initializes a new instance of SigningHandler.
@@ -41,9 +41,9 @@ namespace NSign.Client
         /// The <see cref="ISigner"/> to use to sign outgoing request messages.
         /// </param>
         /// <param name="options">
-        /// The IOptions of <see cref="RequestSigningOptions"/> to define how to sign requests.
+        /// The IOptions of <see cref="MessageSigningOptions"/> to define how to sign requests.
         /// </param>
-        public SigningHandler(ILogger<SigningHandler> logger, ISigner signer, IOptions<RequestSigningOptions> options)
+        public SigningHandler(ILogger<SigningHandler> logger, ISigner signer, IOptions<MessageSigningOptions> options)
         {
             this.logger = logger;
             this.signer = signer;
@@ -53,7 +53,7 @@ namespace NSign.Client
         /// <inheritdoc/>
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            RequestSigningOptions options = this.options.Value;
+            MessageSigningOptions options = this.options.Value;
 
             if (String.IsNullOrWhiteSpace(options.SignatureName))
             {

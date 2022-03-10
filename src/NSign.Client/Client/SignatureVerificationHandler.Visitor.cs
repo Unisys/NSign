@@ -1,40 +1,53 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Primitives;
-using NSign.Http;
+﻿using NSign.Http;
 using NSign.Signatures;
 using StructuredFieldValues;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Text;
 
-namespace NSign.AspNetCore
+namespace NSign.Client
 {
-    partial class HttpRequestExtensions
+    partial class SignatureVerificationHandler
     {
         /// <summary>
-        /// Implements the ISignatureComponentVisitor interface to help build signature input for an incoming HTTP request.
+        /// Implements the ISignatureComponentVisitor interface to help build signature input for an incoming HTTP
+        /// response message for signature verification.
         /// </summary>
         private sealed class Visitor : ISignatureComponentVisitor
         {
+            #region Fields
+
             /// <summary>
-            /// The HttpRequest for which to build signature input.
+            /// The HttpRequestMessage which caused the response for which to build signature input.
             /// </summary>
-            private readonly HttpRequest request;
+            private readonly HttpRequestMessage request;
+
+            /// <summary>
+            /// The HttpResponseMessage for which to build signature input.
+            /// </summary>
+            private readonly HttpResponseMessage response;
 
             /// <summary>
             /// A StringBuilder which tracks signature input as it is being built.
             /// </summary>
             private readonly StringBuilder signatureInput = new StringBuilder();
 
+            #endregion
+
             /// <summary>
             /// Initializes a new instance of Visitor.
             /// </summary>
             /// <param name="request">
-            /// The HttpRequest for which to build signature input.
+            /// The HttpRequestMessage that caused the response for which to build signature input.
             /// </param>
-            public Visitor(HttpRequest request)
+            /// <param name="response">
+            /// The HttpResponseMessage for which to build signature input.
+            /// </param>
+            public Visitor(HttpRequestMessage request, HttpResponseMessage response)
             {
                 this.request = request;
+                this.response = response;
             }
 
             /// <summary>
@@ -51,9 +64,9 @@ namespace NSign.AspNetCore
             /// <inheritdoc/>
             public void Visit(HttpHeaderComponent httpHeader)
             {
-                if (request.Headers.TryGetValue(httpHeader.ComponentName, out StringValues values))
+                if (response.Headers.TryGetValues(httpHeader.ComponentName, out IEnumerable<string> values))
                 {
-                    AddInput(httpHeader, values);
+                    AddInput(httpHeader, String.Join(", ", values));
                 }
                 else
                 {
@@ -64,7 +77,7 @@ namespace NSign.AspNetCore
             /// <inheritdoc/>
             public void Visit(HttpHeaderDictionaryStructuredComponent httpHeaderDictionary)
             {
-                if (request.Headers.TryGetValue(httpHeaderDictionary.ComponentName, out StringValues values))
+                if (response.Headers.TryGetValues(httpHeaderDictionary.ComponentName, out IEnumerable<string> values))
                 {
                     // Per RFC 8941, only the last value for a key is considered, so we're only tracking the last value
                     // we find.
@@ -97,14 +110,7 @@ namespace NSign.AspNetCore
             {
                 string value = derivedComponent.ComponentName switch
                 {
-                    Constants.DerivedComponents.SignatureParams =>
-                    throw new NotSupportedException("The '@signature-params' component cannot be included explicitly."),
-                    Constants.DerivedComponents.QueryParams =>
-                    throw new NotSupportedException("The '@query-params' component must have the 'name' parameter set."),
-                    Constants.DerivedComponents.Status =>
-                    throw new NotSupportedException("The '@status' component cannot be included in request signatures."),
-                    Constants.DerivedComponents.RequestResponse =>
-                    throw new NotSupportedException("The '@request-response' component must have the 'key' parameter set."),
+                    Constants.DerivedComponents.Status => ((int)response.StatusCode).ToString(),
 
                     _ => request.GetDerivedComponentValue(derivedComponent),
                 };
@@ -134,7 +140,12 @@ namespace NSign.AspNetCore
             /// <inheritdoc/>
             public void Visit(QueryParamsComponent queryParams)
             {
-                StringValues values = request.GetQueryParamValues(queryParams);
+                string[] values = request.GetQueryParamValues(queryParams);
+
+                if (null == values)
+                {
+                    throw new SignatureComponentMissingException(queryParams);
+                }
 
                 foreach (string value in values)
                 {
@@ -145,7 +156,18 @@ namespace NSign.AspNetCore
             /// <inheritdoc/>
             public void Visit(RequestResponseComponent requestResponse)
             {
-                throw new NotSupportedException();
+                // The @request-response is a reference to a signature in the request message, so we need to look at
+                // the request's headers here.
+                if (request.Headers.TryGetValues(Constants.Headers.Signature, out IEnumerable<string> values) &&
+                    TryGetDictValue(values, requestResponse.Key, out ParsedItem? lastValue))
+                {
+                    AddInputWithKey(requestResponse,
+                           lastValue.Value.Value.SerializeAsString() +
+                           lastValue.Value.Parameters.SerializeAsParameters());
+                    return;
+                }
+
+                throw new SignatureComponentMissingException(requestResponse);
             }
 
             #region Private Methods
@@ -209,6 +231,37 @@ namespace NSign.AspNetCore
                 }
 
                 signatureInput.Append($"\"{componentSpec}\": {value}");
+            }
+
+            /// <summary>
+            /// Tries to get a dictionary entry from a set of structured dictionary header values.
+            /// </summary>
+            /// <param name="values">
+            /// The <see cref="IEnumerable{String}"/> value representing all the values for the header.
+            /// </param>
+            /// <param name="key">
+            /// The key of the entry in the structured dictionary header to get the value for.
+            /// </param>
+            /// <param name="lastValue">
+            /// On success, holds the last found value for the given key.
+            /// </param>
+            /// <returns>
+            /// True if successful, or false otherwise.
+            /// </returns>
+            private static bool TryGetDictValue(IEnumerable<string> values, string key, out ParsedItem? lastValue)
+            {
+                lastValue = null;
+
+                foreach (string value in values)
+                {
+                    if (null == SfvParser.ParseDictionary(value, out IReadOnlyDictionary<string, ParsedItem> actualDict) &&
+                        actualDict.TryGetValue(key, out ParsedItem valueForKey))
+                    {
+                        lastValue = valueForKey;
+                    }
+                }
+
+                return lastValue.HasValue;
             }
 
             #endregion
