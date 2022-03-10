@@ -100,8 +100,7 @@ namespace NSign.Client
                     return;
                 }
 
-                NameValueCollection query = HttpUtility.ParseQueryString(request.RequestUri.Query);
-                string[] values = query.GetValues(queryParams.Name);
+                string[] values = request.GetQueryParamValues(queryParams);
 
                 Found &= null != values;
             }
@@ -112,6 +111,19 @@ namespace NSign.Client
                 throw new NotSupportedException();
             }
 
+            /// <summary>
+            /// Checks if the given set of values for a structured dictionary header has an entry for the given
+            /// <paramref name="key"/>.
+            /// </summary>
+            /// <param name="structuredDictValues">
+            /// An <see cref="IEnumerable{String}"/> object defining all the values for the header.
+            /// </param>
+            /// <param name="key">
+            /// A string value that represents the key to look for.
+            /// </param>
+            /// <returns>
+            /// True if the key is found, or false otherwise.
+            /// </returns>
             private static bool HasKey(IEnumerable<string> structuredDictValues, string key)
             {
                 foreach (string value in structuredDictValues)

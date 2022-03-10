@@ -1,7 +1,10 @@
 ﻿using NSign.Signatures;
+using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Net.Http;
 using System.Text;
+using System.Web;
 
 namespace NSign.Client
 {
@@ -57,6 +60,71 @@ namespace NSign.Client
             signatureParamsValue = visitor.SignatureParamsValue;
 
             return Encoding.ASCII.GetBytes(visitor.SignatureInput);
+        }
+
+        /// <summary>
+        /// Gets the value of the given <paramref name="derivedComponent"/> for the specified <paramref name="request"/>.
+        /// </summary>
+        /// <param name="request">
+        /// The <see cref="HttpRequestMessage"/> object for which the derived component's value should be retrieved.
+        /// </param>
+        /// <param name="derivedComponent">
+        /// The <see cref="DerivedComponent"/> specifying which value to retrieve.
+        /// </param>
+        /// <returns>
+        /// A string that represents the requested value.
+        /// </returns>
+        /// <exception cref="NotSupportedException">
+        /// Thrown for unsupported derived components. This includes e.g. the '@query-params' component which has dedicated
+        /// logic for value retrieval, or the '@status' or '@request-response' components which are not support for
+        /// request messages in the first place.
+        /// </exception>
+        public static string GetDerivedComponentValue(this HttpRequestMessage request, DerivedComponent derivedComponent)
+        {
+            return derivedComponent.ComponentName switch
+            {
+                Constants.DerivedComponents.SignatureParams =>
+                    throw new NotSupportedException("The '@signature-params' component cannot be included explicitly."),
+                Constants.DerivedComponents.Method => request.Method.Method,
+                Constants.DerivedComponents.TargetUri => request.RequestUri.OriginalString,
+                Constants.DerivedComponents.Authority => request.RequestUri.Authority.ToLower(),
+                Constants.DerivedComponents.Scheme => request.RequestUri.Scheme.ToLower(),
+                Constants.DerivedComponents.RequestTarget => request.RequestUri.PathAndQuery,
+                Constants.DerivedComponents.Path => request.RequestUri.AbsolutePath,
+                Constants.DerivedComponents.Query =>
+                    String.IsNullOrWhiteSpace(request.RequestUri.Query) ?
+                        "?" : request.RequestUri.Query,
+                Constants.DerivedComponents.QueryParams =>
+                    throw new NotSupportedException("The '@query-params' component must have the 'name' parameter set."),
+                Constants.DerivedComponents.Status =>
+                    throw new NotSupportedException("The '@status' component cannot be included in request signatures."),
+                Constants.DerivedComponents.RequestResponse =>
+                    throw new NotSupportedException("The '@request-response' component must have the 'key' parameter set."),
+
+                _ =>
+                    throw new NotSupportedException(
+                        $"Non-standard derived signature component '{derivedComponent.ComponentName}' cannot be retrieved."),
+            };
+        }
+
+        /// <summary>
+        /// Gets the values for the given query parameter from the given request.
+        /// </summary>
+        /// <param name="request">
+        /// The HttpRequestMessage from which to get the values.
+        /// </param>
+        /// <param name="queryParams">
+        /// The QueryParamsComponent component which defines which query parameter values to get.
+        /// </param>
+        /// <returns>
+        /// An array of string values representing the values or null if there's no such parameter.
+        /// </returns>
+        public static string[] GetQueryParamValues(this HttpRequestMessage request, QueryParamsComponent queryParams)
+        {
+            NameValueCollection query = HttpUtility.ParseQueryString(request.RequestUri.Query);
+            string[] values = query.GetValues(queryParams.Name);
+
+            return values;
         }
 
         /// <summary>
