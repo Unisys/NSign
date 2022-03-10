@@ -1,7 +1,8 @@
-![GitHub](https://img.shields.io/github/license/rogerk-unifysquare/nsign)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/rogerk-unifysquare/NSign/Build%20and%20Test)
-![GitHub issues](https://img.shields.io/github/issues/rogerk-unifysquare/NSign)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/rogerk-unifysquare/NSign)
+[![GitHub](https://img.shields.io/github/license/Unisys/NSign)](https://github.com/Unisys/NSign/blob/main/LICENSE)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/Unisys/NSign/Build%20and%20Test)](https://github.com/Unisys/NSign/actions/workflows/build-test.yml)
+[![GitHub issues](https://img.shields.io/github/issues/Unisys/NSign)](https://github.com/Unisys/NSign/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/Unisys/NSign)](https://github.com/Unisys/NSign/pulls)
+[![Coverage Status](https://coveralls.io/repos/github/Unisys/NSign/badge.svg?branch=main)](https://coveralls.io/github/Unisys/NSign?branch=main)
 
 # NSign - HTTP message signatures and verification for .NET
 
