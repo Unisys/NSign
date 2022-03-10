@@ -84,6 +84,7 @@ namespace NSign.AspNetCore
                 }
 
                 VerificationResult result = await VerifySignaturesAsync(context, signatureContext);
+                logger.LogInformation("Verification of signature '{name}' resulted in '{result}'.", signatureContext.Name, result);
                 results.Add(signatureContext.Name, result);
             }
 
