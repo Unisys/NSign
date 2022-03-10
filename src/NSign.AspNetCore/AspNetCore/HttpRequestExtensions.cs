@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
 using NSign.Signatures;
 using System;
 using System.Text;
@@ -73,6 +74,31 @@ namespace NSign.AspNetCore
 
                 _ => throw new NotSupportedException($"Non-standard derived signature component '{derivedComponent.ComponentName}' cannot be retrieved."),
             };
+        }
+
+        /// <summary>
+        /// Gets a StringValues value representing the requested query parameter's values from the given request.
+        /// </summary>
+        /// <param name="request">
+        /// The <see cref="HttpRequest"/> object for which the query parameter values should be retrieved.
+        /// </param>
+        /// <param name="queryParams">
+        /// A QueryParamsComponent component that defines which parameter values to retrieve.
+        /// </param>
+        /// <returns>
+        /// A StringValues value that represents the values.
+        /// </returns>
+        /// <exception cref="SignatureComponentMissingException">
+        /// Thrown if the query string does not have a parameter by the requested name.
+        /// </exception>
+        public static StringValues GetQueryParamValues(this HttpRequest request, QueryParamsComponent queryParams)
+        {
+            if (!request.Query.TryGetValue(queryParams.Name, out StringValues values))
+            {
+                throw new SignatureComponentMissingException(queryParams);
+            }
+
+            return values;
         }
     }
 }

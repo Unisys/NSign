@@ -97,7 +97,8 @@ namespace NSign.AspNetCore
                 if (logger.IsEnabled(LogLevel.Debug))
                 {
                     logger.LogDebug("Signatures {signatures} had input errors.",
-                        String.Join("|", results.Where(VerificationResultPredicates.SignatureInputError)));
+                        String.Join("|",
+                            results.Where(VerificationResultPredicates.SignatureInputError).Select(_ => _.Key)));
                 }
                 httpContext.Response.StatusCode = context.Options.SignatureInputErrorResponseStatus;
             }
@@ -106,7 +107,8 @@ namespace NSign.AspNetCore
                 if (logger.IsEnabled(LogLevel.Debug))
                 {
                     logger.LogDebug("Signatures {signatures} failed verification.",
-                        String.Join("|", results.Where(VerificationResultPredicates.VerificationFailed)));
+                        String.Join("|",
+                            results.Where(VerificationResultPredicates.VerificationFailed).Select(_ => _.Key)));
                 }
                 httpContext.Response.StatusCode = context.Options.VerificationErrorResponseStatus;
             }

@@ -154,10 +154,7 @@ namespace NSign.AspNetCore
             /// <inheritdoc/>
             public override void Visit(QueryParamsComponent queryParams)
             {
-                if (!context.Request.Query.TryGetValue(queryParams.Name, out StringValues values))
-                {
-                    throw new SignatureComponentMissingException(queryParams);
-                }
+                StringValues values = context.Request.GetQueryParamValues(queryParams);
 
                 foreach (string value in values)
                 {
