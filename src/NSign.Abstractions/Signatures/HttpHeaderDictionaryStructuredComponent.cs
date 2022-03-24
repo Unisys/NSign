@@ -65,9 +65,14 @@ namespace NSign.Signatures
         #endregion
 
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            return base.Equals(obj as HttpHeaderDictionaryStructuredComponent);
+            if (obj is HttpHeaderDictionaryStructuredComponent httpHeaderDict)
+            {
+                return base.Equals(httpHeaderDict);
+            }
+
+            return false;
         }
 
         /// <inheritdoc/>

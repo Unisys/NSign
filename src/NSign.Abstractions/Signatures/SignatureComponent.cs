@@ -140,9 +140,14 @@ namespace NSign.Signatures
         #endregion
 
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            return Equals(obj as SignatureComponent);
+            if (obj is SignatureComponent comp)
+            {
+                return Equals(comp);
+            }
+
+            return false;
         }
 
         /// <inheritdoc/>

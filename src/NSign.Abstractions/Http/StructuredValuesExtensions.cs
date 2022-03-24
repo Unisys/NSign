@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StructuredFieldValues;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -24,7 +25,7 @@ namespace NSign.Http
         /// <returns>
         /// A string representing the serialized object.
         /// </returns>
-        public static string SerializeAsString(this object value)
+        public static string SerializeAsString(this object? value)
         {
             if (null == value)
             {
@@ -35,9 +36,17 @@ namespace NSign.Http
             {
                 return SerializeAsString(stringValue);
             }
-            if (value is bool boolValue)
+            else if (value is bool boolValue)
             {
                 return SerializeAsString(boolValue);
+            }
+            else if (value is ParsedItem item)
+            {
+                return SerializeAsString(item.Value);
+            }
+            else if (value is IEnumerable<ParsedItem> itemList)
+            {
+                return SerializeAsString(itemList);
             }
             else if (IsNumeric(value))
             {
@@ -96,6 +105,36 @@ namespace NSign.Http
         }
 
         /// <summary>
+        /// Serializes the given sequence of <see cref="ParsedItem"/> values (as per RFC 8941).
+        /// </summary>
+        /// <param name="itemList">
+        /// An <see cref="IEnumerable{T}"/> of <see cref="ParsedItem"/> representing the items in the list to serialize.
+        /// </param>
+        /// <returns>
+        /// A string that represents the list of items.
+        /// </returns>
+        public static string SerializeAsString(this IEnumerable<ParsedItem> itemList)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append('(');
+            int pos = 0;
+
+            foreach (ParsedItem item in itemList)
+            {
+                if (pos++ > 0)
+                {
+                    builder.Append(' ');
+                }
+
+                builder.Append(item.Value.SerializeAsString() + item.Parameters.SerializeAsParameters());
+            }
+
+            builder.Append(')');
+
+            return builder.ToString();
+        }
+
+        /// <summary>
         /// Serializes the given parameters as per RFC 8941.
         /// </summary>
         /// <param name="parameters">
@@ -104,7 +143,7 @@ namespace NSign.Http
         /// <returns>
         /// A string representing the serialized parameters.
         /// </returns>
-        public static string SerializeAsParameters(this IEnumerable<KeyValuePair<string, object>> parameters)
+        public static string SerializeAsParameters(this IEnumerable<KeyValuePair<string, object>>? parameters)
         {
             if (null == parameters)
             {
@@ -134,6 +173,55 @@ namespace NSign.Http
             }
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Tries to get a dictionary entry from a set of structured dictionary header values.
+        /// </summary>
+        /// <param name="values">
+        /// The <see cref="IEnumerable{T}"/> of <see cref="String"/> value representing all the values for the header.
+        /// </param>
+        /// <param name="key">
+        /// The key of the entry in the structured dictionary header to get the value for.
+        /// </param>
+        /// <param name="lastValue">
+        /// On success, holds the last found value for the given key.
+        /// </param>
+        /// <returns>
+        /// True if successful, or false otherwise.
+        /// </returns>
+        public static bool TryGetStructuredDictionaryValue(this IEnumerable<string> values, string key, out ParsedItem? lastValue)
+        {
+            lastValue = null;
+
+            foreach (string value in values)
+            {
+                if (null == SfvParser.ParseDictionary(value, out IReadOnlyDictionary<string, ParsedItem> actualDict) &&
+                    actualDict.TryGetValue(key, out ParsedItem valueForKey))
+                {
+                    lastValue = valueForKey;
+                }
+            }
+
+            return lastValue.HasValue;
+        }
+
+        /// <summary>
+        /// Tries to get a binary data value from the given <paramref name="item"/>.
+        /// </summary>
+        /// <param name="item">
+        /// The <see cref="ParsedItem"/> from which to try to get a binary value.
+        /// </param>
+        /// <param name="data">
+        /// If successful, holds the <see cref="ReadOnlyMemory{T}"/> of <see cref="byte"/> that represents the binary
+        /// value of the item.
+        /// </param>
+        /// <returns>
+        /// True if successful, false otherwise.
+        /// </returns>
+        public static bool TryGetBinaryData(this ParsedItem item, out ReadOnlyMemory<byte> data)
+        {
+            return IsByteSequence(item.Value, out data);
         }
 
         #region Private Methods

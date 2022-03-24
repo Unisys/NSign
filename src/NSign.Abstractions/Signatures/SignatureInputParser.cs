@@ -36,7 +36,7 @@ namespace NSign.Signatures
         /// <param name="signatureParams">
         /// The SignatureParamsComponent object to update with the results from the parser.
         /// </param>
-        public static void ParseAndUpdate(string input, SignatureParamsComponent signatureParams)
+        public static void ParseAndUpdate(string? input, SignatureParamsComponent? signatureParams)
         {
             if (String.IsNullOrWhiteSpace(input))
             {

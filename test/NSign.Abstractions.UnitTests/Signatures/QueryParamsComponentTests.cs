@@ -48,8 +48,8 @@ namespace NSign.Signatures
             Assert.True(queryParams.Equals(c2));
             Assert.False(queryParams.Equals(c3));
 
-            Assert.False(c1.Equals(null));
-            Assert.False(c1.Equals(new object()));
+            Assert.False(c1.Equals((object?)null));
+            Assert.False(c1!.Equals(new object()));
 
             Assert.True(queryParams.Equals(queryParams));
         }

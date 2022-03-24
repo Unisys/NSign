@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace NSign
 {
@@ -11,15 +12,20 @@ namespace NSign
     public class SignatureVerificationOptions
     {
         /// <summary>
-        /// Initializes a new instance of SignatureVerificationOptions.
+        /// Initializes a new instance of <see cref="SignatureVerificationOptions"/>.
         /// </summary>
         public SignatureVerificationOptions()
         {
             ShouldVerify = DefaultShouldVerify;
+
+            OnMissingSignatures = DefaultOnMissingSignatures;
+            OnSignatureInputError = DefaultOnSignatureInputError;
+            OnSignatureVerificationFailed = DefaultOnSignatureVerificationFailed;
+            OnSignatureVerificationSucceeded = DefaultOnSignatureVerificationSucceeded;
         }
 
         /// <summary>
-        /// Gets an ICollection of string values representing the names of signatures to verify.
+        /// Gets an <see cref="ICollection{T}"/> of string values representing the names of signatures to verify.
         /// </summary>
         public ICollection<string> SignaturesToVerify { get; } = new Collection<string>();
 
@@ -33,11 +39,39 @@ namespace NSign
         public Func<string, bool> ShouldVerify { get; set; }
 
         /// <summary>
+        /// The callback to be invoked when signatures for verification are missing.
+        /// </summary>
+        public Func<MessageContext, Task> OnMissingSignatures { get; set; }
+
+        /// <summary>
+        /// The callback to be invoked when signatures have input errors.
+        /// </summary>
+        /// <remarks>
+        /// The <see cref="IReadOnlyDictionary{TKey, TValue}"/> of <see cref="String"/> and <see cref="VerificationResult"/>
+        /// that maps the names of the signatures with input errors to <see cref="VerificationResult"/> values.
+        /// </remarks>
+        public Func<MessageContext, IReadOnlyDictionary<string, VerificationResult>, Task> OnSignatureInputError { get; set; }
+
+        /// <summary>
+        /// The callback to be invoked when signature verification has failed.
+        /// </summary>
+        /// <remarks>
+        /// The <see cref="IReadOnlyDictionary{TKey, TValue}"/> of <see cref="String"/> and <see cref="VerificationResult"/>
+        /// that maps the names of the signatures with verification failures to <see cref="VerificationResult"/> values.
+        /// </remarks>
+        public Func<MessageContext, IReadOnlyDictionary<string, VerificationResult>, Task> OnSignatureVerificationFailed { get; set; }
+
+        /// <summary>
+        /// The callback to be invoked when signature verification has succeeded.
+        /// </summary>
+        public Func<MessageContext, Task> OnSignatureVerificationSucceeded { get; set; }
+
+        /// <summary>
         /// Gets or sets a function which takes a SignatureInputSpec value as input, validates the nonce from the signature
         /// parameters and returns a boolean indicating whether or not the nonce was accepted. If unset, does not verify
         /// the nonce.
         /// </summary>
-        public Func<SignatureInputSpec, bool> VerifyNonce { get; set; }
+        public Func<SignatureInputSpec, bool>? VerifyNonce { get; set; }
 
         /// <summary>
         /// Gets an ICollection of SignatureComponent objects representing all the components a signature must present in
@@ -84,7 +118,8 @@ namespace NSign
         public TimeSpan? MaxSignatureAge { get; set; } = TimeSpan.FromMinutes(5);
 
         /// <summary>
-        /// Provides the default implementation for the ShouldVerify predicate: all signatures in SignaturesToVerify
+        /// Provides the default implementation for the <see cref="ShouldVerify"/> predicate: all signatures in
+        /// <see cref="SignaturesToVerify"/>.
         /// should be verified.
         /// </summary>
         /// <param name="signatureName">
@@ -96,6 +131,87 @@ namespace NSign
         public bool DefaultShouldVerify(string signatureName)
         {
             return SignaturesToVerify.Contains(signatureName);
+        }
+
+        /// <summary>
+        /// Provides the default implementation for the <see cref="OnMissingSignatures"/> handler. Always throws a
+        /// <see cref="SignatureMissingException"/>.
+        /// </summary>
+        /// <param name="context">
+        /// The <see cref="MessageContext"/> that defines the context which is missing signatures.
+        /// </param>
+        /// <returns>
+        /// A Task that tracks completion of the operation.
+        /// </returns>
+        /// <exception cref="SignatureMissingException">
+        /// Always thrown.
+        /// </exception>
+        public Task DefaultOnMissingSignatures(MessageContext context)
+        {
+            throw new SignatureMissingException();
+        }
+
+        /// <summary>
+        /// Provides the default implementation for the <see cref="OnSignatureInputError"/> handler. Always throws a
+        /// <see cref="SignatureInputException"/>.
+        /// </summary>
+        /// <param name="context">
+        /// The <see cref="MessageContext"/> that defines the context which has signature input errors.
+        /// </param>
+        /// <param name="results">
+        /// A <see cref="IReadOnlyDictionary{TKey, TValue}"/> of <see cref="String"/> and <see cref="VerificationResult"/>
+        /// that maps the names of the signatures with input errors to <see cref="VerificationResult"/> values.
+        /// </param>
+        /// <returns>
+        /// A Task that tracks completion of the operation.
+        /// </returns>
+        /// <exception cref="SignatureInputException">
+        /// Always thrown.
+        /// </exception>
+        public Task DefaultOnSignatureInputError(
+            MessageContext context,
+            IReadOnlyDictionary<string, VerificationResult> results)
+        {
+            throw new SignatureInputException(results.Keys);
+        }
+
+        /// <summary>
+        /// Provides the default implementation for the <see cref="OnSignatureVerificationFailed"/> handler. Always
+        /// throws a <see cref="SignatureVerificationFailedException"/>.
+        /// </summary>
+        /// <param name="context">
+        /// The <see cref="MessageContext"/> that defines the context which has signature verification failures.
+        /// </param>
+        /// <param name="verificationResults">
+        /// A <see cref="IReadOnlyDictionary{TKey, TValue}"/> of <see cref="String"/> and <see cref="VerificationResult"/>
+        /// that maps the names of the signatures with verification failures to <see cref="VerificationResult"/> values.
+        /// </param>
+        /// <returns>
+        /// A Task that tracks completion of the operation.
+        /// </returns>
+        /// <exception cref="SignatureVerificationFailedException">
+        /// Always thrown.
+        /// </exception>
+        public Task DefaultOnSignatureVerificationFailed(
+            MessageContext context,
+            IReadOnlyDictionary<string, VerificationResult> verificationResults)
+        {
+            throw new SignatureVerificationFailedException(verificationResults.Keys);
+        }
+
+        /// <summary>
+        /// Provides the default implementation for the <see cref="OnSignatureVerificationSucceeded"/> handler. Always
+        /// returns <see cref="Task.CompletedTask"/> right away.
+        /// </summary>
+        /// <param name="context">
+        /// The <see cref="MessageContext"/> that defines the context for which signature verification succeeded.
+        /// </param>
+        /// <returns>
+        /// A Task that tracks completion of the operation.
+        /// </returns>
+        public Task DefaultOnSignatureVerificationSucceeded(MessageContext context)
+        {
+            return Task.CompletedTask;
         }
     }
 }

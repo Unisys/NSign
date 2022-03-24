@@ -10,7 +10,7 @@ namespace NSign.Signatures
         public void CtorValidatesComponentType()
         {
             ArgumentOutOfRangeException aoorex = Assert.Throws<ArgumentOutOfRangeException>(
-                () => new CompA(SignatureComponentType.Unknown, null));
+                () => new CompA(SignatureComponentType.Unknown, "unit-test"));
             Assert.Equal("type", aoorex.ParamName);
         }
 
@@ -33,8 +33,8 @@ namespace NSign.Signatures
             CompB c3 = new CompB(SignatureComponentType.HttpHeader, "Equals-Works");
             CompA c4 = new CompA(SignatureComponentType.HttpHeader, "equalsworks");
 
-            Assert.False(c1.Equals(null));
-            Assert.False(c1.Equals(new object()));
+            Assert.False(c1.Equals((object?)null));
+            Assert.False(c1!.Equals(new object()));
 
             Assert.True(c1.Equals(c1));
             Assert.True(c1.Equals(c2));

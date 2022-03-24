@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StructuredFieldValues;
+using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -10,7 +11,7 @@ namespace NSign.Http
         public void SerializeAsStringValidatesInput()
         {
             ArgumentNullException ex = Assert.Throws<ArgumentNullException>(
-                () => StructuredValuesExtensions.SerializeAsString((object)null));
+                () => StructuredValuesExtensions.SerializeAsString((object?)null));
             Assert.Equal("value", ex.ParamName);
         }
 
@@ -44,6 +45,20 @@ namespace NSign.Http
 
             ReadOnlyMemory<byte> memory = input;
             Assert.Equal(expectedOutput, StructuredValuesExtensions.SerializeAsString(memory));
+        }
+
+        [Fact]
+        public void SerializeAsStringWorksForParsedItemList()
+        {
+            ParsedItem item = new ParsedItem(
+                new ParsedItem[]
+                {
+                    new ParsedItem("elem1", new Dictionary<string, object>() { { "a", "x" }, }),
+                    new ParsedItem("elem2", new Dictionary<string, object>()),
+                },
+                new Dictionary<string, object>());
+
+            Assert.Equal("(\"elem1\";a=\"x\" \"elem2\")", item.SerializeAsString());
         }
 
         [Fact]
