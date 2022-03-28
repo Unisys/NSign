@@ -13,31 +13,10 @@ namespace NSign.Providers
         {
             ArgumentException ex;
 
-            ex = Assert.Throws<ArgumentNullException>(() => new TestRsa(null, null, null));
-            Assert.Equal("certificate", ex.ParamName);
-
             ex = Assert.Throws<ArgumentException>(
-                () => new TestRsa(Certificates.GetCertificate("ecdsa-p256-nsign.test.local.cer"), null, null));
+                () => new TestRsa(Certificates.GetCertificate("ecdsa-p256-nsign.test.local.cer"), "blah", null));
             Assert.Equal("certificate", ex.ParamName);
             Assert.Equal("The certificate does not use RSA keys. (Parameter 'certificate')", ex.Message);
-
-            ex = Assert.Throws<ArgumentNullException>(
-                () => new TestRsa(Certificates.GetCertificate("rsa-nsign.test.local.cer"), null, null));
-            Assert.Equal("algorithmName", ex.ParamName);
-        }
-
-        [Fact]
-        public void CtorWithKeysValidatesInput()
-        {
-            ArgumentException ex;
-            RSA publicKey = RSA.Create();
-
-            ex = Assert.Throws<ArgumentNullException>(() => new TestRsa(null, null, null, null));
-            Assert.Equal("publicKey", ex.ParamName);
-
-            ex = Assert.Throws<ArgumentNullException>(
-                () => new TestRsa(null, publicKey, null, null));
-            Assert.Equal("algorithmName", ex.ParamName);
         }
 
         [Fact]
@@ -58,7 +37,7 @@ namespace NSign.Providers
             using TestRsa providerWithPublicKey = new TestRsa(null, RSA.Create(), "test-rsa", null);
         }
 
-        private static TestRsa Make(bool forSigning = false, string keyId = null)
+        private static TestRsa Make(bool forSigning = false, string? keyId = null)
         {
             X509Certificate2 cert;
 
@@ -76,11 +55,11 @@ namespace NSign.Providers
 
         private sealed class TestRsa : RsaSignatureProvider
         {
-            public TestRsa(X509Certificate2 certificate, string algorithmName, string keyId)
+            public TestRsa(X509Certificate2 certificate, string algorithmName, string? keyId)
                 : base(certificate, algorithmName, keyId)
             { }
 
-            public TestRsa(RSA privateKey, RSA publicKey, string algorithmName, string keyId)
+            public TestRsa(RSA? privateKey, RSA publicKey, string algorithmName, string? keyId)
                 : base(privateKey, publicKey, algorithmName, keyId)
             { }
 

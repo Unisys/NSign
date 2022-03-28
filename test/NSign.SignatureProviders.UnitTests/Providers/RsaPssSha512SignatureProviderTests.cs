@@ -152,7 +152,7 @@ aOT9v6d+nb4bnNkQVklLQ3fVAvJm+xdDOp9LCNCN48V2pnDOkFV6+U9nV5oyc6XI
             byte[] random = new byte[2048];
 
             rng.NextBytes(random);
-            byte[] signature = await signingProvider.SignAsync(random, CancellationToken.None);
+            ReadOnlyMemory<byte> signature = await signingProvider.SignAsync(random, CancellationToken.None);
 
             VerificationResult result = await verifyingProvider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
@@ -175,7 +175,7 @@ aOT9v6d+nb4bnNkQVklLQ3fVAvJm+xdDOp9LCNCN48V2pnDOkFV6+U9nV5oyc6XI
             byte[] random = new byte[2048];
 
             rng.NextBytes(random);
-            byte[] signature = await signingProvider.SignAsync(random, CancellationToken.None);
+            ReadOnlyMemory<byte> signature = await signingProvider.SignAsync(random, CancellationToken.None);
 
             VerificationResult result = await verifyingProvider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.NoMatchingVerifierFound, result);
@@ -191,7 +191,7 @@ aOT9v6d+nb4bnNkQVklLQ3fVAvJm+xdDOp9LCNCN48V2pnDOkFV6+U9nV5oyc6XI
             byte[] random = new byte[2048];
 
             rng.NextBytes(random);
-            byte[] signature = await signingProvider.SignAsync(random, CancellationToken.None);
+            ReadOnlyMemory<byte> signature = await signingProvider.SignAsync(random, CancellationToken.None);
 
             VerificationResult result = await verifyingProvider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.NoMatchingVerifierFound, result);
@@ -210,7 +210,7 @@ aOT9v6d+nb4bnNkQVklLQ3fVAvJm+xdDOp9LCNCN48V2pnDOkFV6+U9nV5oyc6XI
 
         private static RsaPssSha512SignatureProvider Make(
             bool forSigning = false,
-            string keyId = null,
+            string? keyId = null,
             string keyName = "rsa-nsign.test.local")
         {
             X509Certificate2 cert;

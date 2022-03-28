@@ -15,7 +15,7 @@ namespace NSign.Providers
         /// <summary>
         /// The private key used to sign.
         /// </summary>
-        private readonly ECDsa privateKey;
+        private readonly ECDsa? privateKey;
 
         /// <summary>
         /// The public key used to verify signatures.
@@ -41,7 +41,7 @@ namespace NSign.Providers
         /// The value for the KeyId parameter of signatures produced with this provider or null if the value should not
         /// be set / is not important.
         /// </param>
-        public ECDsaSignatureProvider(X509Certificate2 certificate, string algorithmName, string keyId) : base(keyId)
+        public ECDsaSignatureProvider(X509Certificate2 certificate, string algorithmName, string? keyId) : base(keyId)
         {
             Certificate = certificate ?? throw new ArgumentNullException(nameof(certificate));
 
@@ -85,7 +85,7 @@ namespace NSign.Providers
         }
 
         /// <inheritdoc/>
-        public override Task<byte[]> SignAsync(byte[] input, CancellationToken cancellationToken)
+        public override Task<ReadOnlyMemory<byte>> SignAsync(ReadOnlyMemory<byte> input, CancellationToken cancellationToken)
         {
             if (null == privateKey)
             {
@@ -94,14 +94,14 @@ namespace NSign.Providers
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            return Task.FromResult(privateKey.SignData(input, SignatureHash));
+            return Task.FromResult(new ReadOnlyMemory<byte>(privateKey.SignData(input.ToArray(), SignatureHash)));
         }
 
         /// <inheritdoc/>
         public override Task<VerificationResult> VerifyAsync(
             SignatureParamsComponent signatureParams,
-            byte[] input,
-            byte[] expectedSignature,
+            ReadOnlyMemory<byte> input,
+            ReadOnlyMemory<byte> expectedSignature,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -115,7 +115,7 @@ namespace NSign.Providers
             }
 
             VerificationResult result = VerificationResult.SignatureMismatch;
-            if (publicKey.VerifyData(input, expectedSignature, SignatureHash))
+            if (publicKey.VerifyData(input.Span, expectedSignature.Span, SignatureHash))
             {
                 result = VerificationResult.SuccessfullyVerified;
             }

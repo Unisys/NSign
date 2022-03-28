@@ -19,7 +19,7 @@ namespace NSign.Providers
         /// The value for the KeyId parameter of signatures produced with this provider or null if the value should not
         /// be set / is not important.
         /// </param>
-        public RsaPkcs15Sha256SignatureProvider(X509Certificate2 certificate, string keyId)
+        public RsaPkcs15Sha256SignatureProvider(X509Certificate2 certificate, string? keyId)
             : base(certificate, Constants.SignatureAlgorithms.RsaPkcs15Sha256, keyId)
         { }
 
@@ -37,7 +37,7 @@ namespace NSign.Providers
         /// The value for the KeyId parameter of signatures produced with this provider or null if the value should not
         /// be set / is not important.
         /// </param>
-        public RsaPkcs15Sha256SignatureProvider(RSA privateKey, RSA publicKey, string keyId)
+        public RsaPkcs15Sha256SignatureProvider(RSA? privateKey, RSA publicKey, string? keyId)
             : base(privateKey, publicKey, Constants.SignatureAlgorithms.RsaPkcs15Sha256, keyId)
         { }
 

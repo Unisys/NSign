@@ -15,7 +15,7 @@ namespace NSign.Providers
         /// <summary>
         /// The private key used to sign.
         /// </summary>
-        private readonly RSA privateKey;
+        private readonly RSA? privateKey;
 
         /// <summary>
         /// The public key used to verify signatures.
@@ -41,7 +41,7 @@ namespace NSign.Providers
         /// The value for the KeyId parameter of signatures produced with this provider or null if the value should not
         /// be set / is not important.
         /// </param>
-        public RsaSignatureProvider(X509Certificate2 certificate, string algorithmName, string keyId) :
+        public RsaSignatureProvider(X509Certificate2 certificate, string algorithmName, string? keyId) :
             this(
                 // Also check that the certificate is not null.
                 (certificate ?? throw new ArgumentNullException(nameof(certificate))).GetRSAPrivateKey(),
@@ -74,15 +74,10 @@ namespace NSign.Providers
         /// <exception cref="ArgumentNullException">
         /// Thrown if the <paramref name="publicKey"/> is null.
         /// </exception>
-        public RsaSignatureProvider(RSA privateKey, RSA publicKey, string algorithmName, string keyId) : base(keyId)
+        public RsaSignatureProvider(RSA? privateKey, RSA publicKey, string algorithmName, string? keyId) : base(keyId)
         {
-            if (null == publicKey)
-            {
-                throw new ArgumentNullException(nameof(publicKey));
-            }
-
             this.privateKey = privateKey;
-            this.publicKey = publicKey;
+            this.publicKey = publicKey ?? throw new ArgumentNullException(nameof(publicKey));
 
             if (String.IsNullOrWhiteSpace(algorithmName))
             {
@@ -97,7 +92,7 @@ namespace NSign.Providers
         /// <remarks>
         /// A certificate with access to the private key is needed only when signatures must be created.
         /// </remarks>
-        public X509Certificate2 Certificate { get; }
+        public X509Certificate2? Certificate { get; }
 
         /// <inheritdoc/>
         public void Dispose()
@@ -119,7 +114,7 @@ namespace NSign.Providers
         }
 
         /// <inheritdoc/>
-        public override Task<byte[]> SignAsync(byte[] input, CancellationToken cancellationToken)
+        public override Task<ReadOnlyMemory<byte>> SignAsync(ReadOnlyMemory<byte> input, CancellationToken cancellationToken)
         {
             if (null == privateKey)
             {
@@ -128,14 +123,15 @@ namespace NSign.Providers
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            return Task.FromResult(privateKey.SignData(input, SignatureHash, SignaturePadding));
+            return Task.FromResult(
+                new ReadOnlyMemory<byte>(privateKey.SignData(input.ToArray(), SignatureHash, SignaturePadding)));
         }
 
         /// <inheritdoc/>
         public override Task<VerificationResult> VerifyAsync(
             SignatureParamsComponent signatureParams,
-            byte[] input,
-            byte[] expectedSignature,
+            ReadOnlyMemory<byte> input,
+            ReadOnlyMemory<byte> expectedSignature,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -149,7 +145,7 @@ namespace NSign.Providers
             }
 
             VerificationResult result = VerificationResult.SignatureMismatch;
-            if (publicKey.VerifyData(input, expectedSignature, SignatureHash, SignaturePadding))
+            if (publicKey.VerifyData(input.Span, expectedSignature.Span, SignatureHash, SignaturePadding))
             {
                 result = VerificationResult.SuccessfullyVerified;
             }

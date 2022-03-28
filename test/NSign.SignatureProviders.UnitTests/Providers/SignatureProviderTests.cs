@@ -39,12 +39,16 @@ namespace NSign.Providers
             {
             }
 
-            public override Task<byte[]> SignAsync(byte[] input, CancellationToken cancellationToken)
+            public override Task<ReadOnlyMemory<byte>> SignAsync(ReadOnlyMemory<byte> input, CancellationToken cancellationToken)
             {
                 throw new NotImplementedException();
             }
 
-            public override Task<VerificationResult> VerifyAsync(SignatureParamsComponent signatureParams, byte[] input, byte[] expectedSignature, CancellationToken cancellationToken)
+            public override Task<VerificationResult> VerifyAsync(
+                SignatureParamsComponent signatureParams,
+                ReadOnlyMemory<byte> input,
+                ReadOnlyMemory<byte> expectedSignature,
+                CancellationToken cancellationToken)
             {
                 throw new NotImplementedException();
             }

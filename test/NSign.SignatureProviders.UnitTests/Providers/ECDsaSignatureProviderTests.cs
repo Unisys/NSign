@@ -13,17 +13,10 @@ namespace NSign.Providers
         {
             ArgumentException ex;
 
-            ex = Assert.Throws<ArgumentNullException>(() => new TestECDsa(null, null, null));
-            Assert.Equal("certificate", ex.ParamName);
-
             ex = Assert.Throws<ArgumentException>(
-                () => new TestECDsa(Certificates.GetCertificate("rsa-nsign.test.local.cer"), null, null));
+                () => new TestECDsa(Certificates.GetCertificate("rsa-nsign.test.local.cer"), "blah", null));
             Assert.Equal("certificate", ex.ParamName);
             Assert.Equal("The certificate does not use elliptic curve keys. (Parameter 'certificate')", ex.Message);
-
-            ex = Assert.Throws<ArgumentNullException>(
-                () => new TestECDsa(Certificates.GetCertificate("ecdsa-p384-nsign.test.local.cer"), null, null));
-            Assert.Equal("algorithmName", ex.ParamName);
         }
 
         [Fact]
@@ -43,7 +36,7 @@ namespace NSign.Providers
             using TestECDsa verifyingProvider = Make(false);
         }
 
-        private static TestECDsa Make(bool forSigning = false, string keyId = null, string certName = "ecdsa-p384-nsign.test.local")
+        private static TestECDsa Make(bool forSigning = false, string? keyId = null, string certName = "ecdsa-p384-nsign.test.local")
         {
             X509Certificate2 cert;
 
@@ -61,7 +54,7 @@ namespace NSign.Providers
 
         private sealed class TestECDsa : ECDsaSignatureProvider
         {
-            public TestECDsa(X509Certificate2 certificate, string algorithmName, string keyId)
+            public TestECDsa(X509Certificate2 certificate, string algorithmName, string? keyId)
                 : base(certificate, algorithmName, keyId)
             { }
 

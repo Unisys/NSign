@@ -110,7 +110,7 @@ namespace NSign.Providers
             byte[] random = new byte[2048];
 
             rng.NextBytes(random);
-            byte[] signature = await signingProvider.SignAsync(random, CancellationToken.None);
+            ReadOnlyMemory<byte> signature = await signingProvider.SignAsync(random, CancellationToken.None);
 
             VerificationResult result = await verifyingProvider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
@@ -133,7 +133,7 @@ namespace NSign.Providers
             byte[] random = new byte[2048];
 
             rng.NextBytes(random);
-            byte[] signature = await signingProvider.SignAsync(random, CancellationToken.None);
+            ReadOnlyMemory<byte> signature = await signingProvider.SignAsync(random, CancellationToken.None);
 
             VerificationResult result = await verifyingProvider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.NoMatchingVerifierFound, result);
@@ -149,7 +149,7 @@ namespace NSign.Providers
             byte[] random = new byte[2048];
 
             rng.NextBytes(random);
-            byte[] signature = await signingProvider.SignAsync(random, CancellationToken.None);
+            ReadOnlyMemory<byte> signature = await signingProvider.SignAsync(random, CancellationToken.None);
 
             VerificationResult result = await verifyingProvider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.NoMatchingVerifierFound, result);
@@ -168,7 +168,7 @@ namespace NSign.Providers
 
         private static ECDsaP256Sha256SignatureProvider Make(
             bool forSigning = false,
-            string keyId = null,
+            string? keyId = null,
             string certName = "ecdsa-p256-nsign.test.local")
         {
             X509Certificate2 cert;

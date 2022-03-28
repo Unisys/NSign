@@ -18,7 +18,7 @@ namespace NSign.Providers
 
         private sealed class TestHmac : HmacSignatureProvider
         {
-            public TestHmac(string algorithmName, string keyId) : base(algorithmName, keyId)
+            public TestHmac(string algorithmName, string? keyId) : base(algorithmName, keyId)
             {
             }
 
