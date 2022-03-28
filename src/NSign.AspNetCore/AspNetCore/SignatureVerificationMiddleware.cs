@@ -10,7 +10,7 @@ namespace NSign.AspNetCore
     /// Implements an AspNetCore middleware that verifies signatures on request messages passed in 'signature' headers
     /// in combination with signature input specs from 'signature-input' headers.
     /// </summary>
-    public sealed partial class SignatureVerificationMiddleware : IMiddleware
+    public sealed class SignatureVerificationMiddleware : IMiddleware
     {
         #region Fields
 

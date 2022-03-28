@@ -7,7 +7,7 @@ namespace NSign.AspNetCore
     /// <summary>
     /// Extensions for HttpRequest objects.
     /// </summary>
-    internal static partial class HttpRequestExtensions
+    internal static class HttpRequestExtensions
     {
         /// <summary>
         /// Gets the value of the given <paramref name="derivedComponent"/> for the specified <paramref name="request"/>.

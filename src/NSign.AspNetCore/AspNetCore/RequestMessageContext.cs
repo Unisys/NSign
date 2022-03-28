@@ -97,7 +97,7 @@ namespace NSign.AspNetCore
         }
 
         /// <inheritdoc/>
-        public override IEnumerable<string> GetRequestHeaderValues(string headerName)
+        public override sealed IEnumerable<string> GetRequestHeaderValues(string headerName)
         {
             if (TryGetHeaderValues(HttpContext.Request.Headers, headerName, out StringValues values))
             {
@@ -140,7 +140,7 @@ namespace NSign.AspNetCore
         protected virtual IHeaderDictionary MessageHeaders => HttpContext.Request.Headers;
 
         /// <summary>
-        /// Tries to get the response header values for the header with the given <paramref name="name"/>.
+        /// Tries to get the message header values for the header with the given <paramref name="name"/>.
         /// </summary>
         /// <param name="headers">
         /// The <see cref="IHeaderDictionary"/> in which to look for the header.
@@ -155,10 +155,10 @@ namespace NSign.AspNetCore
         /// True if the header exists, or false otherwise.
         /// </returns>
         /// <remarks>
-        /// This method also checks the headers on the content of the response, provided it is set. It also emulates
-        /// synthetic headers like 'content-length' which are in some cases calculated based on the content.
+        /// This method also emulates synthetic headers like 'content-length' which are in some cases calculated based
+        /// on the content.
         /// </remarks>
-        protected bool TryGetHeaderValues(IHeaderDictionary headers, string name, out StringValues values)
+        protected static bool TryGetHeaderValues(IHeaderDictionary headers, string name, out StringValues values)
         {
             if (headers.TryGetValue(name, out values))
             {

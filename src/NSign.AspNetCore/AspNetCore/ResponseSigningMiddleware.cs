@@ -9,7 +9,7 @@ namespace NSign.AspNetCore
     /// <summary>
     /// Implements an AspNetCore middleware that adds signatures to response messages.
     /// </summary>
-    public sealed partial class ResponseSigningMiddleware : IMiddleware
+    public sealed class ResponseSigningMiddleware : IMiddleware
     {
         /// <summary>
         /// The ILogger to use.

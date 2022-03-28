@@ -167,12 +167,13 @@ namespace NSign.AspNetCore
 
         [Theory]
         [InlineData("not-found", new string[0])]
-        [InlineData("a", new string[] { "b", "bb", })]
+        [InlineData("a", new string[] { "b", "bb", "B", })]
+        [InlineData("A", new string[] { "b", "bb", "B", })]
         [InlineData("c", new string[] { "d", })]
         [InlineData("e", new string[] { "", })]
         public void GetQueryParamValuesWorks(string name, string[] expectedValues)
         {
-            httpContext.Request.QueryString = new QueryString("?a=b&a=bb&c=d&e=");
+            httpContext.Request.QueryString = new QueryString("?a=b&a=bb&c=d&A=B&e=");
 
             IEnumerable<string> actualValues = context.GetQueryParamValues(name);
 
@@ -199,6 +200,7 @@ namespace NSign.AspNetCore
         [Theory]
         [InlineData("not-found", false)]
         [InlineData("a", true)]
+        [InlineData("A", true)]
         [InlineData("c", true)]
         [InlineData("e", true)]
         public void HasQueryParamWorks(string name, bool expectedResult)

@@ -69,7 +69,7 @@ namespace NSign.Http
             actual = StructuredValuesExtensions.SerializeAsParameters(null);
             Assert.Equal("", actual);
 
-            actual = StructuredValuesExtensions.SerializeAsParameters(new KeyValuePair<string, object>[] { });
+            actual = StructuredValuesExtensions.SerializeAsParameters(Array.Empty<KeyValuePair<string, object>>());
             Assert.Equal("", actual);
         }
 
