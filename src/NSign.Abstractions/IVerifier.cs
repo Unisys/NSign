@@ -1,4 +1,5 @@
 ﻿using NSign.Signatures;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,10 +17,12 @@ namespace NSign
         /// A SignatureParamsComponent object defining the parameters of the signature.
         /// </param>
         /// <param name="input">
-        /// A byte array that represents the raw input used for verification of the signature.
+        /// A <see cref="ReadOnlyMemory{T}"/> of <see cref="byte"/> that represents the raw input used for verification
+        /// of the signature.
         /// </param>
         /// <param name="expectedSignature">
-        /// A byte array that represents the expected signature, i.e. the signature as provided by the signer.
+        /// A <see cref="ReadOnlyMemory{T}"/> of <see cref="byte"/> that represents the expected signature, i.e. the
+        /// signature as provided by the signer.
         /// </param>
         /// <param name="cancellationToken">
         /// A CancellationToken value that tracks cancellation of the operation.
@@ -29,8 +32,8 @@ namespace NSign
         /// </returns>
         Task<VerificationResult> VerifyAsync(
             SignatureParamsComponent signatureParams,
-            byte[] input,
-            byte[] expectedSignature,
+            ReadOnlyMemory<byte> input,
+            ReadOnlyMemory<byte> expectedSignature,
             CancellationToken cancellationToken);
     }
 }

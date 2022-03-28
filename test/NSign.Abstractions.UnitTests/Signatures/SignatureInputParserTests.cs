@@ -50,8 +50,10 @@ namespace NSign.Signatures
                 (c) => Assert.Equal(new HttpHeaderDictionaryStructuredComponent("My-Dict-Header", "blah"), c),
                 (c) => Assert.Equal(new DerivedComponent("@extension"), c));
 
-            Assert.Equal(1234L, signatureParams.Created.Value.ToUnixTimeSeconds());
-            Assert.Equal(-1534L, signatureParams.Expires.Value.ToUnixTimeSeconds());
+            Assert.True(signatureParams.Created.HasValue);
+            Assert.Equal(1234L, signatureParams.Created!.Value.ToUnixTimeSeconds());
+            Assert.True(signatureParams.Expires.HasValue);
+            Assert.Equal(-1534L, signatureParams.Expires!.Value.ToUnixTimeSeconds());
             Assert.Equal("the-nonce", signatureParams.Nonce);
             Assert.Equal("signature-alg", signatureParams.Algorithm);
             Assert.Equal("key-id", signatureParams.KeyId);

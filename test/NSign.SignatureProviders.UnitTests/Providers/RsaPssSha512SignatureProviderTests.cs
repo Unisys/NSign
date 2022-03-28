@@ -122,7 +122,7 @@ aOT9v6d+nb4bnNkQVklLQ3fVAvJm+xdDOp9LCNCN48V2pnDOkFV6+U9nV5oyc6XI
                 "\"date\": Tue, 20 Apr 2021 02:07:55 GMT\n" +
                 "\"@method\": POST\n" +
                 "\"@path\": /foo\n" +
-                "\"@query\": param=Value&Pet=dog\n" + // NOTE: This is in violation of the spec which requires the leading '?'
+                "\"@query\": ?param=Value&Pet=dog\n" +
                 "\"@authority\": example.com\n" +
                 "\"content-type\": application/json\n" +
                 "\"content-digest\": sha-512=:WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+TaPm+AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew==:\n" +
@@ -134,7 +134,7 @@ aOT9v6d+nb4bnNkQVklLQ3fVAvJm+xdDOp9LCNCN48V2pnDOkFV6+U9nV5oyc6XI
             VerificationResult result = await provider.VerifyAsync(
                 sigParams,
                 Encoding.ASCII.GetBytes(input),
-                Convert.FromBase64String("f9nOGJSjCdQ/t+/Mp7gpAHU7Kn1LpnWJE6W2081yRFITJobBDODwQNxnjiIdAGstfGKuM2vlc5SyN16//K5dBLGoiaboMco4J6R0zS+8oXqD7o6KRpIZR/qMrFc5Bu6f6UxuoWZPfCxhs3vxL/60JbF8dcdul1b77mWyC07ZjZ9VkelByeF5+zN7v6Al/vnBzMS3H1NLz9dI2sw5Vb7kxQQ6CvEI9v3R30aFgWz4rCuyT0Kt3ytQvTHOBsadF66eDe641Sd6O/DgbdFibsE/+ToYopL9NlAuva42NlcFemrozvOKvGIPXdAPqmng/bePoSR6DIaFbWp5aDlNSbWlcA=="),
+                Convert.FromBase64String("bbN8oArOxYoyylQQUU6QYwrTuaxLwjAC9fbY2F6SVWvh0yBiMIRGOnMYwZ/5MR6fb0Kh1rIRASVxFkeGt683+qRpRRU5p2voTp768ZrCUb38K0fUxN0O0iC59DzYx8DFll5GmydPxSmme9v6ULbMFkl+V5B1TP/yPViV7KsLNmvKiLJH1pFkh/aYA2HXXZzNBXmIkoQoLd7YfW91kE9o/CCoC1xMy7JA1ipwvKvfrs65ldmlu9bpG6A9BmzhuzF8Eim5f8ui9eH8LZH896+QIF61ka39VBrohr9iyMUJpvRX2Zbhl5ZJzSRxpJyoEZAFL2FUo5fTIztsDZKEgM4cUA=="),
                 default);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
@@ -152,7 +152,7 @@ aOT9v6d+nb4bnNkQVklLQ3fVAvJm+xdDOp9LCNCN48V2pnDOkFV6+U9nV5oyc6XI
             byte[] random = new byte[2048];
 
             rng.NextBytes(random);
-            byte[] signature = await signingProvider.SignAsync(random, CancellationToken.None);
+            ReadOnlyMemory<byte> signature = await signingProvider.SignAsync(random, CancellationToken.None);
 
             VerificationResult result = await verifyingProvider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
@@ -175,7 +175,7 @@ aOT9v6d+nb4bnNkQVklLQ3fVAvJm+xdDOp9LCNCN48V2pnDOkFV6+U9nV5oyc6XI
             byte[] random = new byte[2048];
 
             rng.NextBytes(random);
-            byte[] signature = await signingProvider.SignAsync(random, CancellationToken.None);
+            ReadOnlyMemory<byte> signature = await signingProvider.SignAsync(random, CancellationToken.None);
 
             VerificationResult result = await verifyingProvider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.NoMatchingVerifierFound, result);
@@ -191,7 +191,7 @@ aOT9v6d+nb4bnNkQVklLQ3fVAvJm+xdDOp9LCNCN48V2pnDOkFV6+U9nV5oyc6XI
             byte[] random = new byte[2048];
 
             rng.NextBytes(random);
-            byte[] signature = await signingProvider.SignAsync(random, CancellationToken.None);
+            ReadOnlyMemory<byte> signature = await signingProvider.SignAsync(random, CancellationToken.None);
 
             VerificationResult result = await verifyingProvider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.NoMatchingVerifierFound, result);
@@ -210,7 +210,7 @@ aOT9v6d+nb4bnNkQVklLQ3fVAvJm+xdDOp9LCNCN48V2pnDOkFV6+U9nV5oyc6XI
 
         private static RsaPssSha512SignatureProvider Make(
             bool forSigning = false,
-            string keyId = null,
+            string? keyId = null,
             string keyName = "rsa-nsign.test.local")
         {
             X509Certificate2 cert;

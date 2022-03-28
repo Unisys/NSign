@@ -23,8 +23,12 @@ namespace NSign.Signatures
 
             Assert.Equal("my-sig2", inputSpec.Name);
             Assert.NotNull(inputSpec.SignatureParameters);
-            Assert.Equal(created, inputSpec.SignatureParameters.Created.Value);
-            Assert.Equal(expires, inputSpec.SignatureParameters.Expires.Value);
+
+            Assert.True(inputSpec.SignatureParameters.Created.HasValue);
+            Assert.Equal(created, inputSpec.SignatureParameters.Created!.Value);
+
+            Assert.True(inputSpec.SignatureParameters.Expires.HasValue);
+            Assert.Equal(expires, inputSpec.SignatureParameters.Expires!.Value);
         }
     }
 }

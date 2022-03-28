@@ -1,4 +1,6 @@
-﻿namespace NSign.Signatures
+﻿using System;
+
+namespace NSign.Signatures
 {
     /// <summary>
     /// Holds the relevant details of a signature to verify.
@@ -15,9 +17,9 @@
         /// The (unparsed) input spec string for the signature.
         /// </param>
         /// <param name="signature">
-        /// A byte array representing the signature.
+        /// A <see cref="ReadOnlyMemory{T}"/> of <see cref="byte"/> representing the signature.
         /// </param>
-        public SignatureContext(string name, string inputSpec, byte[] signature)
+        public SignatureContext(string name, string? inputSpec, ReadOnlyMemory<byte> signature)
         {
             Name = name;
             InputSpec = inputSpec;
@@ -32,16 +34,11 @@
         /// <summary>
         /// Gets the (unparsed) input spec string for the signature.
         /// </summary>
-        public string InputSpec { get; }
+        public string? InputSpec { get; }
 
         /// <summary>
-        /// Gets a byte array representing the signature.
+        /// Gets a <see cref="ReadOnlyMemory{T}"/> of <see cref="byte"/> representing the signature.
         /// </summary>
-        public byte[] Signature { get; }
-
-        /// <summary>
-        /// Gets a flag which indicates whether or not the InputSpec is present.
-        /// </summary>
-        public bool HasInputSpec => null != InputSpec;
+        public ReadOnlyMemory<byte> Signature { get; }
     }
 }

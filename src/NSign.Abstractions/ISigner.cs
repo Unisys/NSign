@@ -1,4 +1,5 @@
 ﻿using NSign.Signatures;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,14 +23,15 @@ namespace NSign
         /// Signs the given input asynchronously.
         /// </summary>
         /// <param name="input">
-        /// An array of byte values for which to create the signature.
+        /// An <see cref="ReadOnlyMemory{T}"/> of <see cref="byte"/> values for which to create the signature.
         /// </param>
         /// <param name="cancellationToken">
         /// A CancellationToken value that tracks cancellation of the operation.
         /// </param>
         /// <returns>
-        /// A Task which results in a byte array representing the signature when it completes.
+        /// A Task which results in a <see cref="ReadOnlyMemory{T}"/> of <see cref="byte"/> representing the signature
+        /// when it completes.
         /// </returns>
-        Task<byte[]> SignAsync(byte[] input, CancellationToken cancellationToken);
+        Task<ReadOnlyMemory<byte>> SignAsync(ReadOnlyMemory<byte> input, CancellationToken cancellationToken);
     }
 }

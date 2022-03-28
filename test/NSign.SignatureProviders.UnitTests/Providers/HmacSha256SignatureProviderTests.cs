@@ -27,8 +27,8 @@ namespace NSign.Providers
                 "\"content-type\": application/json\n" +
                 "\"@signature-params\": (\"date\" \"@authority\" \"content-type\");created=1618884473;keyid=\"test-shared-secret\"";
 
-            byte[] signature = await provider.SignAsync(Encoding.ASCII.GetBytes(input), default);
-            string sigBase64 = Convert.ToBase64String(signature);
+            ReadOnlyMemory<byte> signature = await provider.SignAsync(Encoding.ASCII.GetBytes(input), default);
+            string sigBase64 = Convert.ToBase64String(signature.Span);
             Assert.Equal("pxcQw6G3AjtMBQjwo8XzkZf/bws5LelbaMk5rGIGtE8=", sigBase64);
         }
 
@@ -65,7 +65,7 @@ namespace NSign.Providers
             byte[] random = new byte[2048];
 
             rng.NextBytes(random);
-            byte[] signature = await provider.SignAsync(random, CancellationToken.None);
+            ReadOnlyMemory<byte> signature = await provider.SignAsync(random, CancellationToken.None);
 
             VerificationResult result = await provider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
@@ -87,7 +87,7 @@ namespace NSign.Providers
             byte[] random = new byte[2048];
 
             rng.NextBytes(random);
-            byte[] signature = await provider.SignAsync(random, CancellationToken.None);
+            ReadOnlyMemory<byte> signature = await provider.SignAsync(random, CancellationToken.None);
 
             VerificationResult result = await provider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.NoMatchingVerifierFound, result);
@@ -102,7 +102,7 @@ namespace NSign.Providers
             byte[] random = new byte[2048];
 
             rng.NextBytes(random);
-            byte[] signature = await provider.SignAsync(random, CancellationToken.None);
+            ReadOnlyMemory<byte> signature = await provider.SignAsync(random, CancellationToken.None);
 
             VerificationResult result = await provider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.NoMatchingVerifierFound, result);
@@ -124,7 +124,7 @@ namespace NSign.Providers
             return new HmacSha256SignatureProvider(Encoding.ASCII.GetBytes("mykey"));
         }
 
-        private static HmacSha256SignatureProvider Make(string keyId = null, byte[] keyBytes = null)
+        private static HmacSha256SignatureProvider Make(string? keyId = null, byte[]? keyBytes = null)
         {
             if (null == keyBytes)
             {

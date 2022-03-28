@@ -13,7 +13,7 @@ namespace NSign
         /// <summary>
         /// Gets or sets the name of the signature to add.
         /// </summary>
-        public string SignatureName { get; set; }
+        public string? SignatureName { get; set; }
 
         /// <summary>
         /// Gets an ICollection of <see cref="ComponentSpec"/> objects defining the components that should be included
@@ -26,7 +26,7 @@ namespace NSign
         /// of signature parameters before signing, if set. This action gets called <em>before</em>
         /// <see cref="ISigner.UpdateSignatureParams(SignatureParamsComponent)"/>.
         /// </summary>
-        public Action<SignatureParamsComponent> SetParameters { get; set; }
+        public Action<SignatureParamsComponent>? SetParameters { get; set; }
 
         /// <summary>
         /// Gets or sets a flag which indicates whether or not the <see cref="ISigner.UpdateSignatureParams(SignatureParamsComponent)"/>

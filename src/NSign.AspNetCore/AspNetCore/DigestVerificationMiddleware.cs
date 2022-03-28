@@ -98,7 +98,7 @@ namespace NSign.AspNetCore
             {
                 foreach (KeyValuePair<string, string> hashEntry in ParseHeaders(values))
                 {
-                    if (!TryGetHashAlgorithm(hashEntry.Key, out IncrementalHash hashAlgorithm, out int sizeBytes))
+                    if (!TryGetHashAlgorithm(hashEntry.Key, out IncrementalHash? hashAlgorithm, out int sizeBytes))
                     {
                         logger.LogDebug("Unsupported hash algorithm '{alg}'.", hashEntry.Key);
                         ++numUnknown;
@@ -122,7 +122,7 @@ namespace NSign.AspNetCore
                     using IMemoryOwner<byte> actualHashOwner = MemoryPool<byte>.Shared.Rent(sizeBytes);
                     Memory<byte> actualHash = actualHashOwner.Memory;
 
-                    if (!await TryComputeHashAsync(context.Request.Body, hashAlgorithm, actualHash))
+                    if (!await TryComputeHashAsync(context.Request.Body, hashAlgorithm!, actualHash))
                     {
                         // This should really never happen, but be prepared in case it does.
                         logger.LogWarning("Hash algorithm '{alg}' tried to produce more than the expected size of {expectedSize} bytes.",
@@ -184,9 +184,9 @@ namespace NSign.AspNetCore
                     throw new InvalidDataException($"The digest header value '{value}' could not be parsed.");
                 }
 
-                foreach (Match match in matches)
+                foreach (Match? match in matches)
                 {
-                    yield return new KeyValuePair<string, string>(match.Groups[1].Value, match.Groups[2].Value);
+                    yield return new KeyValuePair<string, string>(match!.Groups[1].Value, match!.Groups[2].Value);
                 }
             }
         }
@@ -246,7 +246,7 @@ namespace NSign.AspNetCore
         /// <returns>
         /// True if the algorithm was found, or false otherwise.
         /// </returns>
-        private static bool TryGetHashAlgorithm(string algName, out IncrementalHash alg, out int sizeBytes)
+        private static bool TryGetHashAlgorithm(string algName, out IncrementalHash? alg, out int sizeBytes)
         {
             switch (algName.ToUpper())
             {

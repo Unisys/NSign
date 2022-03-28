@@ -26,7 +26,7 @@ namespace NSign.Providers
         /// The value for the KeyId parameter of signatures produced with this provider or null if the value should not
         /// be set / is not important.
         /// </param>
-        protected HmacSignatureProvider(string algorithmName, string keyId) : base(keyId)
+        protected HmacSignatureProvider(string algorithmName, string? keyId) : base(keyId)
         {
             if (String.IsNullOrWhiteSpace(algorithmName))
             {
@@ -37,19 +37,19 @@ namespace NSign.Providers
         }
 
         /// <inheritdoc/>
-        public override Task<byte[]> SignAsync(byte[] input, CancellationToken cancellationToken)
+        public override Task<ReadOnlyMemory<byte>> SignAsync(ReadOnlyMemory<byte> input, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             using HMAC hmac = GetAlgorithm();
-            return Task.FromResult(hmac.ComputeHash(input));
+            return Task.FromResult(new ReadOnlyMemory<byte>(hmac.ComputeHash(input.ToArray())));
         }
 
         /// <inheritdoc/>
         public override Task<VerificationResult> VerifyAsync(
             SignatureParamsComponent signatureParams,
-            byte[] input,
-            byte[] expectedSignature,
+            ReadOnlyMemory<byte> input,
+            ReadOnlyMemory<byte> expectedSignature,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -63,10 +63,10 @@ namespace NSign.Providers
             }
 
             using HMAC hmac = GetAlgorithm();
-            byte[] actualSignature = hmac.ComputeHash(input);
+            byte[] actualSignature = hmac.ComputeHash(input.ToArray());
 
             VerificationResult result = VerificationResult.SignatureMismatch;
-            if (CryptographicOperations.FixedTimeEquals(expectedSignature, actualSignature))
+            if (CryptographicOperations.FixedTimeEquals(expectedSignature.Span, actualSignature))
             {
                 result = VerificationResult.SuccessfullyVerified;
             }

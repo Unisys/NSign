@@ -5,7 +5,7 @@ using Xunit;
 
 namespace NSign.AspNetCore
 {
-    public partial class HttpRequestExtensionsTests
+    public sealed class HttpRequestExtensionsTests
     {
         private readonly DefaultHttpContext httpContext = new DefaultHttpContext();
 
@@ -22,6 +22,45 @@ namespace NSign.AspNetCore
                 () => httpContext.Request.GetDerivedComponentValue(comp));
 
             Assert.Equal(expectedMessage, ex.Message);
+        }
+
+        [Theory]
+        [InlineData("@method", "PATCH")]
+        [InlineData("@target-uri", "https://localhost:8443/blah/blotz/blimp?a=b&c=")]
+        [InlineData("@authority", "localhost:8443")]
+        [InlineData("@scheme", "https")]
+        [InlineData("@request-target", "/blah/blotz/blimp?a=b&c=")]
+        [InlineData("@path", "/blah/blotz/blimp")]
+        [InlineData("@query", "?a=b&c=")]
+        public void GetDerivedComponentValueReturnsComponentValue(string name, string expectedValue)
+        {
+            HttpRequest? request = httpContext.Request;
+            request.Method = "PATCH";
+            request.Scheme = "https";
+            request.Host = new HostString("localhost", 8443);
+            request.PathBase = "/blah";
+            request.Path = "/blotz/blimp";
+            request.QueryString = new QueryString("?a=b&c=");
+
+            DerivedComponent comp = new DerivedComponent(name);
+            string actualValue = httpContext.Request.GetDerivedComponentValue(comp);
+
+            Assert.Equal(expectedValue, actualValue);
+        }
+
+        [Theory]
+        [InlineData(null, "?")]
+        [InlineData("", "?")]
+        [InlineData("?", "?")]
+        [InlineData("?a", "?a")]
+        public void GetDerivedComponentValueAlwaysHasQuestionMarkInQuery(string? queryStringInput, string expectedQuery)
+        {
+            HttpRequest? request = httpContext.Request;
+            request.QueryString = new QueryString(queryStringInput);
+
+            string actualValue = httpContext.Request.GetDerivedComponentValue(SignatureComponent.Query);
+
+            Assert.Equal(expectedQuery, actualValue);
         }
     }
 }

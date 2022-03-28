@@ -61,7 +61,7 @@ namespace NSign.Signatures
         /// <summary>
         /// Gets the ISignatureComponent which caused the exception.
         /// </summary>
-        public ISignatureComponent Component { get; }
+        public ISignatureComponent? Component { get; }
 
         /// <summary>
         /// Gets the exception message for the given component.

@@ -1,21 +1,18 @@
 ﻿using NSign.Http;
-using NSign.Signatures;
 using StructuredFieldValues;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Net.Http;
+using System.Diagnostics;
 using System.Text;
-using System.Web;
 
-namespace NSign.Client
+namespace NSign.Signatures
 {
-    partial class HttpRequestMessageExtensions
+    partial class MessageContext
     {
         /// <summary>
-        /// Implements the InputVisitorBase class to assist with building strings for signature input.
+        /// Implements the VisitorBase class to assist with building strings for signature input.
         /// </summary>
-        private sealed class InputBuildingVisitor : InputVisitorBase
+        private sealed class InputBuildingVisitor : VisitorBase
         {
             /// <summary>
             /// The StringBuilder which builds the full signature input to be used.
@@ -25,10 +22,10 @@ namespace NSign.Client
             /// <summary>
             /// Initializes a new instance of InputBuildingVisitor.
             /// </summary>
-            /// <param name="request">
-            /// The HttpRequestMessage defining the context for this visitor.
+            /// <param name="context">
+            /// The MessageContext defining the context for this visitor.
             /// </param>
-            public InputBuildingVisitor(HttpRequestMessage request) : base(request) { }
+            public InputBuildingVisitor(MessageContext context) : base(context) { }
 
             /// <summary>
             /// The signature input as built by the visitor.
@@ -38,7 +35,7 @@ namespace NSign.Client
             /// <summary>
             /// The value for the '@signature-params' component, as built by the visitor.
             /// </summary>
-            public string SignatureParamsValue { get; private set; }
+            public string? SignatureParamsValue { get; private set; }
 
             /// <inheritdoc/>
             public override void Visit(SignatureComponent component)
@@ -63,26 +60,15 @@ namespace NSign.Client
             /// <inheritdoc/>
             public override void Visit(HttpHeaderDictionaryStructuredComponent httpHeaderDictionary)
             {
-                if (TryGetHeaderValues(httpHeaderDictionary.ComponentName, out IEnumerable<string> values))
+                if (TryGetHeaderValues(httpHeaderDictionary.ComponentName, out IEnumerable<string> values) &&
+                    values.TryGetStructuredDictionaryValue(httpHeaderDictionary.Key, out ParsedItem? lastValue))
                 {
-                    ParsedItem? lastValue = null;
+                    Debug.Assert(lastValue.HasValue, "lastValue must have a value.");
 
-                    foreach (string value in values)
-                    {
-                        if (null == SfvParser.ParseDictionary(value, out IReadOnlyDictionary<string, ParsedItem> actualDict) &&
-                            actualDict.TryGetValue(httpHeaderDictionary.Key, out ParsedItem valueForKey))
-                        {
-                            lastValue = valueForKey;
-                        }
-                    }
-
-                    if (lastValue.HasValue)
-                    {
-                        AddInputWithKey(httpHeaderDictionary,
-                                        lastValue.Value.Value.SerializeAsString() +
-                                        lastValue.Value.Parameters.SerializeAsParameters());
-                        return;
-                    }
+                    AddInputWithKey(httpHeaderDictionary,
+                                    lastValue.Value.Value.SerializeAsString() +
+                                    lastValue.Value.Parameters.SerializeAsParameters());
+                    return;
                 }
 
                 throw new SignatureComponentMissingException(httpHeaderDictionary);
@@ -91,9 +77,19 @@ namespace NSign.Client
             /// <inheritdoc/>
             public override void Visit(DerivedComponent derived)
             {
-                string value = request.GetDerivedComponentValue(derived);
+                string? value = derived.ComponentName switch
+                {
+                    Constants.DerivedComponents.SignatureParams =>
+                        throw new NotSupportedException("The '@signature-params' component cannot be included explicitly."),
+                    Constants.DerivedComponents.QueryParams =>
+                        throw new NotSupportedException("The '@query-params' component must have the 'name' parameter set."),
+                    Constants.DerivedComponents.RequestResponse =>
+                        throw new NotSupportedException("The '@request-response' component must have the 'key' parameter set."),
 
-                AddInput(derived, value);
+                    _ => context.GetDerivedComponentValue(derived),
+                };
+
+                AddInput(derived, value!);
             }
 
             /// <inheritdoc/>
@@ -159,23 +155,36 @@ namespace NSign.Client
             /// <inheritdoc/>
             public override void Visit(QueryParamsComponent queryParams)
             {
-                string[] values = request.GetQueryParamValues(queryParams);
-
-                if (null == values)
-                {
-                    throw new SignatureComponentMissingException(queryParams);
-                }
+                IEnumerable<string> values = context.GetQueryParamValues(queryParams.Name);
+                int numValues = 0;
 
                 foreach (string value in values)
                 {
+                    numValues++;
                     AddInputWithName(queryParams, value);
+                }
+
+                if (0 >= numValues)
+                {
+                    throw new SignatureComponentMissingException(queryParams);
                 }
             }
 
             /// <inheritdoc/>
             public override void Visit(RequestResponseComponent requestResponse)
             {
-                throw new NotSupportedException();
+                if (context.HasResponse)
+                {
+                    SignatureContext? signature = context.GetRequestSignature(requestResponse.Key);
+
+                    if (signature.HasValue)
+                    {
+                        AddInputWithKey(requestResponse, signature.Value.Signature.SerializeAsString());
+                        return;
+                    }
+                }
+
+                throw new SignatureComponentMissingException(requestResponse);
             }
 
             #region Private Methods

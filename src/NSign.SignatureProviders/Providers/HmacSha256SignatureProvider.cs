@@ -31,7 +31,7 @@ namespace NSign.Providers
         /// The value for the KeyId parameter of signatures produced with this provider or null if the value should not
         /// be set / is not important.
         /// </param>
-        public HmacSha256SignatureProvider(byte[] key, string keyId)
+        public HmacSha256SignatureProvider(byte[] key, string? keyId)
             : base(Constants.SignatureAlgorithms.HmacSha256, keyId)
         {
             this.key = key;

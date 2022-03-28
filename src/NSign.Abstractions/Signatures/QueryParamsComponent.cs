@@ -58,9 +58,14 @@ namespace NSign.Signatures
         #endregion
 
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            return base.Equals(obj as QueryParamsComponent);
+            if (obj is QueryParamsComponent queryParams)
+            {
+                return base.Equals(queryParams);
+            }
+
+            return false;
         }
 
         /// <inheritdoc/>

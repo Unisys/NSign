@@ -26,8 +26,8 @@ namespace NSign.Providers
                 "\"forwarded\": for=192.0.2.123\n" +
                 "\"@signature-params\": (\"signature\";key=\"sig1\" \"forwarded\");created=1618884480;expires=1618884540;keyid=\"test-key-rsa\";alg=\"rsa-v1_5-sha256\"";
 
-            byte[] signature = await provider.SignAsync(Encoding.ASCII.GetBytes(input), default);
-            string sigBase64 = Convert.ToBase64String(signature);
+            ReadOnlyMemory<byte> signature = await provider.SignAsync(Encoding.ASCII.GetBytes(input), default);
+            string sigBase64 = Convert.ToBase64String(signature.Span);
             Assert.Equal(
                 "G1WLTL4/9PGSKEQbSAMypZNk+I2dpLJ6qvl2JISahlP31OO/QEUd8/HdO2O7vYLi5k3JIiAK3UPK4U+kvJZyIUidsiXlzRI+Y2se3SGo0D8dLfhG95bKr6ukYXl60QHpsGRTfSiwdtvYKXGpKNrMlISJYd+oGrGRyI9gbCy0aFhc6I/okIMLeK4g9PgzpC3YTwhUQ98KIBNLWHgREfBgJxjPbxFlsgJ9ykPviLj8GKJ81HwsK3XM9P7WaS7fMGOt8h1kSqgkZQB9YqiIo+WhHvJa7iPy8QrYFKzx9BBEY6AwfStZAsXXz3LobZseyxsYcLJLs8rY0wVA9NPsxKrHGA==",
                 sigBase64);
@@ -86,7 +86,7 @@ namespace NSign.Providers
             byte[] random = new byte[2048];
 
             rng.NextBytes(random);
-            byte[] signature = await signingProvider.SignAsync(random, CancellationToken.None);
+            ReadOnlyMemory<byte> signature = await signingProvider.SignAsync(random, CancellationToken.None);
 
             VerificationResult result = await verifyingProvider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
@@ -109,7 +109,7 @@ namespace NSign.Providers
             byte[] random = new byte[2048];
 
             rng.NextBytes(random);
-            byte[] signature = await signingProvider.SignAsync(random, CancellationToken.None);
+            ReadOnlyMemory<byte> signature = await signingProvider.SignAsync(random, CancellationToken.None);
 
             VerificationResult result = await verifyingProvider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.NoMatchingVerifierFound, result);
@@ -125,7 +125,7 @@ namespace NSign.Providers
             byte[] random = new byte[2048];
 
             rng.NextBytes(random);
-            byte[] signature = await signingProvider.SignAsync(random, CancellationToken.None);
+            ReadOnlyMemory<byte> signature = await signingProvider.SignAsync(random, CancellationToken.None);
 
             VerificationResult result = await verifyingProvider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.NoMatchingVerifierFound, result);
@@ -144,7 +144,7 @@ namespace NSign.Providers
 
         private static RsaPkcs15Sha256SignatureProvider Make(
             bool forSigning = false,
-            string keyId = null,
+            string? keyId = null,
             string certName = "rsa-nsign.test.local")
         {
             X509Certificate2 cert;

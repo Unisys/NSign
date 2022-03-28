@@ -2,7 +2,7 @@
   <Import Project="..\..\common.props" />
 
   <PropertyGroup>
-    <TargetFramework>$(ApplicationTargetFramework)</TargetFramework>
+    <TargetFramework>$(TestTargetFramework)</TargetFramework>
     <IsPackable>false</IsPackable>
     <RootNamespace>NSign</RootNamespace>
   </PropertyGroup>

@@ -1,26 +1,24 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Primitives;
-using NSign.Signatures;
-using StructuredFieldValues;
+﻿using StructuredFieldValues;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
-namespace NSign.AspNetCore
+namespace NSign.Signatures
 {
-    partial class HttpContextExtensions
+    partial class MessageContext
     {
         /// <summary>
         /// Implements the InputVisitorBase class to assist with checking for existence of signature components.
         /// </summary>
-        private sealed class InputCheckingVisitor : InputVisitorBase
+        private sealed class InputCheckingVisitor : VisitorBase
         {
             /// <summary>
             /// Initializes a new instance of InputCheckingVisitor.
             /// </summary>
             /// <param name="context">
-            /// The HttpContext defining the context for this visitor.
+            /// The MessageContext defining the context for this visitor.
             /// </param>
-            public InputCheckingVisitor(HttpContext context) : base(context) { }
+            public InputCheckingVisitor(MessageContext context) : base(context) { }
 
             /// <summary>
             /// Gets or sets a flag which indicates whether or not all the tested components were found.
@@ -36,31 +34,20 @@ namespace NSign.AspNetCore
             /// <inheritdoc/>
             public override void Visit(HttpHeaderComponent httpHeader)
             {
-                if (Found)
-                {
-                    Found &= TryGetHeaderValues(httpHeader.ComponentName, out _);
-                }
+                Found &= context.HasHeader(httpHeader.ComponentName);
             }
 
             /// <inheritdoc/>
             public override void Visit(HttpHeaderDictionaryStructuredComponent httpHeaderDictionary)
             {
-                if (Found)
-                {
-                    Found &=
-                        TryGetHeaderValues(httpHeaderDictionary.ComponentName, out StringValues values) &&
-                        HasKey(values, httpHeaderDictionary.Key);
-                }
+                Found &=
+                    TryGetHeaderValues(httpHeaderDictionary.ComponentName, out IEnumerable<string> values) &&
+                    HasKey(values, httpHeaderDictionary.Key);
             }
 
             /// <inheritdoc/>
             public override void Visit(DerivedComponent derived)
             {
-                if (!Found)
-                {
-                    return;
-                }
-
                 switch (derived.ComponentName)
                 {
                     case Constants.DerivedComponents.Method:
@@ -70,7 +57,10 @@ namespace NSign.AspNetCore
                     case Constants.DerivedComponents.RequestTarget:
                     case Constants.DerivedComponents.Path:
                     case Constants.DerivedComponents.Query:
+                        break;
+
                     case Constants.DerivedComponents.Status:
+                        Found &= context.HasResponse;
                         break;
 
                     case Constants.DerivedComponents.SignatureParams:
@@ -94,24 +84,13 @@ namespace NSign.AspNetCore
             /// <inheritdoc/>
             public override void Visit(QueryParamsComponent queryParams)
             {
-                if (!Found)
-                {
-                    return;
-                }
-
-                Found &= context.Request.Query.TryGetValue(queryParams.Name, out _);
+                Found &= context.HasQueryParam(queryParams.Name);
             }
 
             /// <inheritdoc/>
             public override void Visit(RequestResponseComponent requestResponse)
             {
-                if (Found)
-                {
-                    // We need to check the 'signature' header on the related _request_ message
-                    Found &=
-                        context.Request.Headers.TryGetValue(Constants.Headers.Signature, out StringValues values) &&
-                        HasKey(values, requestResponse.Key);
-                }
+                Found &= context.GetRequestSignature(requestResponse.Key).HasValue;
             }
 
             /// <summary>
@@ -119,7 +98,7 @@ namespace NSign.AspNetCore
             /// <paramref name="key"/>.
             /// </summary>
             /// <param name="structuredDictValues">
-            /// An <see cref="StringValues"/> object defining all the values for the header.
+            /// An <see cref="IEnumerable{String}"/> object defining all the values for the header.
             /// </param>
             /// <param name="key">
             /// A string value that represents the key to look for.
@@ -127,7 +106,7 @@ namespace NSign.AspNetCore
             /// <returns>
             /// True if the key is found, or false otherwise.
             /// </returns>
-            private static bool HasKey(StringValues structuredDictValues, string key)
+            private static bool HasKey(IEnumerable<string> structuredDictValues, string key)
             {
                 foreach (string value in structuredDictValues)
                 {

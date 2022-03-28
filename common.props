@@ -1,12 +1,13 @@
 ﻿<Project>
     <PropertyGroup>
         <LibraryTargetFramework>netstandard2.1</LibraryTargetFramework>
-        <ApplicationTargetFramework>net6.0</ApplicationTargetFramework>
-        <AspNetCoreTargetFrameworks>netcoreapp3.1;net5.0;net6.0</AspNetCoreTargetFrameworks>
+        <AspNetCoreTargetFrameworks>netcoreapp3.1;net6.0</AspNetCoreTargetFrameworks>
+        <TestTargetFramework>net6.0</TestTargetFramework>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup>
-        <Version>0.8.3</Version>
+        <Version>0.9.0</Version>
 
         <Authors>Unify Square (a Unisys company)</Authors>
         <Product>NSign</Product>

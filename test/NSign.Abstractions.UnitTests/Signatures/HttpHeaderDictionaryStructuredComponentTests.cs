@@ -54,8 +54,8 @@ namespace NSign.Signatures
             Assert.False(dictHeader.Equals(c4));
             Assert.False(dictHeader.Equals(c5));
 
-            Assert.False(c1.Equals(null));
-            Assert.False(c1.Equals(new object()));
+            Assert.False(c1.Equals((object?)null));
+            Assert.False(c1!.Equals(new object()));
 
             Assert.True(dictHeader.Equals(dictHeader));
         }

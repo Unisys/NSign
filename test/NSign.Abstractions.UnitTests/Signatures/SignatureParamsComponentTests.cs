@@ -20,7 +20,8 @@ namespace NSign.Signatures
                 (c) => Assert.Equal(new HttpHeaderDictionaryStructuredComponent("My-Header", "blah"), c),
                 (c) => Assert.Equal(SignatureComponent.ContentType, c));
 
-            Assert.Equal(DateTimeOffset.UnixEpoch, signatureParams.Created.Value);
+            Assert.True(signatureParams.Created.HasValue);
+            Assert.Equal(DateTimeOffset.UnixEpoch, signatureParams.Created!.Value);
             Assert.Equal(input, signatureParams.OriginalValue);
         }
 
@@ -67,8 +68,10 @@ namespace NSign.Signatures
               (c) => Assert.Equal(SignatureComponent.Path, c));
 
             Assert.Equal("hmac-sha256", signatureParams.Algorithm);
-            Assert.InRange(signatureParams.Created.Value, DateTimeOffset.UtcNow.AddSeconds(-1), DateTimeOffset.UtcNow.AddSeconds(1));
-            Assert.InRange(signatureParams.Expires.Value, DateTimeOffset.UtcNow.AddSeconds(29), DateTimeOffset.UtcNow.AddSeconds(31));
+            Assert.True(signatureParams.Created.HasValue);
+            Assert.InRange(signatureParams.Created!.Value, DateTimeOffset.UtcNow.AddSeconds(-1), DateTimeOffset.UtcNow.AddSeconds(1));
+            Assert.True(signatureParams.Expires.HasValue);
+            Assert.InRange(signatureParams.Expires!.Value, DateTimeOffset.UtcNow.AddSeconds(29), DateTimeOffset.UtcNow.AddSeconds(31));
             Assert.Equal("MyKeyId", signatureParams.KeyId);
             Assert.Equal("my-nonce", signatureParams.Nonce);
 

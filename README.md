@@ -6,7 +6,7 @@
 
 # NSign - HTTP message signatures and verification for .NET
 
-NSign (/ˈensaɪn/) provides libraries to sign HTTP messages based on recent drafts (currently: Dec 20th 2021) of the
+NSign (/ˈensaɪn/) provides libraries to sign HTTP messages based on recent drafts (currently: March 6th 2022) of the
 [HTTP Message Signatures](https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/) to-be standard from
 the IETF. The key motivation for the standard is to have a standard way to sign and verify HTTP messages e.g. used in
 webhook-like scenarios where a provider needs to sign HTTP request messages before sending them to subscribers, and
@@ -16,7 +16,7 @@ HTTP response messages for a client to verify on receipt.
 >__*Disclaimer*__
 >
 >Since the standard is currently in draft state, much like the standard itself, the libraries and its interfaces and
->implementations are subject to change.
+>implementations are subject to change. Versions 0.x.* of the libraries are usually aligned with draft x of the standard.
 
 ## Libraries and Nuget packages
 
@@ -66,6 +66,22 @@ namespace WebhooksEndpoint
                 .Configure<RequestSignatureVerificationOptions>(ConfigureSignatureVerification)
                 .AddDigestVerification()
                 .AddSignatureVerification(CreateRsaPssSha512())
+
+                // If you want to sign responses, configure services like this:
+                .Configure<MessageSigningOptions>((options) =>
+                {
+                    options
+                        .WithMandatoryComponent(SignatureComponent.Status)
+                        .WithMandatoryComponent(SignatureComponent.Path)
+                        .WithOptionalComponent(new RequestResponseComponent("sample"))
+                        ;
+                    options.SignatureName = "resp";
+                    options.SetParameters = (sigParams) =>
+                    {
+                        sigParams.WithCreatedNow().WithExpires(TimeSpan.FromMinutes(5));
+                    };
+                })
+                .AddResponseSigning(new HmacSha256SignatureProvider(System.Text.Encoding.UTF8.GetBytes("my-key"), "my-key"))
                 ;
         }
 
@@ -81,12 +97,15 @@ namespace WebhooksEndpoint
             app.UseAuthorization();
             // Validate signatures (and digests) only for webhook requests.
             app.UseWhen(IsWebhook, UseSignatureVerification);
+            // If you want to sign all responses:
+            app.UseResponseSigning();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
         }
+
         private void ConfigureSignatureVerification(RequestSignatureVerificationOptions options)
         {
             options.SignaturesToVerify.Add("sample");
@@ -151,10 +170,16 @@ namespace WebhooksCaller
             services
                 .Configure<AddDigestOptions>(options => options.WithHash(AddDigestOptions.Hash.Sha256))
                 .Configure<RequestSigningOptions>(ConfigureRequestSigner)
+                # If you also want to verify signatures on responses:
+                .Configure<SignatureVerificationOptions>((options) => {
+                    // Configure options for response signature verification here.
+                })
 
                 .AddHttpClient<ICaller, Caller>("WebhooksCaller")
                 .ConfigureHttpClient(ConfigureCallerClient)
                 .AddDigestAndSigningHandlers()
+                # If you also want to verify signatures on responses:
+                .AddSignatureVerifiationHandler()
                 .Services
 
                 .AddHostedService<CallerService>()
@@ -196,6 +221,7 @@ namespace WebhooksCaller
 
 ## Missing Features
 
+- [ ] Add support for `sf` parameter for re-serializing structured field header values (see section 2.1.1.)
 - [ ] Support for EdDSA using curve edwards25519 (algorithm `ed25519`)
 - [ ] Support for JSON Web Signature algorithms
 - [ ] Support for `Accept-Signature`

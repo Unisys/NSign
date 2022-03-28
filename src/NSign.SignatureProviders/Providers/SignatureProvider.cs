@@ -1,4 +1,5 @@
 ﻿using NSign.Signatures;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,7 +17,7 @@ namespace NSign.Providers
         /// The value for the KeyId parameter of signatures produced with this provider or null if the value should not
         /// be set / is not important.
         /// </param>
-        public SignatureProvider(string keyId)
+        public SignatureProvider(string? keyId)
         {
             KeyId = keyId;
         }
@@ -25,7 +26,7 @@ namespace NSign.Providers
         /// Gets the value for the KeyId parameter of signatures produced with this provider or null if the value should
         /// not be set / is not important.
         /// </summary>
-        public string KeyId { get; }
+        public string? KeyId { get; }
 
         /// <inheritdoc/>
         public virtual void UpdateSignatureParams(SignatureParamsComponent signatureParams)
@@ -34,13 +35,15 @@ namespace NSign.Providers
         }
 
         /// <inheritdoc/>
-        public abstract Task<byte[]> SignAsync(byte[] input, CancellationToken cancellationToken);
+        public abstract Task<ReadOnlyMemory<byte>> SignAsync(
+            ReadOnlyMemory<byte> input,
+            CancellationToken cancellationToken);
 
         /// <inheritdoc/>
         public abstract Task<VerificationResult> VerifyAsync(
             SignatureParamsComponent signatureParams,
-            byte[] input,
-            byte[] expectedSignature,
+            ReadOnlyMemory<byte> input,
+            ReadOnlyMemory<byte> expectedSignature,
             CancellationToken cancellationToken);
     }
 }

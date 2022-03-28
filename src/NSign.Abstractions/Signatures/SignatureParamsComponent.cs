@@ -53,7 +53,7 @@ namespace NSign.Signatures
         /// Gets the original (unparsed) value of the component; this is null exept when the component was created through
         /// the parser.
         /// </summary>
-        public string OriginalValue { get; }
+        public string? OriginalValue { get; }
 
         /// <summary>
         /// Gets or sets a nullable DateTimeOffset value that defines when the signature was created.
@@ -68,17 +68,17 @@ namespace NSign.Signatures
         /// <summary>
         /// Gets or sets a string value that serves as the signature's nonce.
         /// </summary>
-        public string Nonce { get; set; }
+        public string? Nonce { get; set; }
 
         /// <summary>
         /// Gets or sets the string that defines the signing algorithm used.
         /// </summary>
-        public string Algorithm { get; set; }
+        public string? Algorithm { get; set; }
 
         /// <summary>
         /// Gets or sets the ID of the key used for signing.
         /// </summary>
-        public string KeyId { get; set; }
+        public string? KeyId { get; set; }
 
         #region Fluent interface
 
