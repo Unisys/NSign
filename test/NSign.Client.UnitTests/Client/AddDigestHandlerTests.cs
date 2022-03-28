@@ -138,7 +138,7 @@ namespace NSign.Client
 
         private static bool VerifyDigestHeader(HttpRequestMessage request, params string[] expectedValues)
         {
-            if (!request.Content.Headers.TryGetValues("digest", out IEnumerable<string> values))
+            if (!request.Content!.Headers.TryGetValues("digest", out IEnumerable<string>? values))
             {
                 return false;
             }

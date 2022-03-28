@@ -1,12 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSign.Signatures;
-using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-
-using static NSign.MessageSigningOptions;
 
 namespace NSign.Client
 {
@@ -22,9 +19,9 @@ namespace NSign.Client
         private readonly ILogger<SigningHandler> logger;
 
         /// <summary>
-        /// The <see cref="ISigner"/> to use to sign outgoing request messages.
+        /// The <see cref="IMessageSigner"/> to use to sign outgoing request messages.
         /// </summary>
-        private readonly ISigner signer;
+        private readonly IMessageSigner signer;
 
         /// <summary>
         /// The IOptions of <see cref="MessageSigningOptions"/> to define how to sign requests.
@@ -38,12 +35,15 @@ namespace NSign.Client
         /// The ILogger to use.
         /// </param>
         /// <param name="signer">
-        /// The <see cref="ISigner"/> to use to sign outgoing request messages.
+        /// The <see cref="IMessageSigner"/> to use to sign outgoing request messages.
         /// </param>
         /// <param name="options">
         /// The IOptions of <see cref="MessageSigningOptions"/> to define how to sign requests.
         /// </param>
-        public SigningHandler(ILogger<SigningHandler> logger, ISigner signer, IOptions<MessageSigningOptions> options)
+        public SigningHandler(
+            ILogger<SigningHandler> logger,
+            IMessageSigner signer,
+            IOptions<MessageSigningOptions> options)
         {
             this.logger = logger;
             this.signer = signer;
@@ -51,42 +51,14 @@ namespace NSign.Client
         }
 
         /// <inheritdoc/>
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
         {
-            MessageSigningOptions options = this.options.Value;
+            HttpRequestMessageContext context = new HttpRequestMessageContext(
+                logger, request, cancellationToken, options.Value);
 
-            if (String.IsNullOrWhiteSpace(options.SignatureName))
-            {
-                throw new InvalidOperationException("The SignatureName must be set to a non-blank string. Signing failed.");
-            }
-
-            SignatureInputSpec inputSpec = new SignatureInputSpec(options.SignatureName);
-
-            options.SetParameters?.Invoke(inputSpec.SignatureParameters);
-
-            foreach (ComponentSpec componentSpec in options.ComponentsToInclude)
-            {
-                // Add only fields which are mandatory, or refer to components that exist on the request.
-                if (componentSpec.Mandatory ||
-                    request.HasSignatureComponent(componentSpec.Component))
-                {
-                    inputSpec.SignatureParameters.AddComponent(componentSpec.Component);
-                }
-            }
-
-            if (options.UseUpdateSignatureParams)
-            {
-                signer.UpdateSignatureParams(inputSpec.SignatureParameters);
-            }
-
-            byte[] signature = await signer.SignAsync(
-                request.GetSignatureInput(inputSpec, out string sigInput), cancellationToken);
-
-            logger.LogTrace("Using signature-input '{params}' for signature '{sig}' of request '{method} {url}'.",
-                sigInput, inputSpec.Name, request.Method, request.RequestUri.OriginalString);
-
-            request.Headers.Add(Constants.Headers.SignatureInput, $"{inputSpec.Name}={sigInput}");
-            request.Headers.Add(Constants.Headers.Signature, $"{inputSpec.Name}=:{Convert.ToBase64String(signature)}:");
+            await signer.SignMessageAsync(context);
 
             return await base.SendAsync(request, cancellationToken);
         }
