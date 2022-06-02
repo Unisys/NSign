@@ -35,7 +35,7 @@ namespace NSign.Signatures
 
         [Theory]
         [InlineData("sig1", "blah", null)]
-        [InlineData("test", "qwer", "(\"@query-params\";name=\"test\");key=\"test\"")]
+        [InlineData("test", "qwer", "(\"@query-param\";name=\"test\");key=\"test\"")]
         [InlineData("inexistent", null, null)]
         public void GetRequestSignatureWorks(string sigName, string? expectedSignature, string? expectedInput)
         {
@@ -44,7 +44,7 @@ namespace NSign.Signatures
                 return header.ToLowerInvariant() switch
                 {
                     "signature" => new string[] { "sig1=:blah:, sig2=:asdf:,test=:qwer:" },
-                    "signature-input" => new string[] { "test=(\"@query-params\";name=\"test\");key=\"test\"" },
+                    "signature-input" => new string[] { "test=(\"@query-param\";name=\"test\");key=\"test\"" },
                     _ => Array.Empty<string>(),
                 };
             };
@@ -194,11 +194,15 @@ namespace NSign.Signatures
         }
 
         [Theory]
-        [InlineData("x-first", true)]
-        [InlineData("x-second", true)]
-        [InlineData("x-third", true)]
-        [InlineData("x-fourth", false)]
-        public void HasHeaderWorks(string name, bool exists)
+        [InlineData(false, "x-first", true)]
+        [InlineData(false, "x-second", true)]
+        [InlineData(false, "x-third", true)]
+        [InlineData(false, "x-fourth", false)]
+        [InlineData(true, "y-first", true)]
+        [InlineData(true, "y-second", true)]
+        [InlineData(true, "y-third", true)]
+        [InlineData(true, "y-fourth", false)]
+        public void HasHeaderWorks(bool bindRequest, string name, bool exists)
         {
             context.OnGetHeaderValues = (headerName) =>
             {
@@ -210,8 +214,18 @@ namespace NSign.Signatures
                     _ => Array.Empty<string>(),
                 };
             };
+            context.OnGetRequestHeaderValues = (headerName) =>
+            {
+                return headerName.ToLowerInvariant() switch
+                {
+                    "y-first" => new string[] { "a", "b", "c", },
+                    "y-second" => new string[] { "x", },
+                    "y-third" => new string[] { "", },
+                    _ => Array.Empty<string>(),
+                };
+            };
 
-            Assert.Equal(exists, context.HasHeader(name));
+            Assert.Equal(exists, context.HasHeader(bindRequest, name));
         }
 
         [Theory]
@@ -266,35 +280,51 @@ namespace NSign.Signatures
                     _ => Array.Empty<string>(),
                 };
             };
-            QueryParamsComponent comp = new QueryParamsComponent(name);
+            QueryParamComponent comp = new QueryParamComponent(name);
 
             Assert.Equal(exists, context.HasDerivedComponent(comp));
         }
 
         [Theory]
-        [InlineData("sig1", true, true)]
-        [InlineData("sig1", false, false)]
-        [InlineData("sig2", true, true)]
-        [InlineData("sig2", false, false)]
-        [InlineData("test", true, true)]
-        [InlineData("test", false, false)]
-        [InlineData("inexistent", false, false)]
-        public void HasDerivedComponentWorksForRequestResponse(string name, bool hasResponse, bool exists)
+        [InlineData("blah", "Cannot use BindRequest for request message signature components.")]
+        [InlineData("@authority", "Cannot use BindRequest for request message signature components.")]
+        [InlineData("@status", "Cannot use BindRequest for request message signature components.")]
+        public void EnsureComponentIsAllowedThrowsSignatureComponentNotAllowedExceptionWhenRequestBindingRequiredButNotPossible(
+            string componentName,
+            string expectedExceptionMessage
+            )
         {
-            context.HasResponseValue = hasResponse;
-            context.OnGetRequestHeaderValues = (headerName) =>
-            {
-                return headerName.ToLowerInvariant() switch
-                {
-                    "signature" => new string[] { "sig1=:blah:, sig2=:asdf:,test=:qwer:" },
-                    "signature-input" => new string[] { "test=(\"x-header\";key=\"test\");alg=\"test\", inexistent=()" },
-                    _ => Array.Empty<string>(),
-                };
-            };
+            SignatureComponent comp = componentName[0] == '@' ?
+                new DerivedComponent(componentName, bindRequest: true) :
+                new HttpHeaderComponent(componentName, bindRequest: true);
 
-            RequestResponseComponent comp = new RequestResponseComponent(name);
+            context.HasResponseValue = false;
 
-            Assert.Equal(exists, context.HasDerivedComponent(comp));
+            SignatureComponentNotAllowedException ex = Assert.Throws<SignatureComponentNotAllowedException>(
+                () => context.EnsureComponentIsAllowed(comp));
+
+            Assert.Equal(expectedExceptionMessage, ex.Message);
+            Assert.Same(comp, ex.Component);
+        }
+
+        [Theory]
+        [InlineData("@status", "Cannot use '@status' with request-response binding.")]
+        public void EnsureComponentIsAllowedThrowsSignatureComponentNotAllowedExceptionWhenRequestBindingNotAllowed(
+            string componentName,
+            string expectedExceptionMessage
+            )
+        {
+            SignatureComponent comp = componentName[0] == '@' ?
+                new DerivedComponent(componentName, bindRequest: true) :
+                new HttpHeaderComponent(componentName, bindRequest: true);
+
+            context.HasResponseValue = true;
+
+            SignatureComponentNotAllowedException ex = Assert.Throws<SignatureComponentNotAllowedException>(
+                () => context.EnsureComponentIsAllowed(comp));
+
+            Assert.Equal(expectedExceptionMessage, ex.Message);
+            Assert.Same(comp, ex.Component);
         }
     }
 }

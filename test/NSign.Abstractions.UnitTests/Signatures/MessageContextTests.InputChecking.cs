@@ -20,6 +20,7 @@ namespace NSign.Signatures
         [Fact]
         public void HasSignatureComponentChecksRequestAndContentHeaders()
         {
+            context.HasResponseValue = true;
             context.OnGetHeaderValues = (headerName) =>
             {
                 return headerName switch
@@ -45,6 +46,10 @@ namespace NSign.Signatures
             {
                 return headerName switch
                 {
+                    "y-header" => new string[] { "text", },
+                    "y-header-empty" => new string[] { "", },
+                    "y-dict" => new string[] { "a=b, c", },
+                    "y-dict-malformed" => new string[] { "#", },
                     _ => Array.Empty<string>(),
                 };
             };
@@ -58,10 +63,24 @@ namespace NSign.Signatures
             Assert.False(context.HasSignatureComponent(new HttpHeaderDictionaryStructuredComponent("x-missing-dict", "x")));
             Assert.False(context.HasSignatureComponent(new HttpHeaderDictionaryStructuredComponent("x-dict-malformed", "x")));
 
-            Assert.True(context.HasSignatureComponent(new QueryParamsComponent("a")));
-            Assert.True(context.HasSignatureComponent(new QueryParamsComponent("c")));
-            Assert.True(context.HasSignatureComponent(new QueryParamsComponent("e")));
-            Assert.False(context.HasSignatureComponent(new QueryParamsComponent("x")));
+            Assert.True(context.HasSignatureComponent(new HttpHeaderComponent("y-header", bindRequest: true)));
+            Assert.True(context.HasSignatureComponent(new HttpHeaderComponent("y-header-empty", bindRequest: true)));
+            Assert.False(context.HasSignatureComponent(new HttpHeaderComponent("y-missing", bindRequest: true)));
+            Assert.True(context.HasSignatureComponent(new HttpHeaderDictionaryStructuredComponent("y-dict", "a", bindRequest: true)));
+            Assert.True(context.HasSignatureComponent(new HttpHeaderDictionaryStructuredComponent("y-dict", "c", bindRequest: true)));
+            Assert.False(context.HasSignatureComponent(new HttpHeaderDictionaryStructuredComponent("y-dict", "x", bindRequest: true)));
+            Assert.False(context.HasSignatureComponent(new HttpHeaderDictionaryStructuredComponent("y-missing-dict", "x", bindRequest: true)));
+            Assert.False(context.HasSignatureComponent(new HttpHeaderDictionaryStructuredComponent("y-dict-malformed", "x", bindRequest: true)));
+
+            Assert.True(context.HasSignatureComponent(new QueryParamComponent("a")));
+            Assert.True(context.HasSignatureComponent(new QueryParamComponent("c")));
+            Assert.True(context.HasSignatureComponent(new QueryParamComponent("e")));
+            Assert.False(context.HasSignatureComponent(new QueryParamComponent("x")));
+
+            Assert.True(context.HasSignatureComponent(new QueryParamComponent("a", bindRequest: true)));
+            Assert.True(context.HasSignatureComponent(new QueryParamComponent("c", bindRequest: true)));
+            Assert.True(context.HasSignatureComponent(new QueryParamComponent("e", bindRequest: true)));
+            Assert.False(context.HasSignatureComponent(new QueryParamComponent("x", bindRequest: true)));
 
             Assert.True(context.HasSignatureComponent(SignatureComponent.Method));
             Assert.True(context.HasSignatureComponent(SignatureComponent.RequestTargetUri));
@@ -71,6 +90,15 @@ namespace NSign.Signatures
             Assert.True(context.HasSignatureComponent(SignatureComponent.Path));
             Assert.True(context.HasSignatureComponent(SignatureComponent.Query));
             Assert.False(context.HasSignatureComponent(new DerivedComponent("@foo")));
+
+            Assert.True(context.HasSignatureComponent(SignatureComponent.RequestBoundMethod));
+            Assert.True(context.HasSignatureComponent(SignatureComponent.RequestBoundRequestTargetUri));
+            Assert.True(context.HasSignatureComponent(SignatureComponent.RequestBoundAuthority));
+            Assert.True(context.HasSignatureComponent(SignatureComponent.RequestBoundScheme));
+            Assert.True(context.HasSignatureComponent(SignatureComponent.RequestBoundRequestTarget));
+            Assert.True(context.HasSignatureComponent(SignatureComponent.RequestBoundPath));
+            Assert.True(context.HasSignatureComponent(SignatureComponent.RequestBoundQuery));
+            Assert.False(context.HasSignatureComponent(new DerivedComponent("@foo", bindRequest: true)));
 
             Assert.False(context.HasSignatureComponent(new HttpHeaderComponent("content-length")));
             context.OnGetHeaderValues = (headerName) =>
@@ -83,8 +111,7 @@ namespace NSign.Signatures
             };
             Assert.True(context.HasSignatureComponent(new HttpHeaderComponent("content-length")));
 
-            Assert.False(context.HasSignatureComponent(new RequestResponseComponent("test")));
-
+            context.HasResponseValue = false;
             Assert.False(context.HasSignatureComponent(SignatureComponent.Status));
             context.HasResponseValue = true;
             Assert.True(context.HasSignatureComponent(SignatureComponent.Status));
@@ -100,14 +127,11 @@ namespace NSign.Signatures
                     _ => Array.Empty<string>(),
                 };
             };
-            Assert.False(newContext.HasSignatureComponent(new RequestResponseComponent("missing")));
-            Assert.True(newContext.HasSignatureComponent(new RequestResponseComponent("test")));
         }
 
         [Theory]
         [InlineData("@signature-params")]
-        [InlineData("@query-params")]
-        [InlineData("@request-response")]
+        [InlineData("@query-param")]
         public void HasSignatureComponentThrowsNotSupportedExceptionForUnsupportedDerivedComponents(string name)
         {
             NotSupportedException ex = Assert.Throws<NotSupportedException>(

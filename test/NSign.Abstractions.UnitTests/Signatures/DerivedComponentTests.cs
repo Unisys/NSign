@@ -50,5 +50,14 @@ namespace NSign.Signatures
 
             mockVisitor.Verify(v => v.Visit(It.IsAny<DerivedComponent>()), Times.Once);
         }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CtorPassesBindRequest(bool bindRequest)
+        {
+            DerivedComponent comp = new DerivedComponent("@method", bindRequest);
+            Assert.Equal(bindRequest, comp.BindRequest);
+        }
     }
 }

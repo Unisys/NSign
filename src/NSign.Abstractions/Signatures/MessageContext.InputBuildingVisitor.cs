@@ -15,6 +15,11 @@ namespace NSign.Signatures
         private sealed class InputBuildingVisitor : VisitorBase
         {
             /// <summary>
+            /// The parameter to use to indicate that a component is bound to the request.
+            /// </summary>
+            private const string ParamBindRequest = ";" + Constants.ComponentParameters.Request;
+
+            /// <summary>
             /// The StringBuilder which builds the full signature input to be used.
             /// </summary>
             private readonly StringBuilder signatureInput = new StringBuilder();
@@ -38,16 +43,11 @@ namespace NSign.Signatures
             public string? SignatureParamsValue { get; private set; }
 
             /// <inheritdoc/>
-            public override void Visit(SignatureComponent component)
-            {
-                throw new NotSupportedException(
-                    $"Custom classes derived from SignatureComponent are not supported; component '{component.ComponentName}'.");
-            }
-
-            /// <inheritdoc/>
             public override void Visit(HttpHeaderComponent httpHeader)
             {
-                if (TryGetHeaderValues(httpHeader.ComponentName, out IEnumerable<string> values))
+                bool bindRequest = httpHeader.BindRequest;
+
+                if (TryGetHeaderValues(bindRequest, httpHeader.ComponentName, out IEnumerable<string> values))
                 {
                     AddInput(httpHeader, String.Join(", ", values));
                 }
@@ -60,7 +60,9 @@ namespace NSign.Signatures
             /// <inheritdoc/>
             public override void Visit(HttpHeaderDictionaryStructuredComponent httpHeaderDictionary)
             {
-                if (TryGetHeaderValues(httpHeaderDictionary.ComponentName, out IEnumerable<string> values) &&
+                bool bindRequest = httpHeaderDictionary.BindRequest;
+
+                if (TryGetHeaderValues(bindRequest, httpHeaderDictionary.ComponentName, out IEnumerable<string> values) &&
                     values.TryGetStructuredDictionaryValue(httpHeaderDictionary.Key, out ParsedItem? lastValue))
                 {
                     Debug.Assert(lastValue.HasValue, "lastValue must have a value.");
@@ -81,10 +83,8 @@ namespace NSign.Signatures
                 {
                     Constants.DerivedComponents.SignatureParams =>
                         throw new NotSupportedException("The '@signature-params' component cannot be included explicitly."),
-                    Constants.DerivedComponents.QueryParams =>
-                        throw new NotSupportedException("The '@query-params' component must have the 'name' parameter set."),
-                    Constants.DerivedComponents.RequestResponse =>
-                        throw new NotSupportedException("The '@request-response' component must have the 'key' parameter set."),
+                    Constants.DerivedComponents.QueryParam =>
+                        throw new NotSupportedException("The '@query-param' component must have the 'name' parameter set."),
 
                     _ => context.GetDerivedComponentValue(derived),
                 };
@@ -95,11 +95,61 @@ namespace NSign.Signatures
             /// <inheritdoc/>
             public override void Visit(SignatureParamsComponent signatureParamsComponent)
             {
+                if (null == signatureParamsComponent.OriginalValue)
+                {
+                    BuildSignatureParamsComponentValueAndVisitComponents(signatureParamsComponent);
+                }
+                else
+                {
+                    foreach (SignatureComponent component in signatureParamsComponent.Components)
+                    {
+                        context.EnsureComponentIsAllowed(component);
+                        component.Accept(this);
+                    }
+
+                    SignatureParamsValue = signatureParamsComponent.OriginalValue;
+                    AddInput(signatureParamsComponent, signatureParamsComponent.OriginalValue);
+                }
+            }
+
+            /// <inheritdoc/>
+            public override void Visit(QueryParamComponent queryParam)
+            {
+                IEnumerable<string> values = context.GetQueryParamValues(queryParam.Name);
+                int numValues = 0;
+
+                foreach (string value in values)
+                {
+                    numValues++;
+                    AddInputWithName(queryParam, value);
+                }
+
+                if (0 >= numValues)
+                {
+                    throw new SignatureComponentMissingException(queryParam);
+                }
+            }
+
+            #region Private Methods
+
+            /// <summary>
+            /// Builds the '@signature-params` component value from scratch.
+            /// </summary>
+            /// <param name="signatureParamsComponent">
+            /// The <see cref="SignatureParamsComponent"/> component for which to build the value from scratch.
+            /// </param>
+            private void BuildSignatureParamsComponentValueAndVisitComponents(
+                SignatureParamsComponent signatureParamsComponent)
+            {
+                Debug.Assert(null == signatureParamsComponent.OriginalValue,
+                    "The '@signature-params' component's original value must be null.");
+
                 StringBuilder sb = new StringBuilder("(");
                 int fieldId = 0;
 
                 foreach (SignatureComponent component in signatureParamsComponent.Components)
                 {
+                    context.EnsureComponentIsAllowed(component);
                     component.Accept(this);
 
                     if (0 < fieldId++)
@@ -107,17 +157,26 @@ namespace NSign.Signatures
                         sb.Append(' ');
                     }
 
-                    if (component is ISignatureComponentWithKey componentWithKey)
+                    if (null != component.OriginalIdentifier)
                     {
-                        sb.Append($"\"{component.ComponentName}\";{Constants.ComponentParameters.Key}=\"{componentWithKey.Key}\"");
-                    }
-                    else if (component is ISignatureComponentWithName componentWithName)
-                    {
-                        sb.Append($"\"{component.ComponentName}\";{Constants.ComponentParameters.Name}=\"{componentWithName.Name}\"");
+                        sb.Append(component.OriginalIdentifier);
                     }
                     else
                     {
-                        sb.Append($"\"{component.ComponentName}\"");
+                        string prefix = $"\"{component.ComponentName}\"{(component.BindRequest ? ParamBindRequest : "")}";
+
+                        if (component is ISignatureComponentWithKey componentWithKey)
+                        {
+                            sb.Append($"{prefix};{Constants.ComponentParameters.Key}=\"{componentWithKey.Key}\"");
+                        }
+                        else if (component is ISignatureComponentWithName componentWithName)
+                        {
+                            sb.Append($"{prefix};{Constants.ComponentParameters.Name}=\"{componentWithName.Name}\"");
+                        }
+                        else
+                        {
+                            sb.Append(prefix);
+                        }
                     }
                 }
 
@@ -152,43 +211,6 @@ namespace NSign.Signatures
                 AddInput(signatureParamsComponent, SignatureParamsValue);
             }
 
-            /// <inheritdoc/>
-            public override void Visit(QueryParamsComponent queryParams)
-            {
-                IEnumerable<string> values = context.GetQueryParamValues(queryParams.Name);
-                int numValues = 0;
-
-                foreach (string value in values)
-                {
-                    numValues++;
-                    AddInputWithName(queryParams, value);
-                }
-
-                if (0 >= numValues)
-                {
-                    throw new SignatureComponentMissingException(queryParams);
-                }
-            }
-
-            /// <inheritdoc/>
-            public override void Visit(RequestResponseComponent requestResponse)
-            {
-                if (context.HasResponse)
-                {
-                    SignatureContext? signature = context.GetRequestSignature(requestResponse.Key);
-
-                    if (signature.HasValue)
-                    {
-                        AddInputWithKey(requestResponse, signature.Value.Signature.SerializeAsString());
-                        return;
-                    }
-                }
-
-                throw new SignatureComponentMissingException(requestResponse);
-            }
-
-            #region Private Methods
-
             /// <summary>
             /// Adds a line to the signature input for the given component with the specified value.
             /// </summary>
@@ -200,7 +222,15 @@ namespace NSign.Signatures
             /// </param>
             private void AddInput(SignatureComponent component, string value)
             {
-                AddInput(component.ComponentName, value);
+                if (null == component.OriginalIdentifier)
+                {
+                    string suffix = component.BindRequest ? ParamBindRequest : String.Empty;
+                    AddInput($"\"{component.ComponentName}\"{suffix}", value);
+                }
+                else
+                {
+                    AddInput(component.OriginalIdentifier, value);
+                }
             }
 
             /// <summary>
@@ -214,7 +244,15 @@ namespace NSign.Signatures
             /// </param>
             private void AddInputWithKey(ISignatureComponentWithKey component, string value)
             {
-                AddInput($"{component.ComponentName}\";{Constants.ComponentParameters.Key}=\"{component.Key}", value);
+                if (null == component.OriginalIdentifier)
+                {
+                    string suffix = component.BindRequest ? ParamBindRequest : String.Empty;
+                    AddInput($"\"{component.ComponentName}\"{suffix};{Constants.ComponentParameters.Key}=\"{component.Key}\"", value);
+                }
+                else
+                {
+                    AddInput(component.OriginalIdentifier, value);
+                }
             }
 
             /// <summary>
@@ -228,7 +266,15 @@ namespace NSign.Signatures
             /// </param>
             private void AddInputWithName(ISignatureComponentWithName component, string value)
             {
-                AddInput($"{component.ComponentName}\";{Constants.ComponentParameters.Name}=\"{component.Name}", value);
+                if (null == component.OriginalIdentifier)
+                {
+                    string suffix = component.BindRequest ? ParamBindRequest : String.Empty;
+                    AddInput($"\"{component.ComponentName}\"{suffix};{Constants.ComponentParameters.Name}=\"{component.Name}\"", value);
+                }
+                else
+                {
+                    AddInput(component.OriginalIdentifier, value);
+                }
             }
 
             /// <summary>
@@ -247,7 +293,7 @@ namespace NSign.Signatures
                     signatureInput.Append('\n');
                 }
 
-                signatureInput.Append($"\"{componentSpec}\": {value}");
+                signatureInput.Append($"{componentSpec}: {value}");
             }
 
             #endregion

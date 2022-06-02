@@ -66,6 +66,52 @@ namespace NSign.Signatures
         /// </summary>
         public static readonly HttpHeaderComponent ContentLength = new HttpHeaderComponent(Constants.Headers.ContentLength);
 
+        #region Derived Components with Request-Response binding
+
+        /// <summary>
+        /// Represents the '@method' derived component.
+        /// </summary>
+        internal static readonly DerivedComponent RequestBoundMethod =
+            new DerivedComponent(Constants.DerivedComponents.Method, bindRequest: true);
+
+        /// <summary>
+        /// Represents the '@target-uri' derived component.
+        /// </summary>
+        internal static readonly DerivedComponent RequestBoundRequestTargetUri =
+            new DerivedComponent(Constants.DerivedComponents.TargetUri, bindRequest: true);
+
+        /// <summary>
+        /// Represents the '@authority' derived component.
+        /// </summary>
+        internal static readonly DerivedComponent RequestBoundAuthority =
+            new DerivedComponent(Constants.DerivedComponents.Authority, bindRequest: true);
+
+        /// <summary>
+        /// Represents the '@scheme' derived component.
+        /// </summary>
+        internal static readonly DerivedComponent RequestBoundScheme =
+            new DerivedComponent(Constants.DerivedComponents.Scheme, bindRequest: true);
+
+        /// <summary>
+        /// Represents the '@request-target' derived component.
+        /// </summary>
+        internal static readonly DerivedComponent RequestBoundRequestTarget =
+            new DerivedComponent(Constants.DerivedComponents.RequestTarget, bindRequest: true);
+
+        /// <summary>
+        /// Represents the '@path' derived component.
+        /// </summary>
+        internal static readonly DerivedComponent RequestBoundPath =
+            new DerivedComponent(Constants.DerivedComponents.Path, bindRequest: true);
+
+        /// <summary>
+        /// Represents the '@query' derived component.
+        /// </summary>
+        internal static readonly DerivedComponent RequestBoundQuery =
+            new DerivedComponent(Constants.DerivedComponents.Query, bindRequest: true);
+
+        #endregion
+
         #endregion
 
         #region C'tors
@@ -80,6 +126,22 @@ namespace NSign.Signatures
         /// A string representing the signature component's name.
         /// </param>
         protected SignatureComponent(SignatureComponentType type, string componentName)
+            : this(type, componentName, bindRequest: false) { }
+
+        /// <summary>
+        /// Initializes a new instance of SignatureComponent.
+        /// </summary>
+        /// <param name="type">
+        /// A SignatureComponentType value defining the type of the signature component.
+        /// </param>
+        /// <param name="componentName">
+        /// A string representing the signature component's name.
+        /// </param>
+        /// <param name="bindRequest">
+        /// Whether or not the component should be bound to the request. This represents the <c>req</c> flag from the
+        /// standard.
+        /// </param>
+        protected SignatureComponent(SignatureComponentType type, string componentName, bool bindRequest)
         {
             if (SignatureComponentType.HttpHeader != type && SignatureComponentType.Derived != type)
             {
@@ -92,6 +154,7 @@ namespace NSign.Signatures
 
             Type = type;
             ComponentName = componentName.ToLower();
+            BindRequest = bindRequest;
         }
 
         #endregion
@@ -103,6 +166,12 @@ namespace NSign.Signatures
 
         /// <inheritdoc/>
         public string ComponentName { get; }
+
+        /// <inheritdoc/>
+        public bool BindRequest { get; }
+
+        /// <inheritdoc/>
+        public string? OriginalIdentifier { get; init; }
 
         #endregion
 
@@ -134,6 +203,7 @@ namespace NSign.Signatures
             return
                 GetType() == other.GetType() &&
                 Type == other.Type &&
+                BindRequest == other.BindRequest &&
                 StringComparer.Ordinal.Equals(ComponentName, other.ComponentName);
         }
 
@@ -159,7 +229,8 @@ namespace NSign.Signatures
         /// <inheritdoc/>
         public override string ToString()
         {
-            return ComponentName;
+            string suffix = BindRequest ? ";req" : String.Empty;
+            return $"{ComponentName}{suffix}";
         }
     }
 }

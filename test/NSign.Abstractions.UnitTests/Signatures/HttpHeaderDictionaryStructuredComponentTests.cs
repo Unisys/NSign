@@ -72,6 +72,16 @@ namespace NSign.Signatures
             mockVisitor.Verify(v => v.Visit(It.IsAny<HttpHeaderDictionaryStructuredComponent>()), Times.Once);
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CtorPassesBindRequest(bool bindRequest)
+        {
+            HttpHeaderDictionaryStructuredComponent comp = new HttpHeaderDictionaryStructuredComponent(
+                "blah", "mykey", bindRequest);
+            Assert.Equal(bindRequest, comp.BindRequest);
+        }
+
         private sealed class Comp : HttpHeaderDictionaryStructuredComponent
         {
             public Comp(string name, string key) : base(name, key)

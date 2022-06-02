@@ -120,8 +120,9 @@ namespace NSign.Client
         }
 
         /// <inheritdoc/>
-        public override sealed bool HasHeader(string headerName)
+        public override sealed bool HasHeader(bool bindRequest, string headerName)
         {
+            Debug.Assert(false == bindRequest, "Binding to the request message is not supported for this context.");
             return TryGetHeaderValues(MessageHeaders, MessageContent, headerName, out _);
         }
 

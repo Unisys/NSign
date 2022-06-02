@@ -22,7 +22,7 @@ namespace NSign.AspNetCore
         /// A string that represents the requested value.
         /// </returns>
         /// <exception cref="NotSupportedException">
-        /// Thrown for unsupported derived components. This includes e.g. the '@query-params' component which has dedicated
+        /// Thrown for unsupported derived components. This includes e.g. the '@query-param' component which has dedicated
         /// logic for value retrieval, or the '@status' or '@request-response' components which are not support for
         /// request messages in the first place.
         /// </exception>
@@ -42,12 +42,10 @@ namespace NSign.AspNetCore
                 // TODO: Need to figure out a way to deal with reverse proxies changing paths, i.e. getting the original path/prefix.
                 Constants.DerivedComponents.Path => $"{request.PathBase}{request.Path}",
                 Constants.DerivedComponents.Query => request.QueryString.HasValue ? request.QueryString.Value! : "?",
-                Constants.DerivedComponents.QueryParams
-                    => throw new NotSupportedException("The '@query-params' component value cannot be retrieved like this."),
+                Constants.DerivedComponents.QueryParam
+                    => throw new NotSupportedException("The '@query-param' component value cannot be retrieved like this."),
                 Constants.DerivedComponents.Status
                     => throw new NotSupportedException("The '@status' component value cannot be retrieved for request messages."),
-                Constants.DerivedComponents.RequestResponse
-                    => throw new NotSupportedException("The '@request-response' component value cannot be retrieved for request messages."),
 
                 _ => throw new NotSupportedException($"Non-standard derived signature component '{derivedComponent.ComponentName}' cannot be retrieved."),
             };

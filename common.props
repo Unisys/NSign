@@ -4,6 +4,7 @@
         <AspNetCoreTargetFrameworks>netcoreapp3.1;net6.0</AspNetCoreTargetFrameworks>
         <TestTargetFramework>net6.0</TestTargetFramework>
         <Nullable>enable</Nullable>
+        <LangVersion>9.0</LangVersion>
     </PropertyGroup>
 
     <PropertyGroup>

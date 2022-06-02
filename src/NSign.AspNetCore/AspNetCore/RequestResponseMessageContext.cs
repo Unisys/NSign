@@ -84,8 +84,6 @@ namespace NSign.AspNetCore
             return component.ComponentName switch
             {
                 Constants.DerivedComponents.Status => HttpContext.Response.StatusCode.ToString(),
-                Constants.DerivedComponents.RequestResponse =>
-                    throw new NotSupportedException("The '@request-response' component must have the 'key' parameter set."),
 
                 _ => base.GetDerivedComponentValue(component),
             };

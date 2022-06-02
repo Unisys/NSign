@@ -19,7 +19,7 @@ namespace NSign.Signatures
         /// <summary>
         /// Initializes a new instance of SignatureParamsComponent.
         /// </summary>
-        public SignatureParamsComponent() : base(Constants.DerivedComponents.SignatureParams)
+        public SignatureParamsComponent() : base(Constants.DerivedComponents.SignatureParams, bindRequest: false)
         {
             components = new Collection<SignatureComponent>();
         }
@@ -53,6 +53,10 @@ namespace NSign.Signatures
         /// Gets the original (unparsed) value of the component; this is null exept when the component was created through
         /// the parser.
         /// </summary>
+        /// <remarks>
+        /// <strong>Note:</strong> This string is inevitably different from <see cref="SignatureComponent.OriginalIdentifier"/>
+        /// as it tracks the <em>value</em> of the <c>@signature-params</c> component, not its <em>identifier</em>.
+        /// </remarks>
         public string? OriginalValue { get; }
 
         /// <summary>

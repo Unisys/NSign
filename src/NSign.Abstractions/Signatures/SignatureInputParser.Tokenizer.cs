@@ -10,11 +10,6 @@ namespace NSign.Signatures
         internal ref struct Tokenizer
         {
             /// <summary>
-            /// The input to parse.
-            /// </summary>
-            private readonly ReadOnlySpan<char> input;
-
-            /// <summary>
             /// The position of the next token.
             /// </summary>
             private int position;
@@ -27,11 +22,16 @@ namespace NSign.Signatures
             /// </param>
             public Tokenizer(ReadOnlySpan<char> input)
             {
-                this.input = input;
+                Input = input;
                 position = 0;
                 LastPosition = -1;
                 Token = Token.Empty;
             }
+
+            /// <summary>
+            /// The input to parse.
+            /// </summary>
+            public ReadOnlySpan<char> Input { get; }
 
             /// <summary>
             /// Gets or sets the last read token. Before Next() is called for the first time, this is always the empty token.
@@ -127,12 +127,12 @@ namespace NSign.Signatures
             /// </returns>
             int Peek()
             {
-                if (input.Length <= position)
+                if (Input.Length <= position)
                 {
                     return -1;
                 }
 
-                return input[position];
+                return Input[position];
             }
 
             /// <summary>
@@ -173,7 +173,7 @@ namespace NSign.Signatures
                 }
 
                 // We have already read the closing double quote, so the actual quoted string ends one character before.
-                Token = new Token(TokenType.QuotedString, input[startPos..(position - 1)]);
+                Token = new Token(TokenType.QuotedString, Input[startPos..(position - 1)]);
             }
 
             /// <summary>
@@ -192,7 +192,7 @@ namespace NSign.Signatures
                     Read();
                 }
 
-                Token = new Token(TokenType.Identifier, input[startPos..position]);
+                Token = new Token(TokenType.Identifier, Input[startPos..position]);
             }
 
             /// <summary>
@@ -211,7 +211,7 @@ namespace NSign.Signatures
                     Read();
                 }
 
-                Token = new Token(TokenType.Integer, input[startPos..position]);
+                Token = new Token(TokenType.Integer, Input[startPos..position]);
             }
 
             /// <summary>

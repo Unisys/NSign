@@ -12,9 +12,8 @@ namespace NSign.Client
 
         [Theory]
         [InlineData("@signature-params", "The '@signature-params' component cannot be included explicitly.")]
-        [InlineData("@query-params", "The '@query-params' component must have the 'name' parameter set.")]
+        [InlineData("@query-param", "The '@query-param' component must have the 'name' parameter set.")]
         [InlineData("@status", "The '@status' component cannot be included in request signatures.")]
-        [InlineData("@request-response", "The '@request-response' component must have the 'key' parameter set.")]
         [InlineData("@blah", "Non-standard derived signature component '@blah' cannot be retrieved.")]
         public void GetDerivedComponentValueThrowsForUnsupportedComponents(string name, string expectedMessage)
         {

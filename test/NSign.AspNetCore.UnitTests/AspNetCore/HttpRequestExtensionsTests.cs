@@ -11,9 +11,8 @@ namespace NSign.AspNetCore
 
         [Theory]
         [InlineData("@signature-params", "The '@signature-params' component value cannot be retrieved like this.")]
-        [InlineData("@query-params", "The '@query-params' component value cannot be retrieved like this.")]
+        [InlineData("@query-param", "The '@query-param' component value cannot be retrieved like this.")]
         [InlineData("@status", "The '@status' component value cannot be retrieved for request messages.")]
-        [InlineData("@request-response", "The '@request-response' component value cannot be retrieved for request messages.")]
         [InlineData("@blah", "Non-standard derived signature component '@blah' cannot be retrieved.")]
         public void GetDerivedComponentValueThrowsForUnsupportedComponents(string name, string expectedMessage)
         {

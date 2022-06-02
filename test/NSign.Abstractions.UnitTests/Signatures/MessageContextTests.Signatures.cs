@@ -44,7 +44,7 @@ namespace NSign.Signatures
                     "signature" => new string[] { " good=:abcd:", },
                     "signature-input" => new string[] {
                         "#",
-                        "bad=abcd, good=(\"@query-params\";name=\"test\" \"x-header\");nonce=\"blah\", morebad=123",
+                        "bad=abcd, good=(\"@query-param\";name=\"test\" \"x-header\");nonce=\"blah\", morebad=123",
                         "other=blah",
                     },
                     _ => Array.Empty<string>(),
@@ -55,7 +55,7 @@ namespace NSign.Signatures
             Assert.True(sig.HasValue);
             Assert.Equal("abcd", Convert.ToBase64String(sig!.Value.Signature.Span));
             Assert.NotNull(sig.Value.InputSpec);
-            Assert.Equal("(\"@query-params\";name=\"test\" \"x-header\");nonce=\"blah\"", sig.Value.InputSpec);
+            Assert.Equal("(\"@query-param\";name=\"test\" \"x-header\");nonce=\"blah\"", sig.Value.InputSpec);
         }
     }
 }

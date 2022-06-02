@@ -1,7 +1,6 @@
 ﻿using StructuredFieldValues;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace NSign.Signatures
 {
@@ -26,22 +25,18 @@ namespace NSign.Signatures
             public bool Found { get; private set; } = true;
 
             /// <inheritdoc/>
-            public override void Visit(SignatureComponent component)
-            {
-                throw new NotSupportedException();
-            }
-
-            /// <inheritdoc/>
             public override void Visit(HttpHeaderComponent httpHeader)
             {
-                Found &= context.HasHeader(httpHeader.ComponentName);
+                Found &= context.HasHeader(httpHeader.BindRequest, httpHeader.ComponentName);
             }
 
             /// <inheritdoc/>
             public override void Visit(HttpHeaderDictionaryStructuredComponent httpHeaderDictionary)
             {
                 Found &=
-                    TryGetHeaderValues(httpHeaderDictionary.ComponentName, out IEnumerable<string> values) &&
+                    TryGetHeaderValues(httpHeaderDictionary.BindRequest,
+                                       httpHeaderDictionary.ComponentName,
+                                       out IEnumerable<string> values) &&
                     HasKey(values, httpHeaderDictionary.Key);
             }
 
@@ -64,8 +59,7 @@ namespace NSign.Signatures
                         break;
 
                     case Constants.DerivedComponents.SignatureParams:
-                    case Constants.DerivedComponents.QueryParams:
-                    case Constants.DerivedComponents.RequestResponse:
+                    case Constants.DerivedComponents.QueryParam:
                         throw new NotSupportedException(
                             $"Derived component '{derived.ComponentName}' must be added through the corresponding class.");
 
@@ -82,15 +76,9 @@ namespace NSign.Signatures
             }
 
             /// <inheritdoc/>
-            public override void Visit(QueryParamsComponent queryParams)
+            public override void Visit(QueryParamComponent queryParam)
             {
-                Found &= context.HasQueryParam(queryParams.Name);
-            }
-
-            /// <inheritdoc/>
-            public override void Visit(RequestResponseComponent requestResponse)
-            {
-                Found &= context.GetRequestSignature(requestResponse.Key).HasValue;
+                Found &= context.HasQueryParam(queryParam.Name);
             }
 
             /// <summary>
