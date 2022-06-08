@@ -74,7 +74,14 @@ namespace NSign.Signatures
         /// </returns>
         private static string GetMessage(ISignatureComponent component)
         {
-            return $"The signature component '{component.ComponentName}' does not exist but is required.";
+            if (component is HttpHeaderStructuredFieldComponent)
+            {
+                return $"The signature component '{component.ComponentName};sf' does not exist but is required.";
+            }
+            else
+            {
+                return $"The signature component '{component.ComponentName}' does not exist but is required.";
+            }
         }
 
         /// <summary>

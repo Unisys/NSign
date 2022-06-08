@@ -33,6 +33,12 @@ namespace NSign.Signatures
         }
 
         [Fact]
+        public void ToStringWorks()
+        {
+            Assert.Equal("x-my-dict-header;key=MyKey", dictHeader.ToString());
+        }
+
+        [Fact]
         public void KeyIsPassedAsIs()
         {
             Assert.Equal("MyKey", dictHeader.Key);

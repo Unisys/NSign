@@ -77,6 +77,23 @@ namespace NSign.Signatures
             }
 
             /// <inheritdoc/>
+            public override void Visit(HttpHeaderStructuredFieldComponent httpHeaderStructuredField)
+            {
+                bool bindRequest = httpHeaderStructuredField.BindRequest;
+
+                if (TryGetHeaderValues(bindRequest, httpHeaderStructuredField.ComponentName, out IEnumerable<string> values) &&
+                    values.TryParseStructuredFieldValue(out StructuredFieldValue structuredValue))
+                {
+                    AddInput(httpHeaderStructuredField, structuredValue.Serialize());
+                }
+                else
+                {
+                    // TODO: consider separate exception in case the values are not parsable.
+                    throw new SignatureComponentMissingException(httpHeaderStructuredField);
+                }
+            }
+
+            /// <inheritdoc/>
             public override void Visit(DerivedComponent derived)
             {
                 string? value = derived.ComponentName switch
@@ -173,6 +190,10 @@ namespace NSign.Signatures
                         {
                             sb.Append($"{prefix};{Constants.ComponentParameters.Name}=\"{componentWithName.Name}\"");
                         }
+                        else if (component is HttpHeaderStructuredFieldComponent)
+                        {
+                            sb.Append($"{prefix};sf");
+                        }
                         else
                         {
                             sb.Append(prefix);
@@ -225,6 +246,12 @@ namespace NSign.Signatures
                 if (null == component.OriginalIdentifier)
                 {
                     string suffix = component.BindRequest ? ParamBindRequest : String.Empty;
+
+                    if (component is HttpHeaderStructuredFieldComponent)
+                    {
+                        suffix += ";sf";
+                    }
+
                     AddInput($"\"{component.ComponentName}\"{suffix}", value);
                 }
                 else

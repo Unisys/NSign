@@ -30,17 +30,26 @@ namespace NSign.Signatures
             ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
             Assert.Equal("The signature component 'my-header;key=\"a\"' does not exist but is required.", ex.Message);
 
+            spec = MakeSignatureInput(new HttpHeaderStructuredFieldComponent("my-header"));
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            Assert.Equal("The signature component 'my-header;sf' does not exist but is required.", ex.Message);
+
             spec = MakeSignatureInput(new QueryParamComponent("blotz"));
             ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
             Assert.Equal("The signature component '@query-param;name=\"blotz\"' does not exist but is required.", ex.Message);
 
-            spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("blah", "a", bindRequest: true));
+            // With bindRequest: true
+            spec = MakeSignatureInput(new HttpHeaderComponent("blah", bindRequest: true));
             ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
-            Assert.Equal("The signature component 'blah;key=\"a\"' does not exist but is required.", ex.Message);
+            Assert.Equal("The signature component 'blah' does not exist but is required.", ex.Message);
 
             spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("my-header", "a", bindRequest: true));
             ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
             Assert.Equal("The signature component 'my-header;key=\"a\"' does not exist but is required.", ex.Message);
+
+            spec = MakeSignatureInput(new HttpHeaderStructuredFieldComponent("my-header", bindRequest: true));
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            Assert.Equal("The signature component 'my-header;sf' does not exist but is required.", ex.Message);
         }
 
         [Theory]
@@ -98,6 +107,13 @@ namespace NSign.Signatures
             input = context.GetSignatureInput(spec, out inputStr);
             Assert.Equal($"(\"my-generic-dict\"{suffix};key=\"c\")", inputStr);
             Assert.Equal($"\"my-generic-dict\"{suffix};key=\"c\": ?1\n\"@signature-params\": (\"my-generic-dict\"{suffix};key=\"c\")",
+                Encoding.ASCII.GetString(input.Span));
+
+            // Structured field HTTP header.
+            spec = MakeSignatureInput(new HttpHeaderStructuredFieldComponent("my-generic-dict", bindRequest));
+            input = context.GetSignatureInput(spec, out inputStr);
+            Assert.Equal($"(\"my-generic-dict\"{suffix};sf)", inputStr);
+            Assert.Equal($"\"my-generic-dict\"{suffix};sf: a=b, b=z, c\n\"@signature-params\": (\"my-generic-dict\"{suffix};sf)",
                 Encoding.ASCII.GetString(input.Span));
         }
 

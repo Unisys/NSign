@@ -30,6 +30,14 @@
         void Visit(HttpHeaderDictionaryStructuredComponent httpHeaderDictionary);
 
         /// <summary>
+        /// Visits the given HttpHeaderStructuredFieldComponent.
+        /// </summary>
+        /// <param name="httpHeaderStructuredField">
+        /// The HttpHeaderStructuredFieldComponent that is to be visited.
+        /// </param>
+        void Visit(HttpHeaderStructuredFieldComponent httpHeaderStructuredField);
+
+        /// <summary>
         /// Visits the given DerivedComponent.
         /// </summary>
         /// <param name="derived">

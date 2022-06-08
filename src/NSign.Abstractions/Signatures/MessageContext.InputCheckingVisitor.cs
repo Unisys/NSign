@@ -41,6 +41,14 @@ namespace NSign.Signatures
             }
 
             /// <inheritdoc/>
+            public override void Visit(HttpHeaderStructuredFieldComponent httpHeaderStructuredField)
+            {
+                // Assume that the header value is a proper structured field, so we can leave the check to the normal
+                // check for HttpHeaderComponent.
+                Visit((HttpHeaderComponent)httpHeaderStructuredField);
+            }
+
+            /// <inheritdoc/>
             public override void Visit(DerivedComponent derived)
             {
                 switch (derived.ComponentName)
