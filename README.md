@@ -68,12 +68,16 @@ namespace WebhooksEndpoint
                 .AddSignatureVerification(CreateRsaPssSha512())
 
                 // If you want to sign responses, configure services like this:
-                .Configure<MessageSigningOptions>((options) =>
+                .ConfigureMessageSigningOptions((options) =>
                 {
                     options
                         .WithMandatoryComponent(SignatureComponent.Status)
                         .WithMandatoryComponent(SignatureComponent.Path)
-                        .WithOptionalComponent(new RequestResponseComponent("sample"))
+                        // Include the 'sample' signature from the request in the response signature, if present.
+                        .WithOptionalComponent(
+                            new HttpHeaderDictionaryStructuredComponent(Constants.Headers.Signature,
+                                                                        "sample",
+                                                                        bindRequest: true))
                         ;
                     options.SignatureName = "resp";
                     options.SetParameters = (sigParams) =>
@@ -81,6 +85,8 @@ namespace WebhooksEndpoint
                         sigParams.WithCreatedNow().WithExpires(TimeSpan.FromMinutes(5));
                     };
                 })
+                .ValidateOnStart()
+                .Services
                 .AddResponseSigning(new HmacSha256SignatureProvider(System.Text.Encoding.UTF8.GetBytes("my-key"), "my-key"))
                 ;
         }
@@ -221,7 +227,6 @@ namespace WebhooksCaller
 
 ## Missing Features
 
-- [ ] Add support for `sf` parameter for re-serializing structured field header values (see section 2.1.1.)
 - [ ] Support for EdDSA using curve edwards25519 (algorithm `ed25519`)
 - [ ] Support for JSON Web Signature algorithms
 - [ ] Support for `Accept-Signature`
