@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace NSign
 {
@@ -13,6 +14,11 @@ namespace NSign
         /// <summary>
         /// Gets or sets the name of the signature to add.
         /// </summary>
+        /// <remarks>
+        /// Valid names are per section 3.1.2 of RFC 8941.
+        /// See also <see href="https://httpwg.org/specs/rfc8941.html#rfc.section.3.1.2"/>.
+        /// </remarks>
+        [RegularExpression(@"^[a-z*][a-z0-9_\-\.*]*$")]
         public string? SignatureName { get; set; }
 
         /// <summary>

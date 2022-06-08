@@ -10,11 +10,6 @@ namespace NSign.Signatures
         internal ref struct Tokenizer
         {
             /// <summary>
-            /// The input to parse.
-            /// </summary>
-            private readonly ReadOnlySpan<char> input;
-
-            /// <summary>
             /// The position of the next token.
             /// </summary>
             private int position;
@@ -27,11 +22,16 @@ namespace NSign.Signatures
             /// </param>
             public Tokenizer(ReadOnlySpan<char> input)
             {
-                this.input = input;
+                Input = input;
                 position = 0;
                 LastPosition = -1;
                 Token = Token.Empty;
             }
+
+            /// <summary>
+            /// The input to parse.
+            /// </summary>
+            public ReadOnlySpan<char> Input { get; }
 
             /// <summary>
             /// Gets or sets the last read token. Before Next() is called for the first time, this is always the empty token.
@@ -88,7 +88,7 @@ namespace NSign.Signatures
                         return true;
 
                     default:
-                        if (IsIdentifierChar(chr))
+                        if (IsIdentifierChar(chr, isFirst: true))
                         {
                             ConsumeIdentifier();
                             return true;
@@ -127,12 +127,12 @@ namespace NSign.Signatures
             /// </returns>
             int Peek()
             {
-                if (input.Length <= position)
+                if (Input.Length <= position)
                 {
                     return -1;
                 }
 
-                return input[position];
+                return Input[position];
             }
 
             /// <summary>
@@ -173,7 +173,7 @@ namespace NSign.Signatures
                 }
 
                 // We have already read the closing double quote, so the actual quoted string ends one character before.
-                Token = new Token(TokenType.QuotedString, input[startPos..(position - 1)]);
+                Token = new Token(TokenType.QuotedString, Input[startPos..(position - 1)]);
             }
 
             /// <summary>
@@ -187,12 +187,13 @@ namespace NSign.Signatures
             {
                 int startPos = position - 1;
 
-                while (IsIdentifierChar(Peek()))
+                // Consume identifier characters starting at the second character until we find a non-identifier character.
+                while (IsIdentifierChar(Peek(), isFirst: false))
                 {
                     Read();
                 }
 
-                Token = new Token(TokenType.Identifier, input[startPos..position]);
+                Token = new Token(TokenType.Identifier, Input[startPos..position]);
             }
 
             /// <summary>
@@ -211,7 +212,7 @@ namespace NSign.Signatures
                     Read();
                 }
 
-                Token = new Token(TokenType.Integer, input[startPos..position]);
+                Token = new Token(TokenType.Integer, Input[startPos..position]);
             }
 
             /// <summary>
@@ -220,14 +221,25 @@ namespace NSign.Signatures
             /// <param name="chr">
             /// The character to check.
             /// </param>
+            /// <param name="isFirst">
+            /// A flag which indicates whether or not this is the first char for a new identifier.
+            /// </param>
             /// <returns>
             /// True if the character is a valid identifier character.
             /// </returns>
-            private static bool IsIdentifierChar(int chr)
+            /// <remarks>
+            /// Valid names are per section 3.1.2 of RFC 8941.
+            /// See also <see href="https://httpwg.org/specs/rfc8941.html#rfc.section.3.1.2"/>.
+            /// </remarks>
+            private static bool IsIdentifierChar(int chr, bool isFirst)
             {
-                // TODO: The spec currently doesn't seem to mention valid characters; once it's finalized, this might
-                //       need to be updated.
-                return (chr >= 'A' && chr <= 'Z') || (chr >= 'a' && chr <= 'z');
+                if (isFirst)
+                {
+                    return (chr >= 'a' && chr <= 'z') || chr == '*';
+                }
+
+                return (chr >= 'a' && chr <= 'z') || (chr >= '0' && chr <= '9') ||
+                    chr == '_' || chr == '-' || chr == '.' || chr == '*';
             }
 
             /// <summary>

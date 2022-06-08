@@ -30,6 +30,14 @@
         void Visit(HttpHeaderDictionaryStructuredComponent httpHeaderDictionary);
 
         /// <summary>
+        /// Visits the given HttpHeaderStructuredFieldComponent.
+        /// </summary>
+        /// <param name="httpHeaderStructuredField">
+        /// The HttpHeaderStructuredFieldComponent that is to be visited.
+        /// </param>
+        void Visit(HttpHeaderStructuredFieldComponent httpHeaderStructuredField);
+
+        /// <summary>
         /// Visits the given DerivedComponent.
         /// </summary>
         /// <param name="derived">
@@ -46,19 +54,11 @@
         void Visit(SignatureParamsComponent signatureParams);
 
         /// <summary>
-        /// Visits the given QueryParamsComponent.
+        /// Visits the given QueryParamComponent.
         /// </summary>
-        /// <param name="queryParams">
-        /// The QueryParamsComponent that is to be visited.
+        /// <param name="queryParam">
+        /// The QueryParamComponent that is to be visited.
         /// </param>
-        void Visit(QueryParamsComponent queryParams);
-
-        /// <summary>
-        /// Visits the given RequestResponseComponent.
-        /// </summary>
-        /// <param name="requestResponse">
-        /// The RequestResponseComponent that is to be visited.
-        /// </param>
-        void Visit(RequestResponseComponent requestResponse);
+        void Visit(QueryParamComponent queryParam);
     }
 }

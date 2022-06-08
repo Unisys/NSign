@@ -33,6 +33,12 @@ namespace NSign.Signatures
         }
 
         [Fact]
+        public void ToStringWorks()
+        {
+            Assert.Equal("x-my-dict-header;key=MyKey", dictHeader.ToString());
+        }
+
+        [Fact]
         public void KeyIsPassedAsIs()
         {
             Assert.Equal("MyKey", dictHeader.Key);
@@ -70,6 +76,16 @@ namespace NSign.Signatures
             dictHeader.Accept(mockVisitor.Object);
 
             mockVisitor.Verify(v => v.Visit(It.IsAny<HttpHeaderDictionaryStructuredComponent>()), Times.Once);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CtorPassesBindRequest(bool bindRequest)
+        {
+            HttpHeaderDictionaryStructuredComponent comp = new HttpHeaderDictionaryStructuredComponent(
+                "blah", "mykey", bindRequest);
+            Assert.Equal(bindRequest, comp.BindRequest);
         }
 
         private sealed class Comp : HttpHeaderDictionaryStructuredComponent

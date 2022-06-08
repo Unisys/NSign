@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32519.379
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NSign.Abstractions", "src\NSign.Abstractions\NSign.Abstractions.csproj", "{F34984BD-8D42-4FFE-A51F-3303D383F461}"
 EndProject
@@ -11,8 +11,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Global", "Global", "{6F1B62
 		.github\workflows\build-test.yml = .github\workflows\build-test.yml
 		common.props = common.props
 		.github\workflows\publish.yml = .github\workflows\publish.yml
-		README.md = README.md
 		.github\workflows\pull-request-build-test.yml = .github\workflows\pull-request-build-test.yml
+		README.md = README.md
+		Test-Coverage.ps1 = Test-Coverage.ps1
 		test.coverage.cmd = test.coverage.cmd
 	EndProjectSection
 EndProject
@@ -26,9 +27,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NSign.SignatureProviders", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NSign.AspNetCore", "src\NSign.AspNetCore\NSign.AspNetCore.csproj", "{653443C6-7003-4359-9988-A4A7ADB969E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NSign.AspNetCore.UnitTests", "test\NSign.AspNetCore.UnitTests\NSign.AspNetCore.UnitTests.csproj", "{4DBD30D6-5E09-406F-922C-190D270A12D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NSign.AspNetCore.UnitTests", "test\NSign.AspNetCore.UnitTests\NSign.AspNetCore.UnitTests.csproj", "{4DBD30D6-5E09-406F-922C-190D270A12D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NSign.SignatureProviders.UnitTests", "test\NSign.SignatureProviders.UnitTests\NSign.SignatureProviders.UnitTests.csproj", "{C259AB0B-3F5B-4844-B407-2576D2114669}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NSign.SignatureProviders.UnitTests", "test\NSign.SignatureProviders.UnitTests\NSign.SignatureProviders.UnitTests.csproj", "{C259AB0B-3F5B-4844-B407-2576D2114669}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -74,8 +74,7 @@ namespace NSign.Client
         [Theory]
         [InlineData("@status", "The '@status' component cannot be included in request signatures.")]
         [InlineData("@signature-params", "The '@signature-params' component cannot be included explicitly.")]
-        [InlineData("@query-params", "The '@query-params' component must have the 'name' parameter set.")]
-        [InlineData("@request-response", "The '@request-response' component must have the 'key' parameter set.")]
+        [InlineData("@query-param", "The '@query-param' component must have the 'name' parameter set.")]
         [InlineData("@blah", "Non-standard derived signature component '@blah' cannot be retrieved.")]
         public void GetDerivedComponentValueThrowsNotSupportedExceptionForUnsupportedComponents(string compName, string expectedMessage)
         {
@@ -212,7 +211,7 @@ namespace NSign.Client
             request.Headers.Add("x-Second-Header", "");
             request.Headers.Add("x-third-header", new string[] { "1", "2", "3", });
 
-            Assert.Equal(expectedResult, context.HasHeader(header));
+            Assert.Equal(expectedResult, context.HasHeader(bindRequest: false, header));
         }
 
         [Theory]

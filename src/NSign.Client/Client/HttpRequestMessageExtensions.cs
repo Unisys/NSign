@@ -22,7 +22,7 @@ namespace NSign.Client
         /// A string that represents the requested value.
         /// </returns>
         /// <exception cref="NotSupportedException">
-        /// Thrown for unsupported derived components. This includes e.g. the '@query-params' component which has dedicated
+        /// Thrown for unsupported derived components. This includes e.g. the '@query-param' component which has dedicated
         /// logic for value retrieval, or the '@status' or '@request-response' components which are not support for
         /// request messages in the first place.
         /// </exception>
@@ -40,12 +40,10 @@ namespace NSign.Client
                 Constants.DerivedComponents.Path => request.RequestUri.AbsolutePath,
                 Constants.DerivedComponents.Query =>
                     String.IsNullOrWhiteSpace(request.RequestUri.Query) ? "?" : request.RequestUri.Query,
-                Constants.DerivedComponents.QueryParams =>
-                    throw new NotSupportedException("The '@query-params' component must have the 'name' parameter set."),
+                Constants.DerivedComponents.QueryParam =>
+                    throw new NotSupportedException("The '@query-param' component must have the 'name' parameter set."),
                 Constants.DerivedComponents.Status =>
                     throw new NotSupportedException("The '@status' component cannot be included in request signatures."),
-                Constants.DerivedComponents.RequestResponse =>
-                    throw new NotSupportedException("The '@request-response' component must have the 'key' parameter set."),
 
                 _ =>
                     throw new NotSupportedException(

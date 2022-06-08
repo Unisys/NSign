@@ -6,7 +6,7 @@
 
 # NSign - HTTP message signatures and verification for .NET
 
-NSign (/ˈensaɪn/) provides libraries to sign HTTP messages based on recent drafts (currently: March 6th 2022) of the
+NSign (/ˈensaɪn/) provides libraries to sign HTTP messages based on recent drafts (currently: May 26th 2022) of the
 [HTTP Message Signatures](https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/) to-be standard from
 the IETF. The key motivation for the standard is to have a standard way to sign and verify HTTP messages e.g. used in
 webhook-like scenarios where a provider needs to sign HTTP request messages before sending them to subscribers, and
@@ -35,7 +35,7 @@ them in `NSign.Client` at a later stage too.
 
 Below are some usage examples of the `NSign.*` libraries. Sample code will be added to the repository at a later time.
 
-### Validate signed requests in AspNetCore Server (.Net Core 3.1 and .Net 5.0/6.0)
+### Validate signed requests in AspNetCore Server (.Net Core 3.1 and .Net 6.0)
 
 The following excerpt of an ASP.NET Core's `Startup` class can be used to verify signatures on requests sent to `/webhooks`
 endpoints (and endpoints starting with `/webhooks/`). It also makes sure that signatures include the following request
@@ -68,12 +68,16 @@ namespace WebhooksEndpoint
                 .AddSignatureVerification(CreateRsaPssSha512())
 
                 // If you want to sign responses, configure services like this:
-                .Configure<MessageSigningOptions>((options) =>
+                .ConfigureMessageSigningOptions((options) =>
                 {
                     options
                         .WithMandatoryComponent(SignatureComponent.Status)
                         .WithMandatoryComponent(SignatureComponent.Path)
-                        .WithOptionalComponent(new RequestResponseComponent("sample"))
+                        // Include the 'sample' signature from the request in the response signature, if present.
+                        .WithOptionalComponent(
+                            new HttpHeaderDictionaryStructuredComponent(Constants.Headers.Signature,
+                                                                        "sample",
+                                                                        bindRequest: true))
                         ;
                     options.SignatureName = "resp";
                     options.SetParameters = (sigParams) =>
@@ -81,6 +85,8 @@ namespace WebhooksEndpoint
                         sigParams.WithCreatedNow().WithExpires(TimeSpan.FromMinutes(5));
                     };
                 })
+                .ValidateOnStart()
+                .Services
                 .AddResponseSigning(new HmacSha256SignatureProvider(System.Text.Encoding.UTF8.GetBytes("my-key"), "my-key"))
                 ;
         }
@@ -221,7 +227,6 @@ namespace WebhooksCaller
 
 ## Missing Features
 
-- [ ] Add support for `sf` parameter for re-serializing structured field header values (see section 2.1.1.)
 - [ ] Support for EdDSA using curve edwards25519 (algorithm `ed25519`)
 - [ ] Support for JSON Web Signature algorithms
 - [ ] Support for `Accept-Signature`

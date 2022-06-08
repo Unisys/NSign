@@ -76,6 +76,8 @@ namespace NSign.Signatures
         /// </returns>
         public bool HasSignatureComponent(SignatureComponent component)
         {
+            EnsureComponentIsAllowed(component);
+
             InputCheckingVisitor visitor = new InputCheckingVisitor(this);
 
             component.Accept(visitor);
@@ -232,15 +234,26 @@ namespace NSign.Signatures
         /// <summary>
         /// Checks if a header with the given <paramref name="headerName"/> is available in the message.
         /// </summary>
+        /// <param name="bindRequest">
+        /// Whether or not the header's existence should checked on the request message (as opposed to the message from
+        /// the context).
+        /// </param>
         /// <param name="headerName">
         /// The name of the header to check.
         /// </param>
         /// <returns>
         /// True if the header exists, or false otherwise.
         /// </returns>
-        public virtual bool HasHeader(string headerName)
+        public virtual bool HasHeader(bool bindRequest, string headerName)
         {
-            return GetHeaderValues(headerName).Any();
+            if (bindRequest)
+            {
+                return GetRequestHeaderValues(headerName).Any();
+            }
+            else
+            {
+                return GetHeaderValues(headerName).Any();
+            }
         }
 
         /// <summary>
@@ -254,18 +267,13 @@ namespace NSign.Signatures
         /// </returns>
         public virtual bool HasDerivedComponent(DerivedComponent component)
         {
-            if (component is QueryParamsComponent queryParams)
+            if (component is QueryParamComponent queryParam)
             {
-                return HasQueryParam(queryParams.Name);
+                return HasQueryParam(queryParam.Name);
             }
 
             if (HasResponse)
             {
-                if (component is RequestResponseComponent requestResponse)
-                {
-                    return null != GetRequestSignature(requestResponse.Key);
-                }
-
                 return true;
             }
             else
@@ -273,7 +281,6 @@ namespace NSign.Signatures
                 switch (component.ComponentName)
                 {
                     case Constants.DerivedComponents.Status:
-                    case Constants.DerivedComponents.RequestResponse:
                         return false;
 
                     default:
@@ -327,6 +334,40 @@ namespace NSign.Signatures
         /// Thrown when adding headers to messages is not supported by the context.
         /// </exception>
         public abstract void AddHeader(string headerName, string value);
+
+        #endregion
+
+        #region Internal Interface
+
+        /// <summary>
+        /// Ensures that the given component is allowed on the HTTP message described by this context. In particular,
+        /// verifies that the <see cref="SignatureComponent.BindRequest"/> is not set when the message is a request
+        /// message. If the component is not allowed, an exception is thrown.
+        /// </summary>
+        /// <param name="component">
+        /// The <see cref="SignatureComponent"/> that should be checked.
+        /// </param>
+        /// <exception cref="Exception"></exception>
+        internal void EnsureComponentIsAllowed(SignatureComponent component)
+        {
+            if (component.BindRequest)
+            {
+                if (!HasResponse)
+                {
+                    // This context is for a request message, but request-response binding is not allowed for request
+                    // messages.
+                    throw new SignatureComponentNotAllowedException(
+                        $"Cannot use {nameof(component.BindRequest)} for request message signature components.", component);
+                }
+                else if (StringComparer.Ordinal.Equals(Constants.DerivedComponents.Status, component.ComponentName))
+                {
+                    // The '@status' derived component can never be bound to the request because the request doesn't
+                    // have a status code.
+                    throw new SignatureComponentNotAllowedException(
+                        $"Cannot use '@status' with request-response binding.", component);
+                }
+            }
+        }
 
         #endregion
 

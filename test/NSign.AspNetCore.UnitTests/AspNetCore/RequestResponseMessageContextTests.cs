@@ -68,7 +68,6 @@ namespace NSign.AspNetCore
         }
 
         [Theory]
-        [InlineData("@request-response", "The '@request-response' component must have the 'key' parameter set.")]
         [InlineData("@blotz", "Non-standard derived signature component '@blotz' cannot be retrieved.")]
         public void GetDerivedComponentValueThrowsNotSupportedExceptionForUnsupportedComponents(string compName, string expectedMessage)
         {

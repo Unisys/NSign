@@ -51,8 +51,6 @@ namespace NSign.Client
             return component.ComponentName switch
             {
                 Constants.DerivedComponents.Status => ((int)Response.StatusCode).ToString(),
-                Constants.DerivedComponents.RequestResponse =>
-                    throw new NotSupportedException("The '@request-response' component must have the 'key' parameter set."),
 
                 _ => base.GetDerivedComponentValue(component),
             };

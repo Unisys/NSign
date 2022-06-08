@@ -13,7 +13,20 @@ namespace NSign.Signatures
         /// <param name="name">
         /// The name of the derived component.
         /// </param>
-        public DerivedComponent(string name) : base(SignatureComponentType.Derived, ValidateNameOrThrow(name)) { }
+        public DerivedComponent(string name) : this(name, bindRequest: false) { }
+
+        /// <summary>
+        /// Initializes a new instance of DerivedComponent.
+        /// </summary>
+        /// <param name="name">
+        /// The name of the derived component.
+        /// </param>
+        /// <param name="bindRequest">
+        /// Whether or not the component should be bound to the request. This represents the <c>req</c> flag from the
+        /// standard.
+        /// </param>
+        public DerivedComponent(string name, bool bindRequest)
+            : base(SignatureComponentType.Derived, ValidateNameOrThrow(name), bindRequest) { }
 
         /// <inheritdoc/>
         public override void Accept(ISignatureComponentVisitor visitor)

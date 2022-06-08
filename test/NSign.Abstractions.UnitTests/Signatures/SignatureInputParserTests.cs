@@ -23,32 +23,40 @@ namespace NSign.Signatures
             Assert.Equal("signatureParams", ex.ParamName);
         }
 
-        [Fact]
-        public void ParsingSucceedsForValidInput()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParsingSucceedsForValidInput(bool bindRequest)
         {
+            string suffix = bindRequest ? ";req" : String.Empty;
+
             string input =
-                @"(""@method"" ""@target-uri"" ""@authority"" ""@scheme"" ""@request-target"" ""@path"" ""@query"" " +
-                @"""@query-params"";name=""some-param"" ""@status"" ""@request-response"";key=""mySig"" ""my-header"" " +
-                @"""my-dict-header"";key=""blah"" ""@extension"");created=1234;expires=-1534;nonce=""the-nonce"";" +
-                @"alg=""signature-alg"";keyid=""key-id""";
+                $@"(""@method""{suffix} ""@target-uri""{suffix} ""@authority""{suffix} ""@scheme""{suffix} " +
+                $@"""@request-target""{suffix} ""@path""{suffix} ""@query""{suffix} ""@query-param""{suffix};name=""some-param"" " +
+                $@"""@status"" ""my-header""{suffix} ""my-dict-header""{suffix};key=""blah"" ""my-structured-header"";sf{suffix} " +
+                $@"""@extension""{suffix});expires=-1534;created=1234;keyid=""key-id"";nonce=""the-nonce"";alg=""signature-alg""";
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
 
             SignatureInputParser.ParseAndUpdate(input, signatureParams);
 
             Assert.Collection(signatureParams.Components,
-                (c) => Assert.Equal(SignatureComponent.Method, c),
-                (c) => Assert.Equal(SignatureComponent.RequestTargetUri, c),
-                (c) => Assert.Equal(SignatureComponent.Authority, c),
-                (c) => Assert.Equal(SignatureComponent.Scheme, c),
-                (c) => Assert.Equal(SignatureComponent.RequestTarget, c),
-                (c) => Assert.Equal(SignatureComponent.Path, c),
-                (c) => Assert.Equal(SignatureComponent.Query, c),
-                (c) => Assert.Equal(new QueryParamsComponent("Some-Param"), c),
+                (c) => Assert.Equal(bindRequest ? SignatureComponent.RequestBoundMethod : SignatureComponent.Method, c),
+                (c) => Assert.Equal(bindRequest ? SignatureComponent.RequestBoundRequestTargetUri : SignatureComponent.RequestTargetUri, c),
+                (c) => Assert.Equal(bindRequest ? SignatureComponent.RequestBoundAuthority : SignatureComponent.Authority, c),
+                (c) => Assert.Equal(bindRequest ? SignatureComponent.RequestBoundScheme : SignatureComponent.Scheme, c),
+                (c) => Assert.Equal(bindRequest ? SignatureComponent.RequestBoundRequestTarget : SignatureComponent.RequestTarget, c),
+                (c) => Assert.Equal(bindRequest ? SignatureComponent.RequestBoundPath : SignatureComponent.Path, c),
+                (c) => Assert.Equal(bindRequest ? SignatureComponent.RequestBoundQuery : SignatureComponent.Query, c),
+                (c) => Assert.Equal(new QueryParamComponent("Some-Param", bindRequest), c),
                 (c) => Assert.Equal(SignatureComponent.Status, c),
-                (c) => Assert.Equal(new RequestResponseComponent("mySig"), c),
-                (c) => Assert.Equal(new HttpHeaderComponent("My-Header"), c),
-                (c) => Assert.Equal(new HttpHeaderDictionaryStructuredComponent("My-Dict-Header", "blah"), c),
-                (c) => Assert.Equal(new DerivedComponent("@extension"), c));
+                (c) => Assert.Equal(new HttpHeaderComponent("My-Header", bindRequest), c),
+                (c) => Assert.Equal(new HttpHeaderDictionaryStructuredComponent("My-Dict-Header", "blah", bindRequest), c),
+                (c) =>
+                {
+                    Assert.Equal(new HttpHeaderStructuredFieldComponent("My-Structured-Header", bindRequest), c);
+                    Assert.Equal($@"""my-structured-header"";sf{suffix}", c.OriginalIdentifier);
+                },
+                (c) => Assert.Equal(new DerivedComponent("@extension", bindRequest), c));
 
             Assert.True(signatureParams.Created.HasValue);
             Assert.Equal(1234L, signatureParams.Created!.Value.ToUnixTimeSeconds());
@@ -60,27 +68,50 @@ namespace NSign.Signatures
         }
 
         [Theory]
-        [InlineData("blah", "Expected token of type OpenParenthesis, but found token 'blah' of type Identifier at position 0.")]
-        [InlineData("\"blah\"", "Expected token of type OpenParenthesis, but found token 'blah' of type QuotedString at position 0.")]
-        [InlineData("1234", "Expected token of type OpenParenthesis, but found token '1234' of type Integer at position 0.")]
-        [InlineData("(987", "Expected token type to be one of {QuotedString, CloseParenthesis}, but found token '987' of type Integer at position 1.")]
-        [InlineData(@"(""a"" b)", "Expected token of type QuotedString, but found token 'b' of type Identifier at position 5.")]
-        [InlineData(@"(""a""""b"")", "Expected token type to be one of {Semicolon, CloseParenthesis, Whitespace}, but found token 'b' of type QuotedString at position 4.")]
-        [InlineData("()created=1234", "Expected token of type Semicolon, but found token 'created' of type Identifier at position 2.")]
-        [InlineData(@"();created=""1234""", "Expected token of type Integer, but found token '1234' of type QuotedString at position 11.")]
-        [InlineData(@"();expires=""1234""", "Expected token of type Integer, but found token '1234' of type QuotedString at position 11.")]
-        [InlineData(@"();nonce=1234", "Expected token of type QuotedString, but found token '1234' of type Integer at position 9.")]
-        [InlineData(@"();alg=1234", "Expected token of type QuotedString, but found token '1234' of type Integer at position 7.")]
-        [InlineData(@"();keyid=1234", "Expected token of type QuotedString, but found token '1234' of type Integer at position 9.")]
-        [InlineData(@"(""header"";555", "Expected token of type Identifier, but found token '555' of type Integer at position 10.")]
-        [InlineData(@"(""header"";foo;", "Expected token of type Equal, but found token '' of type Semicolon at position 13.")]
-        [InlineData(@"(""header"";foo=bar", "Expected token of type QuotedString, but found token 'bar' of type Identifier at position 14.")]
-        [InlineData(@"(""header"";foo=""bar""", "Expected token type to be one of {CloseParenthesis, Whitespace}, but found token '' of type EndOfInput at position 19.")]
-        [InlineData(@"(""header"";foo=""bar"";", "Expected token type to be one of {CloseParenthesis, Whitespace}, but found token '' of type Semicolon at position 19.")]
-        [InlineData(@"();333", "Expected token of type Identifier, but found token '333' of type Integer at position 3.")]
-        [InlineData(@"();blah", "Expected token of type Equal, but found token '' of type EndOfInput at position 7.")]
-        [InlineData(@"();blah;", "Expected token of type Equal, but found token '' of type Semicolon at position 7.")]
-        [InlineData(@"();blah=;", "Expected token type to be one of {QuotedString, Integer}, but found token '' of type Semicolon at position 8.")]
+        [InlineData("blah",
+            "Expected token of type OpenParenthesis, but found token 'blah' of type Identifier at position 0.")]
+        [InlineData("\"blah\"",
+            "Expected token of type OpenParenthesis, but found token 'blah' of type QuotedString at position 0.")]
+        [InlineData("1234",
+            "Expected token of type OpenParenthesis, but found token '1234' of type Integer at position 0.")]
+        [InlineData("(987",
+            "Expected token type to be one of {QuotedString, CloseParenthesis}, but found token '987' of type Integer at position 1.")]
+        [InlineData(@"(""a"" b)",
+            "Expected token of type QuotedString, but found token 'b' of type Identifier at position 5.")]
+        [InlineData(@"(""a""""b"")",
+            "Expected token type to be one of {Semicolon, CloseParenthesis, Whitespace}, but found token 'b' of type QuotedString at position 4.")]
+        [InlineData("()created=1234",
+            "Expected token of type Semicolon, but found token 'created' of type Identifier at position 2.")]
+        [InlineData(@"();created=""1234""",
+            "Expected token of type Integer, but found token '1234' of type QuotedString at position 11.")]
+        [InlineData(@"();expires=""1234""",
+            "Expected token of type Integer, but found token '1234' of type QuotedString at position 11.")]
+        [InlineData(@"();nonce=1234",
+            "Expected token of type QuotedString, but found token '1234' of type Integer at position 9.")]
+        [InlineData(@"();alg=1234",
+            "Expected token of type QuotedString, but found token '1234' of type Integer at position 7.")]
+        [InlineData(@"();keyid=1234",
+            "Expected token of type QuotedString, but found token '1234' of type Integer at position 9.")]
+        [InlineData(@"(""header"";555",
+            "Expected token of type Identifier, but found token '555' of type Integer at position 10.")]
+        [InlineData(@"(""header"";foo;",
+            "Expected token of type Identifier, but found token '' of type EndOfInput at position 14.")]
+        [InlineData(@"(""header"";foo=bar",
+            "Expected token of type QuotedString, but found token 'bar' of type Identifier at position 14.")]
+        [InlineData(@"(""header"";foo=""bar""",
+            "Expected token type to be one of {Semicolon, CloseParenthesis, Whitespace}, but found token '' of type EndOfInput at position 19.")]
+        [InlineData(@"(""header"";foo=""bar"";",
+            "Expected token of type Identifier, but found token '' of type EndOfInput at position 20.")]
+        [InlineData(@"(""header"";foo=123",
+            "Expected token of type QuotedString, but found token '123' of type Integer at position 14.")]
+        [InlineData(@"();333",
+            "Expected token of type Identifier, but found token '333' of type Integer at position 3.")]
+        [InlineData(@"();blah",
+            "Expected token of type Equal, but found token '' of type EndOfInput at position 7.")]
+        [InlineData(@"();blah;",
+            "Expected token of type Equal, but found token '' of type Semicolon at position 7.")]
+        [InlineData(@"();blah=;",
+            "Expected token type to be one of {QuotedString, Integer}, but found token '' of type Semicolon at position 8.")]
         public void ParsingThrowsSignatureInputParserException(string input, string expectedMessage)
         {
             SignatureInputParserException ex;
@@ -119,23 +150,48 @@ namespace NSign.Signatures
         }
 
         [Theory]
-        [InlineData(@"("""")", "Component names must not be empty.")]
-        [InlineData(@"(""blah"" """")", "Component names must not be empty.")]
-        [InlineData(@"(""@query-params"")", "The @query-params component requires the 'name' parameter.")]
-        [InlineData(@"(""@query-params""  ""header"")", "The @query-params component requires the 'name' parameter.")]
-        [InlineData(@"(""@query-params"";key=""foo"" ""header"")", "The @query-params component requires the 'name' parameter.")]
-        [InlineData(@"(""@request-response"")", "The @request-response component requires the 'key' parameter.")]
-        [InlineData(@"(""@request-response"" ""header"")", "The @request-response component requires the 'key' parameter.")]
-        [InlineData(@"(""@request-response"";name=""foo"" ""header"")", "The @request-response component requires the 'key' parameter.")]
-        [InlineData(@"(""blah"" ""@signature-params"")", "The @signature-params component is not allowed.")]
-        [InlineData(@"(""dict-header"";name=""blah"")", "Dictionary structured HTTP message header components require the 'key' parameter.")]
-        [InlineData(@"();Foo=1234", "Unsupported signature input parameter: Foo with value '1234'.")]
+        [InlineData(@"("""")",
+            "Component names must not be empty.")]
+        [InlineData(@"(""blah"" """")",
+            "Component names must not be empty.")]
+        [InlineData(@"(""@query-param"")",
+            "The @query-param component requires the 'name' parameter.")]
+        [InlineData(@"(""@query-param""  ""header"")",
+            "The @query-param component requires the 'name' parameter.")]
+        [InlineData(@"(""@query-param"";key=""foo"" ""header"")",
+            @"The component '""@query-param"";key=""foo""' has unsupported parameter 'key'.")]
+        [InlineData(@"(""blah"" ""@signature-params"")",
+            "The @signature-params component is not allowed.")]
+        [InlineData(@"(""dict-header"";name=""blah"")",
+            @"The component '""dict-header"";name=""blah""' has unsupported parameter 'name'.")]
+        [InlineData(@"();foo=1234",
+            "Unsupported signature input parameter: foo with value '1234'.")]
         public void ParsingThrowsSignatureInputException(string input, string expectedMessage)
         {
             SignatureInputException ex;
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
 
             ex = Assert.Throws<SignatureInputException>(() => SignatureInputParser.ParseAndUpdate(input, signatureParams));
+            Assert.Equal(expectedMessage, ex.Message);
+        }
+
+        [Theory]
+        [InlineData(@"(""header"" ""@query-param"";blah=""foo"")",
+            @"The component '""@query-param"";blah=""foo""' has unsupported parameter 'blah'.")]
+        [InlineData(@"(""header"";blotz=""blimp"" ""@status"")",
+            @"The component '""header"";blotz=""blimp""' has unsupported parameter 'blotz'.")]
+        [InlineData(@"(""header"";req ""@query-param"";req;blah=""foo"")",
+            @"The component '""@query-param"";req;blah=""foo""' has unsupported parameter 'blah'.")]
+        [InlineData(@"(""header"";req;blotz=""blimp"" ""@status"")",
+            @"The component '""header"";req;blotz=""blimp""' has unsupported parameter 'blotz'.")]
+        [InlineData(@"(""header"" ""@status"";req)",
+            @"The component '""@status"";req' has unsupported parameter 'req'.")]
+        public void ParsingThrowsSignatureInputExceptionForUnsupportedParameters(string input, string expectedMessage)
+        {
+            SignatureParamsComponent signatureParams = new SignatureParamsComponent();
+
+            SignatureInputException ex = Assert.Throws<SignatureInputException>(
+                () => SignatureInputParser.ParseAndUpdate(input, signatureParams));
             Assert.Equal(expectedMessage, ex.Message);
         }
     }

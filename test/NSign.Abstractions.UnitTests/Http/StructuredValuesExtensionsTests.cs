@@ -1,6 +1,8 @@
 ﻿using StructuredFieldValues;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Xunit;
 
 namespace NSign.Http
@@ -59,6 +61,7 @@ namespace NSign.Http
                 new Dictionary<string, object>());
 
             Assert.Equal("(\"elem1\";a=\"x\" \"elem2\")", item.SerializeAsString());
+            Assert.Equal("(\"elem1\";a=\"x\" \"elem2\")", ((object)item).SerializeAsString());
         }
 
         [Fact]
@@ -105,6 +108,52 @@ namespace NSign.Http
         public void SerializeAsStringWorksForNumbers(object input, string expectedOutput)
         {
             Assert.Equal(expectedOutput, StructuredValuesExtensions.SerializeAsString(input));
+        }
+
+        [Theory]
+        [InlineData(@"""abc")]
+        public void TryParseStructuredFieldValueFailsForInvalidInput(string input)
+        {
+            Assert.False(new string[] { input }.TryParseStructuredFieldValue(out StructuredFieldValue value));
+            Assert.Equal(StructuredFieldType.Unknown, value.Type);
+
+            try
+            {
+                value.Serialize();
+            }
+            catch (NotSupportedException ex)
+            {
+                Assert.Equal("Cannot serialize a field of type Unknown type.", ex.Message);
+            }
+        }
+
+        [Theory]
+        [InlineData(@"2; foourl=""https://foo.example.com/""", StructuredFieldType.List,
+            @"2;foourl=""https://foo.example.com/""")]
+        [InlineData(@"sugar, tea,  rum", StructuredFieldType.List, @"sugar, tea, rum")]
+        [InlineData(@"(""foo""  ""bar""),  (""baz""), ( ""bat"" ""one""), ( )", StructuredFieldType.List,
+            @"(""foo"" ""bar""), (""baz""), (""bat"" ""one""), ()")]
+        [InlineData(@"(""foo""; a=1; b=2); lvl=5, (""bar"" ""baz"");lvl=1", StructuredFieldType.List
+            , @"(""foo"";a=1;b=2);lvl=5, (""bar"" ""baz"");lvl=1")]
+        [InlineData(@"abc;a=1;b=2; cde_456, (ghi;jk=4  l);q=""9"";r=w", StructuredFieldType.List,
+            @"abc;a=1;b=2;cde_456, (ghi;jk=4 l);q=""9"";r=w")]
+        [InlineData(@"1;  a;  b=?0", StructuredFieldType.List, @"1;a;b=?0")]
+        [InlineData(@"en=""Applepie"" ,  da=:w4ZibGV0w6ZydGU=:", StructuredFieldType.Dictionary,
+            @"en=""Applepie"", da=:w4ZibGV0w6ZydGU=:")]
+        [InlineData(@"a=?0 ,  b, c; foo=bar ", StructuredFieldType.Dictionary, @"a=?0, b, c;foo=bar")]
+        [InlineData(@"rating=1.5 , feelings=(joy  sadness)", StructuredFieldType.Dictionary,
+            @"rating=1.5, feelings=(joy sadness)")]
+        [InlineData(@"a=(1  2), b=3,  c=4; aa=bb, d=(5  6); valid", StructuredFieldType.Dictionary,
+            @"a=(1 2), b=3, c=4;aa=bb, d=(5 6);valid")]
+        [InlineData(@"5; foo=bar", StructuredFieldType.List, @"5;foo=bar")]
+        public void TryParseStructuredFieldValueWithSubsequentSerializationNormalizes(
+            string input,
+            StructuredFieldType expectedType,
+            string expectedOutout)
+        {
+            Assert.True(new string[] { input, }.TryParseStructuredFieldValue(out StructuredFieldValue value));
+            Assert.Equal(expectedType, value.Type);
+            Assert.Equal(expectedOutout, value.Serialize());
         }
     }
 }

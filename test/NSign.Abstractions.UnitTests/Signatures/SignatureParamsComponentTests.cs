@@ -11,12 +11,12 @@ namespace NSign.Signatures
         [Fact]
         public void CtorWithValueParses()
         {
-            string input = "(\"@method\" \"@query-params\";name=\"foo\" \"my-header\";key=\"blah\" \"content-type\");created=0";
+            string input = "(\"@method\" \"@query-param\";name=\"foo\" \"my-header\";key=\"blah\" \"content-type\");created=0";
             SignatureParamsComponent signatureParams = new SignatureParamsComponent(input);
 
             Assert.Collection(signatureParams.Components,
                 (c) => Assert.Equal(SignatureComponent.Method, c),
-                (c) => Assert.Equal(new QueryParamsComponent("Foo"), c),
+                (c) => Assert.Equal(new QueryParamComponent("Foo"), c),
                 (c) => Assert.Equal(new HttpHeaderDictionaryStructuredComponent("My-Header", "blah"), c),
                 (c) => Assert.Equal(SignatureComponent.ContentType, c));
 

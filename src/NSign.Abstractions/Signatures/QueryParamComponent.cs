@@ -4,18 +4,31 @@ using System.Diagnostics;
 namespace NSign.Signatures
 {
     /// <summary>
-    /// Represents the '@query-params' derived signature component for a specific query parameter.
+    /// Represents the '@query-param' derived signature component for a specific query parameter.
     /// </summary>
     [DebuggerDisplay("Type={Type}, Component={ComponentName}, Name={Name}")]
-    public sealed class QueryParamsComponent : DerivedComponent, ISignatureComponentWithName, IEquatable<QueryParamsComponent>
+    public sealed class QueryParamComponent : DerivedComponent, ISignatureComponentWithName, IEquatable<QueryParamComponent>
     {
         /// <summary>
-        /// Initializes a new instance of QueryParamsComponent.
+        /// Initializes a new instance of <see cref="QueryParamComponent"/>.
         /// </summary>
         /// <param name="name">
         /// The name of the query parameter to use with this component.
         /// </param>
-        public QueryParamsComponent(string name) : base(Constants.DerivedComponents.QueryParams)
+        public QueryParamComponent(string name) : this(name, bindRequest: false) { }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="QueryParamComponent"/>.
+        /// </summary>
+        /// <param name="name">
+        /// The name of the query parameter to use with this component.
+        /// </param>
+        /// <param name="bindRequest">
+        /// Whether or not the component should be bound to the request. This represents the <c>req</c> flag from the
+        /// standard.
+        /// </param>
+        public QueryParamComponent(string name, bool bindRequest)
+            : base(Constants.DerivedComponents.QueryParam, bindRequest)
         {
             if (String.IsNullOrWhiteSpace(name))
             {
@@ -38,10 +51,10 @@ namespace NSign.Signatures
             visitor.Visit(this);
         }
 
-        #region IEquatable<QueryParamsComponent> Implementation
+        #region IEquatable<QueryParamComponent> Implementation
 
         /// <inheritdoc/>
-        public bool Equals(QueryParamsComponent other)
+        public bool Equals(QueryParamComponent other)
         {
             if (null == other)
             {
@@ -52,7 +65,8 @@ namespace NSign.Signatures
                 return true;
             }
 
-            return StringComparer.OrdinalIgnoreCase.Equals(Name, other.Name);
+            return BindRequest == other.BindRequest &&
+                StringComparer.OrdinalIgnoreCase.Equals(Name, other.Name);
         }
 
         #endregion
@@ -60,9 +74,9 @@ namespace NSign.Signatures
         /// <inheritdoc/>
         public override bool Equals(object? obj)
         {
-            if (obj is QueryParamsComponent queryParams)
+            if (obj is QueryParamComponent queryParam)
             {
-                return base.Equals(queryParams);
+                return base.Equals(queryParam);
             }
 
             return false;

@@ -59,8 +59,7 @@ namespace NSign.AspNetCore
         [Theory]
         [InlineData("@status", "The '@status' component value cannot be retrieved for request messages.")]
         [InlineData("@signature-params", "The '@signature-params' component value cannot be retrieved like this.")]
-        [InlineData("@query-params", "The '@query-params' component value cannot be retrieved like this.")]
-        [InlineData("@request-response", "The '@request-response' component value cannot be retrieved for request messages.")]
+        [InlineData("@query-param", "The '@query-param' component value cannot be retrieved like this.")]
         [InlineData("@blah", "Non-standard derived signature component '@blah' cannot be retrieved.")]
         public void GetDerivedComponentValueThrowsNotSupportedExceptionForUnsupportedComponents(string compName, string expectedMessage)
         {
@@ -194,7 +193,7 @@ namespace NSign.AspNetCore
             httpContext.Request.Headers.Add("x-Second-Header", "");
             httpContext.Request.Headers.Add("x-third-header", new StringValues(new string[] { "1", "2", "3", }));
 
-            Assert.Equal(expectedResult, context.HasHeader(header));
+            Assert.Equal(expectedResult, context.HasHeader(bindRequest: false, header));
         }
 
         [Theory]

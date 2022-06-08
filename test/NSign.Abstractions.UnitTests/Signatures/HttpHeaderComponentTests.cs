@@ -30,5 +30,14 @@ namespace NSign.Signatures
 
             mockVisitor.Verify(v => v.Visit(It.IsAny<HttpHeaderComponent>()), Times.Once);
         }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CtorPassesBindRequest(bool bindRequest)
+        {
+            HttpHeaderComponent comp = new HttpHeaderComponent("blah", bindRequest);
+            Assert.Equal(bindRequest, comp.BindRequest);
+        }
     }
 }

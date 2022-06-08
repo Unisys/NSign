@@ -82,20 +82,15 @@
             public const string Query = "@query";
 
             /// <summary>
-            /// The name of the derived component holding the dictionary-structured query parameters of the message's associated
-            /// request.
+            /// The name of the derived component holding the dictionary-structured query parameter of a given name from
+            /// the message's associated request.
             /// </summary>
-            public const string QueryParams = "@query-params";
+            public const string QueryParam = "@query-param";
 
             /// <summary>
             /// The name of the derived component holding the status of the message's associated response.
             /// </summary>
             public const string Status = "@status";
-
-            /// <summary>
-            /// The name of the derived component holding the request-response signature binding.
-            /// </summary>
-            public const string RequestResponse = "@request-response";
         }
 
         /// <summary>
@@ -112,6 +107,16 @@
             /// The name of the 'name' parameter.
             /// </summary>
             public const string Name = "name";
+
+            /// <summary>
+            /// The name of the 'req' parameter.
+            /// </summary>
+            public const string Request = "req";
+
+            /// <summary>
+            /// The name of the 'sf' parameter.
+            /// </summary>
+            public const string StructuredField = "sf";
         }
 
         /// <summary>
