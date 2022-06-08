@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <Version>0.9.0</Version>
+        <Version>0.10.0</Version>
 
         <Authors>Unify Square (a Unisys company)</Authors>
         <Product>NSign</Product>
