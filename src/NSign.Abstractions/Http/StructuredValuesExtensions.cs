@@ -42,7 +42,7 @@ namespace NSign.Http
             }
             else if (value is ParsedItem item)
             {
-                return SerializeAsString(item.Value);
+                return SerializeAsString(item);
             }
             else if (value is IEnumerable<ParsedItem> itemList)
             {
@@ -60,6 +60,20 @@ namespace NSign.Http
             {
                 return value.ToString();
             }
+        }
+
+        /// <summary>
+        /// Serializes the given <see cref="ParsedItem"/> as a string (as per RFC 8941).
+        /// </summary>
+        /// <param name="item">
+        /// The <see cref="ParsedItem"/> to serialize.
+        /// </param>
+        /// <returns>
+        /// A string representing the serialized value.
+        /// </returns>
+        public static string SerializeAsString(this ParsedItem item)
+        {
+            return SerializeAsString(item.Value) + item.Parameters.SerializeAsParameters();
         }
 
         /// <summary>
@@ -110,26 +124,84 @@ namespace NSign.Http
         /// <param name="itemList">
         /// An <see cref="IEnumerable{T}"/> of <see cref="ParsedItem"/> representing the items in the list to serialize.
         /// </param>
+        /// <param name="innerList">
+        /// A flag which indicates whether or not the <paramref name="itemList"/> should be serialized as an inner list,
+        /// i.e. with surrounding parenthesis. Defaults to <c>false</c>.
+        /// </param>
         /// <returns>
         /// A string that represents the list of items.
         /// </returns>
-        public static string SerializeAsString(this IEnumerable<ParsedItem> itemList)
+        public static string SerializeAsString(this IEnumerable<ParsedItem> itemList, bool innerList = true)
         {
             StringBuilder builder = new StringBuilder();
-            builder.Append('(');
+            if (innerList)
+            {
+                builder.Append('(');
+            }
             int pos = 0;
 
             foreach (ParsedItem item in itemList)
             {
                 if (pos++ > 0)
                 {
-                    builder.Append(' ');
+                    if (innerList)
+                    {
+                        builder.Append(' ');
+                    }
+                    else
+                    {
+                        builder.Append(", ");
+                    }
                 }
 
                 builder.Append(item.Value.SerializeAsString() + item.Parameters.SerializeAsParameters());
             }
 
-            builder.Append(')');
+            if (innerList)
+            {
+                builder.Append(')');
+            }
+
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// Serializes the given <see cref="IReadOnlyDictionary{TKey, TValue}"/> of <see cref="string"/> and
+        /// <see cref="ParsedItem"/> key/value pairs (as per RFC 8941).
+        /// </summary>
+        /// <param name="dictionary">
+        /// A dictionary of key/value pairs to serialize.
+        /// </param>
+        /// <returns>
+        /// A string that represents the list of items.
+        /// </returns>
+        public static string SerializeAsString(this IReadOnlyDictionary<string, ParsedItem> dictionary)
+        {
+            StringBuilder builder = new StringBuilder();
+            int pos = 0;
+
+            foreach (KeyValuePair<string, ParsedItem> item in dictionary)
+            {
+                if (pos++ > 0)
+                {
+                    builder.Append(", ");
+                }
+
+                builder.Append(item.Key);
+
+                if (item.Value.Value is bool boolValue && boolValue)
+                {
+                    // For serialization of boolean true values, the value must be omitted.
+                    // See https://httpwg.org/specs/rfc8941.html#rfc.section.3.2.
+                }
+                else
+                {
+                    builder.Append('=');
+                    builder.Append(item.Value.Value.SerializeAsString());
+                }
+
+                builder.Append(item.Value.Parameters.SerializeAsParameters());
+            }
 
             return builder.ToString();
         }
@@ -157,6 +229,7 @@ namespace NSign.Http
                 if (parameter.Value is bool boolValue)
                 {
                     // Per the RFC, if a boolean parameter is true, only the name must be serialized.
+                    // See https://httpwg.org/specs/rfc8941.html#rfc.section.4.1.1.2
                     if (boolValue)
                     {
                         sb.Append($";{parameter.Key}");
@@ -222,6 +295,41 @@ namespace NSign.Http
         public static bool TryGetBinaryData(this ParsedItem item, out ReadOnlyMemory<byte> data)
         {
             return IsByteSequence(item.Value, out data);
+        }
+
+        /// <summary>
+        /// Tries to parse a <see cref="StructuredFieldValue"/> from the given HTTP header values.
+        /// </summary>
+        /// <param name="values">
+        /// An <see cref="IEnumerable{T}"/> of <see cref="string"/> that represent the values of the HTTP header to try
+        /// to parsed as a structured field.
+        /// </param>
+        /// <param name="value">
+        /// If parsing was successful, this is updated with a <see cref="StructuredFieldValue"/> value representing the
+        /// structured value of the HTTP header.
+        /// </param>
+        /// <returns>
+        /// True if successful, or false otherwise.
+        /// </returns>
+        public static bool TryParseStructuredFieldValue(this IEnumerable<string> values, out StructuredFieldValue value)
+        {
+            string combinedValues = String.Join(',', values);
+            if (null == SfvParser.ParseList(combinedValues, out IReadOnlyList<ParsedItem> list))
+            {
+                value = new StructuredFieldValue(list);
+                return true;
+            }
+            else if (null == SfvParser.ParseDictionary(combinedValues, out IReadOnlyDictionary<string, ParsedItem> dict))
+            {
+                value = new StructuredFieldValue(dict);
+                return true;
+            }
+            // The parser would always parse single items as a list (because a single item is a list with a single
+            // element), thus we can't expect SfvParser.ParseItem to succeed when SfvParser.ParseList has not succeeded.
+            // Accordingly, there's no point in trying SfvParser.ParseItem(...) here.
+
+            value = default;
+            return false;
         }
 
         #region Private Methods
