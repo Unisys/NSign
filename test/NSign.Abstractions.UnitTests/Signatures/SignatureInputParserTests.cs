@@ -33,8 +33,8 @@ namespace NSign.Signatures
             string input =
                 $@"(""@method""{suffix} ""@target-uri""{suffix} ""@authority""{suffix} ""@scheme""{suffix} " +
                 $@"""@request-target""{suffix} ""@path""{suffix} ""@query""{suffix} ""@query-param""{suffix};name=""some-param"" " +
-                $@"""@status"" ""my-header""{suffix} ""my-dict-header""{suffix};key=""blah"" ""@extension""{suffix})" +
-                @";expires=-1534;created=1234;keyid=""key-id"";nonce=""the-nonce"";alg=""signature-alg""";
+                $@"""@status"" ""my-header""{suffix} ""my-dict-header""{suffix};key=""blah"" ""my-structured-header"";sf{suffix} " +
+                $@"""@extension""{suffix});expires=-1534;created=1234;keyid=""key-id"";nonce=""the-nonce"";alg=""signature-alg""";
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
 
             SignatureInputParser.ParseAndUpdate(input, signatureParams);
@@ -51,6 +51,11 @@ namespace NSign.Signatures
                 (c) => Assert.Equal(SignatureComponent.Status, c),
                 (c) => Assert.Equal(new HttpHeaderComponent("My-Header", bindRequest), c),
                 (c) => Assert.Equal(new HttpHeaderDictionaryStructuredComponent("My-Dict-Header", "blah", bindRequest), c),
+                (c) =>
+                {
+                    Assert.Equal(new HttpHeaderStructuredFieldComponent("My-Structured-Header", bindRequest), c);
+                    Assert.Equal($@"""my-structured-header"";sf{suffix}", c.OriginalIdentifier);
+                },
                 (c) => Assert.Equal(new DerivedComponent("@extension", bindRequest), c));
 
             Assert.True(signatureParams.Created.HasValue);
@@ -159,8 +164,8 @@ namespace NSign.Signatures
             "The @signature-params component is not allowed.")]
         [InlineData(@"(""dict-header"";name=""blah"")",
             @"The component '""dict-header"";name=""blah""' has unsupported parameter 'name'.")]
-        [InlineData(@"();Foo=1234",
-            "Unsupported signature input parameter: Foo with value '1234'.")]
+        [InlineData(@"();foo=1234",
+            "Unsupported signature input parameter: foo with value '1234'.")]
         public void ParsingThrowsSignatureInputException(string input, string expectedMessage)
         {
             SignatureInputException ex;

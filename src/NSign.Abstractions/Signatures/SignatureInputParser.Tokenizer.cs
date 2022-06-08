@@ -88,7 +88,7 @@ namespace NSign.Signatures
                         return true;
 
                     default:
-                        if (IsIdentifierChar(chr))
+                        if (IsIdentifierChar(chr, isFirst: true))
                         {
                             ConsumeIdentifier();
                             return true;
@@ -187,7 +187,8 @@ namespace NSign.Signatures
             {
                 int startPos = position - 1;
 
-                while (IsIdentifierChar(Peek()))
+                // Consume identifier characters starting at the second character until we find a non-identifier character.
+                while (IsIdentifierChar(Peek(), isFirst: false))
                 {
                     Read();
                 }
@@ -220,14 +221,25 @@ namespace NSign.Signatures
             /// <param name="chr">
             /// The character to check.
             /// </param>
+            /// <param name="isFirst">
+            /// A flag which indicates whether or not this is the first char for a new identifier.
+            /// </param>
             /// <returns>
             /// True if the character is a valid identifier character.
             /// </returns>
-            private static bool IsIdentifierChar(int chr)
+            /// <remarks>
+            /// Valid names are per section 3.1.2 of RFC 8941.
+            /// See also <see href="https://httpwg.org/specs/rfc8941.html#rfc.section.3.1.2"/>.
+            /// </remarks>
+            private static bool IsIdentifierChar(int chr, bool isFirst)
             {
-                // TODO: The spec currently doesn't seem to mention valid characters; once it's finalized, this might
-                //       need to be updated.
-                return (chr >= 'A' && chr <= 'Z') || (chr >= 'a' && chr <= 'z');
+                if (isFirst)
+                {
+                    return (chr >= 'a' && chr <= 'z') || chr == '*';
+                }
+
+                return (chr >= 'a' && chr <= 'z') || (chr >= '0' && chr <= '9') ||
+                    chr == '_' || chr == '-' || chr == '.' || chr == '*';
             }
 
             /// <summary>

@@ -19,11 +19,17 @@ namespace NSign.Signatures
             .Add(Constants.ComponentParameters.Request);
 
         /// <summary>
+        /// The set of component parameters supported by structured HTTP header field components. This includes the <c>sf</c>
+        /// and the <c>req</c> parameters.
+        /// </summary>
+        private static readonly ImmutableHashSet<string> StucturedFieldSupportedParameters = RequestTargetSupportedParameters
+            .Add(Constants.ComponentParameters.StructuredField);
+
+        /// <summary>
         /// The set of component parameters supported by HTTP header components. This includes the <c>key</c> and <c>sf</c>
         /// parameters for structured header values, in addition to the <c>req</c> parameter.
         /// </summary>
-        private static readonly ImmutableHashSet<string> HttpHeaderSupportedParameters = RequestTargetSupportedParameters
-            .Add(Constants.ComponentParameters.StructuredField)
+        private static readonly ImmutableHashSet<string> HttpHeaderSupportedParameters = StucturedFieldSupportedParameters
             .Add(Constants.ComponentParameters.Key);
 
         /// <summary>
@@ -329,10 +335,20 @@ namespace NSign.Signatures
         {
             ThrowForUnsupportedParameters(originalIdentifier, componentParams, HttpHeaderSupportedParameters);
             TryGetParameterValue(componentParams, Constants.ComponentParameters.Request, out bool bindRequest);
-            // TODO: sf parameter handling
+            TryGetParameterValue(componentParams, Constants.ComponentParameters.StructuredField, out bool structuredField);
+
             string original = new String(originalIdentifier);
 
-            if (TryGetParameterValue(componentParams, Constants.ComponentParameters.Key, out string key))
+            if (structuredField)
+            {
+                // If the 'sf' (structured field) parameter is present, the 'key' parameter must not be present.
+                ThrowForUnsupportedParameters(originalIdentifier, componentParams, StucturedFieldSupportedParameters);
+                signatureParams.AddComponent(new HttpHeaderStructuredFieldComponent(componentName, bindRequest)
+                {
+                    OriginalIdentifier = original,
+                });
+            }
+            else if (TryGetParameterValue(componentParams, Constants.ComponentParameters.Key, out string key))
             {
                 signatureParams.AddComponent(new HttpHeaderDictionaryStructuredComponent(componentName, key, bindRequest)
                 {
