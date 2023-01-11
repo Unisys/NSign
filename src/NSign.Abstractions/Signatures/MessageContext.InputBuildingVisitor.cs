@@ -20,6 +20,11 @@ namespace NSign.Signatures
             private const string ParamBindRequest = ";" + Constants.ComponentParameters.Request;
 
             /// <summary>
+            /// The parameter to use to indicate that a HTTP field is bound to the original byte sequence.
+            /// </summary>
+            private const string ParamByteSequence = ";" + Constants.ComponentParameters.ByteSequence;
+
+            /// <summary>
             /// The StringBuilder which builds the full signature input to be used.
             /// </summary>
             private readonly StringBuilder signatureInput = new StringBuilder();
@@ -49,7 +54,14 @@ namespace NSign.Signatures
 
                 if (TryGetHeaderValues(bindRequest, httpHeader.ComponentName, out IEnumerable<string> values))
                 {
-                    AddInput(httpHeader, String.Join(", ", values));
+                    if (httpHeader.UseByteSequence)
+                    {
+                        AddByteSequenceInput(httpHeader, values);
+                    }
+                    else
+                    {
+                        AddInput(httpHeader, String.Join(", ", values));
+                    }
                 }
                 else
                 {
@@ -194,6 +206,10 @@ namespace NSign.Signatures
                         {
                             sb.Append($"{prefix};sf");
                         }
+                        else if (component is HttpHeaderComponent headerComponent && headerComponent.UseByteSequence)
+                        {
+                            sb.Append($"{prefix};bs");
+                        }
                         else
                         {
                             sb.Append(prefix);
@@ -279,6 +295,7 @@ namespace NSign.Signatures
                 if (null == component.OriginalIdentifier)
                 {
                     string suffix = component.BindRequest ? ParamBindRequest : String.Empty;
+
                     AddInput($"\"{component.ComponentName}\"{suffix};{Constants.ComponentParameters.Key}=\"{component.Key}\"", value);
                 }
                 else
@@ -310,6 +327,47 @@ namespace NSign.Signatures
             }
 
             /// <summary>
+            /// Adds a line to the signature input for the given HTTP field with byte-sequence encoding.
+            /// </summary>
+            /// <param name="component">
+            /// The <see cref="HttpHeaderComponent"/> for which to add the values as byte sequences.
+            /// </param>
+            /// <param name="values">
+            /// An <see cref="IEnumerable{T}"/> of string values representing the HTTP field's values.
+            /// </param>
+            private void AddByteSequenceInput(HttpHeaderComponent component, IEnumerable<string> values)
+            {
+                // Build the byte sequence list for the value of the input.
+                StringBuilder builder = new StringBuilder();
+                foreach (string value in values)
+                {
+                    if (builder.Length > 0)
+                    {
+                        builder.Append(", ");
+                    }
+
+                    builder.Append(GetByteSequence(value));
+                }
+
+                // Now add the encoded values to the input.
+                if (null == component.OriginalIdentifier)
+                {
+                    // The order of the parameters is relevant; it must match the order used when building the
+                    // '@signature-params' component (see BuildSignatureParamsComponentValueAndVisitComponents). If
+                    // they are not, signatures cannot correctly be validated, because input cannot be reconstruted.
+                    string suffix = component.BindRequest ? ParamBindRequest : String.Empty;
+
+                    suffix += ParamByteSequence;
+
+                    AddInput($"\"{component.ComponentName}\"{suffix}", builder.ToString());
+                }
+                else
+                {
+                    AddInput(component.OriginalIdentifier, builder.ToString());
+                }
+            }
+
+            /// <summary>
             /// Adds a line to the signature input for the given component with the specified value.
             /// </summary>
             /// <param name="componentSpec">
@@ -326,6 +384,35 @@ namespace NSign.Signatures
                 }
 
                 signatureInput.Append($"{componentSpec}: {value}");
+            }
+
+            /// <summary>
+            /// Get the ASCII byte-sequence for the given input string.
+            /// </summary>
+            /// <param name="value">
+            /// The value to encode as byte-sequence.
+            /// </param>
+            /// <returns>
+            /// A string value that represents the byte-sequence encoded value.
+            /// </returns>
+            private static string GetByteSequence(string value)
+            {
+                value = value.Trim();
+                int byteLen = Encoding.ASCII.GetByteCount(value);
+
+                if (byteLen <= 1024)
+                {
+                    Span<byte> buffer = stackalloc byte[byteLen];
+                    byteLen = Encoding.ASCII.GetBytes(value, buffer);
+
+                    return ((ReadOnlySpan<byte>)buffer).SerializeAsString();
+                }
+                else
+                {
+                    ReadOnlyMemory<byte> buffer = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes(value));
+
+                    return buffer.SerializeAsString();
+                }
             }
 
             #endregion

@@ -117,6 +117,11 @@
             /// The name of the 'sf' parameter.
             /// </summary>
             public const string StructuredField = "sf";
+
+            /// <summary>
+            /// The name of the 'bs' parameter.
+            /// </summary>
+            public const string ByteSequence = "bs";
         }
 
         /// <summary>

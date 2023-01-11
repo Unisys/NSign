@@ -378,6 +378,71 @@ namespace NSign.Signatures
                 $"\"@signature-params\": {outputSigParams}", Encoding.ASCII.GetString(input.Span));
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void GetInputSignatureUsesByteSequenceEncodingCorrectly(bool bindRequest)
+        {
+            string suffix = bindRequest ? ";req" : String.Empty;
+            string VeryLongValue = new String('*', 1025);
+
+            context.HasResponseValue = bindRequest;
+            context.OnGetHeaderValues = context.OnGetRequestHeaderValues = (headerName) =>
+            {
+                return headerName switch
+                {
+                    "xyz" => new string[] { "  a = b   ", "", "c=d, e=f", VeryLongValue, },
+                    _ => throw new Exception("Unexpected"),
+                };
+            };
+
+            SignatureInputSpec spec = new SignatureInputSpec("unitTest");
+            spec.SignatureParameters
+                .AddComponent(new HttpHeaderComponent("xyz", bindRequest, useByteSequence: true, fromTrailers: false))
+                ;
+
+            ReadOnlyMemory<byte> input = context.GetSignatureInput(spec, out string outputSigParams);
+
+            Assert.Equal($"(\"xyz\"{suffix};bs)", outputSigParams);
+            Assert.Equal(
+                $"\"xyz\"{suffix};bs: :YSA9IGI=:, ::, :Yz1kLCBlPWY=:, :{Convert.ToBase64String(Encoding.ASCII.GetBytes(VeryLongValue))}:\n" +
+                $"\"@signature-params\": {outputSigParams}", Encoding.ASCII.GetString(input.Span));
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void GetInputSignatureUsesByteSequenceEncodingCorrectlyWithOriginalIdentifiers(bool bindRequest)
+        {
+            string suffix = bindRequest ? ";req" : String.Empty;
+
+            context.HasResponseValue = bindRequest;
+            context.OnGetHeaderValues = context.OnGetRequestHeaderValues = (headerName) =>
+            {
+                return headerName switch
+                {
+                    "xyz" => new string[] { "  a = b   ", "c=d, e=f", },
+                    _ => throw new Exception("Unexpected"),
+                };
+            };
+
+            SignatureInputSpec spec = new SignatureInputSpec("unitTest");
+            spec.SignatureParameters
+                .AddComponent(new HttpHeaderComponent("xyz", bindRequest, useByteSequence: true, fromTrailers: false)
+                {
+                    // Introduce a mistake on purpose, so we can verify that the original identifier is passed.
+                    OriginalIdentifier = $"\"test-xyz\";bs{suffix}",
+                })
+                ;
+
+            ReadOnlyMemory<byte> input = context.GetSignatureInput(spec, out string outputSigParams);
+
+            Assert.Equal($"(\"test-xyz\";bs{suffix})", outputSigParams);
+            Assert.Equal(
+                $"\"test-xyz\";bs{suffix}: :YSA9IGI=:, :Yz1kLCBlPWY=:\n" +
+                $"\"@signature-params\": {outputSigParams}", Encoding.ASCII.GetString(input.Span));
+        }
+
         private static SignatureInputSpec MakeSignatureInput(SignatureComponent component)
         {
             SignatureInputSpec spec = new SignatureInputSpec("unitTest");

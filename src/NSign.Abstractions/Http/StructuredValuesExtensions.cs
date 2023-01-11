@@ -115,7 +115,21 @@ namespace NSign.Http
         /// </returns>
         public static string SerializeAsString(this ReadOnlyMemory<byte> value)
         {
-            return $":{Convert.ToBase64String(value.Span)}:";
+            return SerializeAsString(value.Span);
+        }
+
+        /// <summary>
+        /// Serializes the given byte sequence (as per RFC 8941).
+        /// </summary>
+        /// <param name="value">
+        /// A ReadOnlySpan of byte to serialize.
+        /// </param>
+        /// <returns>
+        /// A string representing the serialized value.
+        /// </returns>
+        public static string SerializeAsString(this ReadOnlySpan<byte> value)
+        {
+            return $":{Convert.ToBase64String(value)}:";
         }
 
         /// <summary>

@@ -41,12 +41,24 @@ namespace NSign.Http
         [InlineData(new byte[] { }, @"::")]
         [InlineData(new byte[] { 0x00, }, @":AA==:")]
         [InlineData(new byte[] { 0x0d, 0xe6, 0x9d, 0x05, 0xe7, 0x9f, }, @":DeadBeef:")]
-        public void SerializeAsStringWorksForByteSequence(byte[] input, string expectedOutput)
+        public void SerializeAsStringWorksForByteSequenceAsReadOnlyMemory(byte[] input, string expectedOutput)
         {
-            Assert.Equal(expectedOutput, StructuredValuesExtensions.SerializeAsString(input));
+            Assert.Equal(expectedOutput, StructuredValuesExtensions.SerializeAsString((object)input));
 
             ReadOnlyMemory<byte> memory = input;
             Assert.Equal(expectedOutput, StructuredValuesExtensions.SerializeAsString(memory));
+        }
+
+        [Theory]
+        [InlineData(new byte[] { }, @"::")]
+        [InlineData(new byte[] { 0x00, }, @":AA==:")]
+        [InlineData(new byte[] { 0x0d, 0xe6, 0x9d, 0x05, 0xe7, 0x9f, }, @":DeadBeef:")]
+        public void SerializeAsStringWorksForByteSequenceAsReadOnlySpan(byte[] input, string expectedOutput)
+        {
+            Assert.Equal(expectedOutput, StructuredValuesExtensions.SerializeAsString((object)input));
+
+            ReadOnlySpan<byte> span = input;
+            Assert.Equal(expectedOutput, StructuredValuesExtensions.SerializeAsString(span));
         }
 
         [Fact]
