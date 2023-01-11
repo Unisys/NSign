@@ -423,6 +423,11 @@ namespace NSign.Signatures
                     signatureParams.KeyId = new String(tokenizer.Token.Value);
                     break;
 
+                case Constants.SignatureParams.Tag:
+                    tokenizer.EnsureTokenOneOfOrThrow(TokenType.QuotedString);
+                    signatureParams.Tag = new String(tokenizer.Token.Value);
+                    break;
+
                 default:
                     throw new SignatureInputException(
                         $"Unsupported signature input parameter: {paramName} with value '{new String(tokenizer.Token.Value)}'.");

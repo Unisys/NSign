@@ -361,7 +361,26 @@ namespace NSign.Signatures
         }
 
         [Fact]
-        public async Task VerifyMessageAsyncReportsSignatureInputErrorResponseStatusOnMandatoryButComponent()
+        public async Task VerifyMessageAsyncReportsSignatureInputErrorResponseStatusOnMandatoryButAbsentTag()
+        {
+            options.SignaturesToVerify.Add("unittest");
+            options.ExpiresRequired = false;
+            options.TagRequired = true;
+            options.MaxSignatureAge = null;
+
+            mockContext.SetupGet(c => c.HasResponse).Returns(true);
+            mockContext.SetupGet(c => c.VerificationOptions).Returns(options);
+
+            mockContext.Setup(c => c.GetHeaderValues("signature")).Returns(new string[] { "unittest=:Test:", });
+            mockContext.Setup(c => c.GetHeaderValues("signature-input")).Returns(new string[] { "unittest=();created=1234", });
+
+            await verifier.VerifyMessageAsync(mockContext.Object);
+
+            Assert.Equal("SignatureInputError:unittest=SignatureInputComponentMissing", result);
+        }
+
+        [Fact]
+        public async Task VerifyMessageAsyncReportsSignatureInputErrorResponseStatusOnMandatoryButAbsentComponent()
         {
             options.SignaturesToVerify.Add("unittest");
             options.AlgorithmRequired = options.CreatedRequired = options.ExpiresRequired = options.KeyIdRequired = options.NonceRequired = false;

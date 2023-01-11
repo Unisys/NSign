@@ -246,6 +246,13 @@ namespace NSign.Signatures
                     inputSpec.Name, sigParams.OriginalValue);
                 return false;
             }
+            else if (options.TagRequired && String.IsNullOrWhiteSpace(sigParams.Tag))
+            {
+                logger.LogDebug(
+                    "Verification failed ('tag' parameter missing) for signature '{name}' with spec '{inputSpec}'.",
+                    inputSpec.Name, sigParams.OriginalValue);
+                return false;
+            }
             else if (null != sigParams.Nonce && null != options.VerifyNonce && !options.VerifyNonce(inputSpec))
             {
                 logger.LogDebug(

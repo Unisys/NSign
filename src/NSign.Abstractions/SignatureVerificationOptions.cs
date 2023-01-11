@@ -110,6 +110,12 @@ namespace NSign
         public bool KeyIdRequired { get; set; } = false;
 
         /// <summary>
+        /// Gets or sets a flag which indicates whether the 'tag' parameter of signature input must be set in order for
+        /// the signature to be accepted. Defaults to <c>false</c>.
+        /// </summary>
+        public bool TagRequired { get; set; } = false;
+
+        /// <summary>
         /// Gets or sets a nullable TimeSpan value that indicates the maximum age of a signature (based on the 'created'
         /// parameter) in order for the signature to accepted. If a value is set, it is applied even if <c>ExpiresRequired == true</c>
         /// and an expiration is set on the signature, provided that the 'created' parameter is set too.

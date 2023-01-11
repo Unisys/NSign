@@ -34,7 +34,8 @@ namespace NSign.Signatures
                 $@"(""@method""{suffix} ""@target-uri""{suffix} ""@authority""{suffix} ""@scheme""{suffix} " +
                 $@"""@request-target""{suffix} ""@path""{suffix} ""@query""{suffix} ""@query-param""{suffix};name=""some-param"" " +
                 $@"""@status"" ""my-header""{suffix} ""my-dict-header""{suffix};key=""blah"" ""my-structured-header"";sf{suffix} " +
-                $@"""@extension""{suffix});expires=-1534;created=1234;keyid=""key-id"";nonce=""the-nonce"";alg=""signature-alg""";
+                $@"""@extension""{suffix});expires=-1534;created=1234;keyid=""key-id"";nonce=""the-nonce"";alg=""signature-alg"";" +
+                $@"tag=""my-tag""";
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
 
             SignatureInputParser.ParseAndUpdate(input, signatureParams);
@@ -65,6 +66,7 @@ namespace NSign.Signatures
             Assert.Equal("the-nonce", signatureParams.Nonce);
             Assert.Equal("signature-alg", signatureParams.Algorithm);
             Assert.Equal("key-id", signatureParams.KeyId);
+            Assert.Equal("my-tag", signatureParams.Tag);
         }
 
         [Theory]

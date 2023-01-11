@@ -228,6 +228,11 @@ namespace NSign.Signatures
                     sb.Append($";{Constants.SignatureParams.KeyId}=\"{signatureParamsComponent.KeyId}\"");
                 }
 
+                if (null != signatureParamsComponent.Tag)
+                {
+                    sb.Append($";{Constants.SignatureParams.Tag}=\"{signatureParamsComponent.Tag}\"");
+                }
+
                 SignatureParamsValue = sb.ToString();
                 AddInput(signatureParamsComponent, SignatureParamsValue);
             }

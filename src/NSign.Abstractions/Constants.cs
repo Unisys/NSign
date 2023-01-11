@@ -148,6 +148,11 @@
             /// The name of the 'keyid' parameter.
             /// </summary>
             public const string KeyId = "keyid";
+
+            /// <summary>
+            /// The name of the 'tag' parameter.
+            /// </summary>
+            public const string Tag = "tag";
         }
 
         /// <summary>
