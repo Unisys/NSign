@@ -223,7 +223,7 @@ namespace NSign.Signatures
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return Type.GetHashCode() ^ ComponentName.GetHashCode();
+            return Type.GetHashCode() ^ ComponentName.GetHashCode() ^ BindRequest.GetHashCode();
         }
 
         /// <inheritdoc/>

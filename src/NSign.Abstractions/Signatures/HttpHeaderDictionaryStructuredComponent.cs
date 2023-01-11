@@ -34,7 +34,32 @@ namespace NSign.Signatures
         /// Whether or not the component should be bound to the request. This represents the <c>req</c> flag from the
         /// standard.
         /// </param>
-        public HttpHeaderDictionaryStructuredComponent(string name, string key, bool bindRequest) : base(name, bindRequest)
+        public HttpHeaderDictionaryStructuredComponent(string name, string key, bool bindRequest)
+            : this(name, key, bindRequest, fromTrailers: false) { }
+
+        /// <summary>
+        /// Initializes a new instance of HttpHeaderDictionaryStructuredComponent.
+        /// </summary>
+        /// <param name="name">
+        /// The name of the HTTP message header this component represents.
+        /// </param>
+        /// <param name="key">
+        /// The key of the dictionary-structured value to use.
+        /// </param>
+        /// <param name="bindRequest">
+        /// Whether or not the component should be bound to the request. This represents the <c>req</c> flag from the
+        /// standard.
+        /// </param>
+        /// <param name="fromTrailers">
+        /// Whether the component should be taken from the trailers. This represents the <c>tr</c> flag from the
+        /// standard.
+        /// </param>
+        public HttpHeaderDictionaryStructuredComponent(
+            string name,
+            string key,
+            bool bindRequest,
+            bool fromTrailers
+        ) : base(name, bindRequest, useByteSequence: false, fromTrailers)
         {
             if (String.IsNullOrWhiteSpace(key))
             {
@@ -72,9 +97,7 @@ namespace NSign.Signatures
             }
 
             return
-                GetType() == other.GetType() &&
-                BindRequest == other.BindRequest &&
-                StringComparer.Ordinal.Equals(ComponentName, other.ComponentName) &&
+                base.Equals(other) &&
                 StringComparer.Ordinal.Equals(Key, other.Key);
         }
 
@@ -85,7 +108,7 @@ namespace NSign.Signatures
         {
             if (obj is HttpHeaderDictionaryStructuredComponent httpHeaderDict)
             {
-                return base.Equals(httpHeaderDict);
+                return Equals(httpHeaderDict);
             }
 
             return false;
