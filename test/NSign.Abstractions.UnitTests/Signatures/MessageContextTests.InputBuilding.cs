@@ -263,14 +263,17 @@ namespace NSign.Signatures
                 .AddComponent(SignatureComponent.Authority)
                 .WithCreated(DateTimeOffset.UnixEpoch.AddMinutes(1))
                 .WithKeyId("my-key")
-                .WithNonce("test-nonce");
+                .WithNonce("test-nonce")
+                .WithTag("abc")
+                ;
+
             spec.SignatureParameters.Expires = DateTimeOffset.UnixEpoch.AddMinutes(6);
             spec.SignatureParameters.Algorithm = "my";
 
             ReadOnlyMemory<byte> input = context.GetSignatureInput(spec, out string inputStr);
             Assert.Equal(
                 "(\"@status\" \"signature\";req;key=\"test\" \"content-type\" \"content-length\" \"@authority\")" +
-                ";created=60;expires=360;nonce=\"test-nonce\";alg=\"my\";keyid=\"my-key\"",
+                ";created=60;expires=360;nonce=\"test-nonce\";alg=\"my\";keyid=\"my-key\";tag=\"abc\"",
                 inputStr);
             Assert.Equal(
                 $"\"@status\": {status}\n" +
