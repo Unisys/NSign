@@ -1,8 +1,9 @@
 ﻿<Project>
     <PropertyGroup>
         <LibraryTargetFramework>netstandard2.1</LibraryTargetFramework>
-        <AspNetCoreTargetFrameworks>netcoreapp3.1;net6.0</AspNetCoreTargetFrameworks>
-        <TestTargetFramework>net6.0</TestTargetFramework>
+        <AspNetCoreTargetFrameworks>net6.0;net7.0</AspNetCoreTargetFrameworks>
+        <TestTargetFrameworks>net6.0;net7.0</TestTargetFrameworks>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <Nullable>enable</Nullable>
         <LangVersion>9.0</LangVersion>
     </PropertyGroup>
@@ -25,6 +26,7 @@
         <Deterministic>true</Deterministic>
         <ContinuousIntegrationBuild>True</ContinuousIntegrationBuild>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <RestoreLockedMode>true</RestoreLockedMode>
     </PropertyGroup>
 
     <ItemGroup Label="NuSpec">

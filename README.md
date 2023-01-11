@@ -35,7 +35,7 @@ them in `NSign.Client` at a later stage too.
 
 Below are some usage examples of the `NSign.*` libraries. Sample code will be added to the repository at a later time.
 
-### Validate signed requests in AspNetCore Server (.Net Core 3.1 and .Net 6.0)
+### Validate signed requests in AspNetCore Server (.Net 6.0 and 7.0)
 
 The following excerpt of an ASP.NET Core's `Startup` class can be used to verify signatures on requests sent to `/webhooks`
 endpoints (and endpoints starting with `/webhooks/`). It also makes sure that signatures include the following request
