@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace NSign.Signatures
 {
@@ -74,14 +75,9 @@ namespace NSign.Signatures
         /// </returns>
         private static string GetMessage(ISignatureComponent component)
         {
-            if (component is HttpHeaderStructuredFieldComponent)
-            {
-                return $"The signature component '{component.ComponentName};sf' does not exist but is required.";
-            }
-            else
-            {
-                return $"The signature component '{component.ComponentName}' does not exist but is required.";
-            }
+            string parameters = GetParameters(component);
+
+            return $"The signature component '{component.ComponentName}{parameters}' does not exist but is required.";
         }
 
         /// <summary>
@@ -95,7 +91,9 @@ namespace NSign.Signatures
         /// </returns>
         private static string GetMessage(ISignatureComponentWithKey component)
         {
-            return $"The signature component '{component.ComponentName};key=\"{component.Key}\"' does not exist but is required.";
+            string parameters = GetParameters(component);
+
+            return $"The signature component '{component.ComponentName}{parameters};key=\"{component.Key}\"' does not exist but is required.";
         }
 
         /// <summary>
@@ -109,7 +107,47 @@ namespace NSign.Signatures
         /// </returns>
         private static string GetMessage(ISignatureComponentWithName component)
         {
-            return $"The signature component '{component.ComponentName};name=\"{component.Name}\"' does not exist but is required.";
+            string parameters = GetParameters(component);
+
+            return $"The signature component '{component.ComponentName}{parameters};name=\"{component.Name}\"' does not exist but is required.";
+        }
+
+        /// <summary>
+        /// Returns additional parameters for the given component.
+        /// </summary>
+        /// <param name="component">
+        /// The SignatureComponent to get additional parameters for.
+        /// </param>
+        /// <returns>
+        /// A string representing the component's parameters.
+        /// </returns>
+        private static string GetParameters(ISignatureComponent component)
+        {
+            StringBuilder parameters = new StringBuilder();
+
+            if (component.BindRequest)
+            {
+                parameters.Append(";req");
+            }
+
+            if (component is HttpHeaderComponent header)
+            {
+                if (header.UseByteSequence)
+                {
+                    parameters.Append(";bs");
+                }
+                if (header.FromTrailers)
+                {
+                    parameters.Append(";tr");
+                }
+
+                if (header is HttpHeaderStructuredFieldComponent)
+                {
+                    parameters.Append(";sf");
+                }
+            }
+
+            return parameters.ToString();
         }
     }
 }

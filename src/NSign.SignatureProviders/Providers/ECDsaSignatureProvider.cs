@@ -23,16 +23,32 @@ namespace NSign.Providers
         private readonly ECDsa publicKey;
 
         /// <summary>
+        /// The OID value of the curve required to use this signature.
+        /// </summary>
+        private readonly string requiredCurveOid;
+
+        /// <summary>
+        /// The name of the curve rqeuired to use this instance.
+        /// </summary>
+        private readonly string requiredCurveName;
+
+        /// <summary>
         /// The name of the symmetric signature algorithm provided by this instance.
         /// </summary>
         private readonly string algorithmName;
 
         /// <summary>
-        /// Initializes a new instance of RsaSignatureProvider.
+        /// Initializes a new instance of ECDsaSignatureProvider.
         /// </summary>
         /// <param name="certificate">
         /// The <see cref="X509Certificate2"/> to use to get the public key and the private key (only needed if the
         /// provider is used to create signatures).
+        /// </param>
+        /// <param name="requiredCurveOid">
+        /// The OID value of the curve required to use this instance.
+        /// </param>
+        /// <param name="requiredCurveName">
+        /// The name of the curve rqeuired to use this instance.
         /// </param>
         /// <param name="algorithmName">
         /// The name of the asymmetric signature algorithm provided by this instance.
@@ -41,12 +57,22 @@ namespace NSign.Providers
         /// The value for the KeyId parameter of signatures produced with this provider or null if the value should not
         /// be set / is not important.
         /// </param>
-        public ECDsaSignatureProvider(X509Certificate2 certificate, string algorithmName, string? keyId) : base(keyId)
+        public ECDsaSignatureProvider(
+            X509Certificate2 certificate,
+            string requiredCurveOid,
+            string requiredCurveName,
+            string algorithmName,
+            string? keyId
+        ) : base(keyId)
         {
             Certificate = certificate ?? throw new ArgumentNullException(nameof(certificate));
 
             privateKey = Certificate.GetECDsaPrivateKey();
             publicKey = Certificate.GetECDsaPublicKey();
+
+            this.requiredCurveOid = requiredCurveOid;
+            this.requiredCurveName = requiredCurveName;
+
             // Give derived classes a chance to reject the certificate because the curve doesn't match.
             CheckKeyAlgorithm(publicKey, nameof(certificate));
 
@@ -157,6 +183,16 @@ namespace NSign.Providers
             if (null == publicKey)
             {
                 throw new ArgumentException("The certificate does not use elliptic curve keys.", parameterName);
+            }
+
+            ECParameters parameters = publicKey.ExportParameters(false);
+
+            if (parameters.Curve.Oid.Value != requiredCurveOid)
+            {
+                throw new ArgumentException(
+                    $"A certificate with elliptic curve {requiredCurveName} (oid: {requiredCurveOid}) is expected, " +
+                    $"but curve '{parameters.Curve.Oid.FriendlyName}' (oid: {parameters.Curve.Oid.Value}) was provided.",
+                    parameterName);
             }
         }
     }

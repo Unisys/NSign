@@ -18,7 +18,7 @@ rd /q /s %TEMPRESULTS_DIR% 2>nul
 
 rem Run tests for all test projects.
 for /F "tokens=* usebackq" %%p in (`dir /b /ad /s %BASE%\%TESTPROJECTS_PATTERN%`) do (
-    dotnet test %%p --collect:"XPlat Code Coverage" -r %TEMPRESULTS_DIR% %ADDTL_TESTPARAMS%
+    dotnet test %%p --collect:"XPlat Code Coverage" --results-directory %TEMPRESULTS_DIR% %ADDTL_TESTPARAMS%
 )
 
 rem Run the individual coverage reports through the reportgenerator tool to combine and generate HTML output.

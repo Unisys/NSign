@@ -84,6 +84,11 @@ namespace NSign.Signatures
         /// </summary>
         public string? KeyId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the application tag of the signature.
+        /// </summary>
+        public string? Tag { get; set; }
+
         #region Fluent interface
 
         /// <summary>
@@ -211,6 +216,22 @@ namespace NSign.Signatures
         public SignatureParamsComponent WithKeyId(string keyId)
         {
             KeyId = keyId;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the 'tag' parameter to the given value.
+        /// </summary>
+        /// <param name="tag">
+        /// The string to set.
+        /// </param>
+        /// <returns>
+        /// The SignatureParamsComponent on which the method was called.
+        /// </returns>
+        public SignatureParamsComponent WithTag(string tag)
+        {
+            Tag = tag;
 
             return this;
         }

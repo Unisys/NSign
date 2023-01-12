@@ -229,6 +229,41 @@ namespace NSign.Signatures
         }
 
         [Theory]
+        [InlineData(false, "x-first", true)]
+        [InlineData(false, "x-second", true)]
+        [InlineData(false, "x-third", true)]
+        [InlineData(false, "x-fourth", false)]
+        [InlineData(true, "y-first", true)]
+        [InlineData(true, "y-second", true)]
+        [InlineData(true, "y-third", true)]
+        [InlineData(true, "y-fourth", false)]
+        public void HasTrailerWorks(bool bindRequest, string name, bool exists)
+        {
+            context.OnGetTrailerValues = (headerName) =>
+            {
+                return headerName.ToLowerInvariant() switch
+                {
+                    "x-first" => new string[] { "a", "b", "c", },
+                    "x-second" => new string[] { "x", },
+                    "x-third" => new string[] { "", },
+                    _ => Array.Empty<string>(),
+                };
+            };
+            context.OnGetRequestTrailerValues = (headerName) =>
+            {
+                return headerName.ToLowerInvariant() switch
+                {
+                    "y-first" => new string[] { "a", "b", "c", },
+                    "y-second" => new string[] { "x", },
+                    "y-third" => new string[] { "", },
+                    _ => Array.Empty<string>(),
+                };
+            };
+
+            Assert.Equal(exists, context.HasTrailer(bindRequest, name));
+        }
+
+        [Theory]
         [InlineData("@method", false, true)]
         [InlineData("@method", true, true)]
         [InlineData("@target-uri", false, true)]

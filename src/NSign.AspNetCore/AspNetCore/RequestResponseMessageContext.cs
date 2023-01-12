@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
 using NSign.Signatures;
 using System;
@@ -93,5 +94,20 @@ namespace NSign.AspNetCore
 
         /// <inheritdoc/>
         protected override IHeaderDictionary MessageHeaders => HttpContext.Response.Headers;
+
+        /// <inheritdoc/>
+        protected override IHeaderDictionary MessageTrailers
+        {
+            get
+            {
+                IHttpResponseTrailersFeature? feature = HttpContext.Features.Get<IHttpResponseTrailersFeature>();
+                if (null == feature)
+                {
+                    throw new NotSupportedException("Trailers are not supported for this response.");
+                }
+
+                return feature.Trailers;
+            }
+        }
     }
 }

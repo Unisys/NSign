@@ -41,5 +41,13 @@
         /// The string representation is "ecdsa-p256-sha256".
         /// </remarks>
         EcdsaP256Sha256,
+
+        /// <summary>
+        /// Asymmetric signature with ECDSA with curve P-384 and SHA-384.
+        /// </summary>
+        /// <remarks>
+        /// The string representation is "ecdsa-p384-sha384".
+        /// </remarks>
+        EcdsaP384Sha384,
     }
 }

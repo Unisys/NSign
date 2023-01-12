@@ -117,6 +117,16 @@
             /// The name of the 'sf' parameter.
             /// </summary>
             public const string StructuredField = "sf";
+
+            /// <summary>
+            /// The name of the 'bs' parameter.
+            /// </summary>
+            public const string ByteSequence = "bs";
+
+            /// <summary>
+            /// The name of the 'tr' parameter.
+            /// </summary>
+            public const string FromTrailers = "tr";
         }
 
         /// <summary>
@@ -148,6 +158,11 @@
             /// The name of the 'keyid' parameter.
             /// </summary>
             public const string KeyId = "keyid";
+
+            /// <summary>
+            /// The name of the 'tag' parameter.
+            /// </summary>
+            public const string Tag = "tag";
         }
 
         /// <summary>
@@ -187,9 +202,14 @@
             public const string HmacSha256 = "hmac-sha256";
 
             /// <summary>
-            /// The name for signatures using ECDSA with curve P-256 and SHA-256;
+            /// The name for signatures using ECDSA with curve P-256 and SHA-256.
             /// </summary>
             public const string EcdsaP256Sha256 = "ecdsa-p256-sha256";
+
+            /// <summary>
+            /// The name for signatures using ECDSA with curve P-384 and SHA-384.
+            /// </summary>
+            public const string EcdsaP384Sha384 = "ecdsa-p384-sha384";
         }
     }
 }

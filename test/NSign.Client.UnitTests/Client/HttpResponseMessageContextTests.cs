@@ -2,6 +2,8 @@
 using Moq;
 using NSign.Signatures;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
@@ -107,6 +109,80 @@ namespace NSign.Client
             PropertyInfo? prop = typeof(HttpRequestMessageContext).GetProperty("MessageContent", BindingFlags.Instance | BindingFlags.NonPublic);
 
             Assert.Same(response.Content, prop!.GetValue(context));
+        }
+
+        [Theory]
+        [InlineData("x-resp-header", false)]
+        [InlineData("x-first-header", true)]
+        [InlineData("x-second-header", true)]
+        [InlineData("x-third-header", true)]
+        public void HasHeaderWorks(string header, bool expectOnRequest)
+        {
+            request.Headers.Add("x-first-header", "firstValue");
+            request.Headers.Add("x-Second-Header", "");
+            request.Headers.Add("x-third-header", new string[] { "1", "2", "3", });
+            response.Headers.Add("x-resp-header", "blah");
+
+            Assert.Equal(!expectOnRequest, context.HasHeader(bindRequest: false, header));
+            Assert.Equal(expectOnRequest, context.HasHeader(bindRequest: true, header));
+        }
+
+        [Theory]
+        [InlineData("x-first", new string[] { "value1", "value2", })]
+        [InlineData("x-second", new string[] { "", })]
+        [InlineData("inexistent", null)]
+        public void GetTrailerValuesWorks(string name, string[]? expectedValue)
+        {
+            response.TrailingHeaders.Add("x-first", new String[] { "value1", "value2", });
+            response.TrailingHeaders.Add("x-second", "");
+
+            IEnumerable<string>? actualValues = context.GetTrailerValues(name);
+
+            if (null != expectedValue)
+            {
+                Assert.Collection(actualValues,
+                    expectedValue.Select((val) => (Action<string>)((actualVal) => Assert.Equal(val, actualVal))).ToArray());
+            }
+            else
+            {
+                Assert.Empty(actualValues);
+            }
+        }
+
+        [Theory]
+        [InlineData("not-found", false)]
+        [InlineData("x-first-header", true)]
+        [InlineData("x-second-header", true)]
+        [InlineData("x-third-header", true)]
+        public void HasTrailerWorks(string header, bool expectOnResponse)
+        {
+            response.TrailingHeaders.Add("x-first-header", "firstValue");
+            response.TrailingHeaders.Add("x-Second-Header", "");
+            response.TrailingHeaders.Add("x-third-header", new string[] { "1", "2", "3", });
+
+            Assert.Equal(expectOnResponse, context.HasTrailer(bindRequest: false, header));
+            Assert.False(context.HasTrailer(bindRequest: true, header));
+        }
+
+        [Theory]
+        [InlineData("not-found")]
+        [InlineData("x-first-header")]
+        [InlineData("x-second-header")]
+        [InlineData("x-third-header")]
+        public void GetRequestTrailerValuesThrowsWhenBindingToRequest(string header)
+        {
+            NotSupportedException ex = Assert.Throws<NotSupportedException>(() => context.GetRequestTrailerValues(header));
+            Assert.Equal("Request-based trailers in signatures are not supported.", ex.Message);
+        }
+
+        [Theory]
+        [InlineData("not-found")]
+        [InlineData("x-first-header")]
+        [InlineData("x-second-header")]
+        [InlineData("x-third-header")]
+        public void HasTrailerReturnsFalseWhenBindingToRequest(string header)
+        {
+            Assert.False(context.HasTrailer(bindRequest: true, header));
         }
     }
 }

@@ -55,10 +55,18 @@ namespace NSign.Providers
         private sealed class TestECDsa : ECDsaSignatureProvider
         {
             public TestECDsa(X509Certificate2 certificate, string algorithmName, string? keyId)
-                : base(certificate, algorithmName, keyId)
+                : base(certificate, "irrelevant", "P-Test", algorithmName, keyId)
             { }
 
             protected override HashAlgorithmName SignatureHash => throw new NotImplementedException();
+
+            protected override void CheckKeyAlgorithm(ECDsa publicKey, string parameterName)
+            {
+                if (null == publicKey)
+                {
+                    throw new ArgumentException("The certificate does not use elliptic curve keys.", parameterName);
+                }
+            }
         }
     }
 }

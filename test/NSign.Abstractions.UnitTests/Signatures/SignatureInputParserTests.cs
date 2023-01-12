@@ -24,17 +24,26 @@ namespace NSign.Signatures
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void ParsingSucceedsForValidInput(bool bindRequest)
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void ParsingSucceedsForValidInput(bool bindRequest, bool fromTrailers)
         {
             string suffix = bindRequest ? ";req" : String.Empty;
+            string httpFieldSuffix = suffix;
+            if (fromTrailers)
+            {
+                httpFieldSuffix += ";tr";
+            }
 
             string input =
                 $@"(""@method""{suffix} ""@target-uri""{suffix} ""@authority""{suffix} ""@scheme""{suffix} " +
                 $@"""@request-target""{suffix} ""@path""{suffix} ""@query""{suffix} ""@query-param""{suffix};name=""some-param"" " +
-                $@"""@status"" ""my-header""{suffix} ""my-dict-header""{suffix};key=""blah"" ""my-structured-header"";sf{suffix} " +
-                $@"""@extension""{suffix});expires=-1534;created=1234;keyid=""key-id"";nonce=""the-nonce"";alg=""signature-alg""";
+                $@"""@status"" ""my-header""{httpFieldSuffix} ""my-dict-header""{httpFieldSuffix};key=""blah"" " +
+                $@"""my-structured-header"";sf{httpFieldSuffix} ""my-bs-structured-header"";bs{httpFieldSuffix} " +
+                $@"""@extension""{suffix});expires=-1534;created=1234;keyid=""key-id"";nonce=""the-nonce"";alg=""signature-alg"";" +
+                $@"tag=""my-tag""";
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
 
             SignatureInputParser.ParseAndUpdate(input, signatureParams);
@@ -49,13 +58,14 @@ namespace NSign.Signatures
                 (c) => Assert.Equal(bindRequest ? SignatureComponent.RequestBoundQuery : SignatureComponent.Query, c),
                 (c) => Assert.Equal(new QueryParamComponent("Some-Param", bindRequest), c),
                 (c) => Assert.Equal(SignatureComponent.Status, c),
-                (c) => Assert.Equal(new HttpHeaderComponent("My-Header", bindRequest), c),
-                (c) => Assert.Equal(new HttpHeaderDictionaryStructuredComponent("My-Dict-Header", "blah", bindRequest), c),
+                (c) => Assert.Equal(new HttpHeaderComponent("My-Header", bindRequest, useByteSequence: false, fromTrailers), c),
+                (c) => Assert.Equal(new HttpHeaderDictionaryStructuredComponent("My-Dict-Header", "blah", bindRequest, fromTrailers), c),
                 (c) =>
                 {
-                    Assert.Equal(new HttpHeaderStructuredFieldComponent("My-Structured-Header", bindRequest), c);
-                    Assert.Equal($@"""my-structured-header"";sf{suffix}", c.OriginalIdentifier);
+                    Assert.Equal(new HttpHeaderStructuredFieldComponent("My-Structured-Header", bindRequest, fromTrailers), c);
+                    Assert.Equal($@"""my-structured-header"";sf{httpFieldSuffix}", c.OriginalIdentifier);
                 },
+                (c) => Assert.Equal(new HttpHeaderComponent("my-bs-structured-header", bindRequest, useByteSequence: true, fromTrailers), c),
                 (c) => Assert.Equal(new DerivedComponent("@extension", bindRequest), c));
 
             Assert.True(signatureParams.Created.HasValue);
@@ -65,6 +75,7 @@ namespace NSign.Signatures
             Assert.Equal("the-nonce", signatureParams.Nonce);
             Assert.Equal("signature-alg", signatureParams.Algorithm);
             Assert.Equal("key-id", signatureParams.KeyId);
+            Assert.Equal("my-tag", signatureParams.Tag);
         }
 
         [Theory]
@@ -184,6 +195,12 @@ namespace NSign.Signatures
             @"The component '""@query-param"";req;blah=""foo""' has unsupported parameter 'blah'.")]
         [InlineData(@"(""header"";req;blotz=""blimp"" ""@status"")",
             @"The component '""header"";req;blotz=""blimp""' has unsupported parameter 'blotz'.")]
+        [InlineData(@"(""header"";blotz=""blimp"";req ""@status"")",
+            @"The component '""header"";blotz=""blimp"";req' has unsupported parameter 'blotz'.")]
+        [InlineData(@"(""trailer"";tr;key=""x"";sf;bs)",
+            @"The component '""trailer"";tr;key=""x"";sf;bs' has unsupported parameter 'bs'.")]
+        [InlineData(@"(""header"";bs;sf)",
+            @"The component '""header"";bs;sf' has unsupported parameter 'bs'.")]
         [InlineData(@"(""header"" ""@status"";req)",
             @"The component '""@status"";req' has unsupported parameter 'req'.")]
         public void ParsingThrowsSignatureInputExceptionForUnsupportedParameters(string input, string expectedMessage)

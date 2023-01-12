@@ -27,16 +27,25 @@ namespace NSign.Signatures
             /// <inheritdoc/>
             public override void Visit(HttpHeaderComponent httpHeader)
             {
-                Found &= context.HasHeader(httpHeader.BindRequest, httpHeader.ComponentName);
+                if (httpHeader.FromTrailers)
+                {
+                    Found &= context.HasTrailer(httpHeader.BindRequest, httpHeader.ComponentName);
+                }
+                else
+                {
+                    Found &= context.HasHeader(httpHeader.BindRequest, httpHeader.ComponentName);
+                }
             }
 
             /// <inheritdoc/>
             public override void Visit(HttpHeaderDictionaryStructuredComponent httpHeaderDictionary)
             {
+                bool fromTrailers = httpHeaderDictionary.FromTrailers;
+                bool bindRequest = httpHeaderDictionary.BindRequest;
+                string fieldName = httpHeaderDictionary.ComponentName;
+
                 Found &=
-                    TryGetHeaderValues(httpHeaderDictionary.BindRequest,
-                                       httpHeaderDictionary.ComponentName,
-                                       out IEnumerable<string> values) &&
+                    TryGetHeaderOrTrailerValues(fromTrailers, bindRequest, fieldName, out IEnumerable<string> values) &&
                     HasKey(values, httpHeaderDictionary.Key);
             }
 

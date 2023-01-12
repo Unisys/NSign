@@ -20,6 +20,21 @@ namespace NSign.Signatures
             private const string ParamBindRequest = ";" + Constants.ComponentParameters.Request;
 
             /// <summary>
+            /// The parameter to use to indicate that a HTTP field is bound to the original byte sequence.
+            /// </summary>
+            private const string ParamByteSequence = ";" + Constants.ComponentParameters.ByteSequence;
+
+            /// <summary>
+            /// The parameter to use to indicate that a HTTP field is to be taken from the trailers.
+            /// </summary>
+            private const string ParamFromTrailers = ";" + Constants.ComponentParameters.FromTrailers;
+
+            /// <summary>
+            /// The parameter to use to indicate that a HTTP field is to be serialized as a structured field.
+            /// </summary>
+            private const string ParamStructuredField = ";" + Constants.ComponentParameters.StructuredField;
+
+            /// <summary>
             /// The StringBuilder which builds the full signature input to be used.
             /// </summary>
             private readonly StringBuilder signatureInput = new StringBuilder();
@@ -45,11 +60,20 @@ namespace NSign.Signatures
             /// <inheritdoc/>
             public override void Visit(HttpHeaderComponent httpHeader)
             {
+                bool fromTrailers = httpHeader.FromTrailers;
                 bool bindRequest = httpHeader.BindRequest;
+                string fieldName = httpHeader.ComponentName;
 
-                if (TryGetHeaderValues(bindRequest, httpHeader.ComponentName, out IEnumerable<string> values))
+                if (TryGetHeaderOrTrailerValues(fromTrailers, bindRequest, fieldName, out IEnumerable<string> values))
                 {
-                    AddInput(httpHeader, String.Join(", ", values));
+                    if (httpHeader.UseByteSequence)
+                    {
+                        AddByteSequenceInput(httpHeader, values);
+                    }
+                    else
+                    {
+                        AddInput(httpHeader, String.Join(", ", values));
+                    }
                 }
                 else
                 {
@@ -60,9 +84,11 @@ namespace NSign.Signatures
             /// <inheritdoc/>
             public override void Visit(HttpHeaderDictionaryStructuredComponent httpHeaderDictionary)
             {
+                bool fromTrailers = httpHeaderDictionary.FromTrailers;
                 bool bindRequest = httpHeaderDictionary.BindRequest;
+                string fieldName = httpHeaderDictionary.ComponentName;
 
-                if (TryGetHeaderValues(bindRequest, httpHeaderDictionary.ComponentName, out IEnumerable<string> values) &&
+                if (TryGetHeaderOrTrailerValues(fromTrailers, bindRequest, fieldName, out IEnumerable<string> values) &&
                     values.TryGetStructuredDictionaryValue(httpHeaderDictionary.Key, out ParsedItem? lastValue))
                 {
                     Debug.Assert(lastValue.HasValue, "lastValue must have a value.");
@@ -79,9 +105,11 @@ namespace NSign.Signatures
             /// <inheritdoc/>
             public override void Visit(HttpHeaderStructuredFieldComponent httpHeaderStructuredField)
             {
+                bool fromTrailers = httpHeaderStructuredField.FromTrailers;
                 bool bindRequest = httpHeaderStructuredField.BindRequest;
+                string fieldName = httpHeaderStructuredField.ComponentName;
 
-                if (TryGetHeaderValues(bindRequest, httpHeaderStructuredField.ComponentName, out IEnumerable<string> values) &&
+                if (TryGetHeaderOrTrailerValues(fromTrailers, bindRequest, fieldName, out IEnumerable<string> values) &&
                     values.TryParseStructuredFieldValue(out StructuredFieldValue structuredValue))
                 {
                     AddInput(httpHeaderStructuredField, structuredValue.Serialize());
@@ -180,7 +208,25 @@ namespace NSign.Signatures
                     }
                     else
                     {
-                        string prefix = $"\"{component.ComponentName}\"{(component.BindRequest ? ParamBindRequest : "")}";
+                        string prefix = $"\"{component.ComponentName}\"";
+
+                        if (component.BindRequest)
+                        {
+                            prefix += ParamBindRequest;
+                        }
+
+                        if (component is HttpHeaderComponent headerComponent)
+                        {
+                            if (headerComponent.UseByteSequence)
+                            {
+                                prefix += ParamByteSequence;
+                            }
+
+                            if (headerComponent.FromTrailers)
+                            {
+                                prefix += ParamFromTrailers;
+                            }
+                        }
 
                         if (component is ISignatureComponentWithKey componentWithKey)
                         {
@@ -192,7 +238,7 @@ namespace NSign.Signatures
                         }
                         else if (component is HttpHeaderStructuredFieldComponent)
                         {
-                            sb.Append($"{prefix};sf");
+                            sb.Append($"{prefix}{ParamStructuredField}");
                         }
                         else
                         {
@@ -228,6 +274,11 @@ namespace NSign.Signatures
                     sb.Append($";{Constants.SignatureParams.KeyId}=\"{signatureParamsComponent.KeyId}\"");
                 }
 
+                if (null != signatureParamsComponent.Tag)
+                {
+                    sb.Append($";{Constants.SignatureParams.Tag}=\"{signatureParamsComponent.Tag}\"");
+                }
+
                 SignatureParamsValue = sb.ToString();
                 AddInput(signatureParamsComponent, SignatureParamsValue);
             }
@@ -247,9 +298,17 @@ namespace NSign.Signatures
                 {
                     string suffix = component.BindRequest ? ParamBindRequest : String.Empty;
 
-                    if (component is HttpHeaderStructuredFieldComponent)
+                    if (component is HttpHeaderComponent headerComponent)
                     {
-                        suffix += ";sf";
+                        if (headerComponent.FromTrailers)
+                        {
+                            suffix += ParamFromTrailers;
+                        }
+
+                        if (component is HttpHeaderStructuredFieldComponent)
+                        {
+                            suffix += ParamStructuredField;
+                        }
                     }
 
                     AddInput($"\"{component.ComponentName}\"{suffix}", value);
@@ -274,7 +333,15 @@ namespace NSign.Signatures
                 if (null == component.OriginalIdentifier)
                 {
                     string suffix = component.BindRequest ? ParamBindRequest : String.Empty;
-                    AddInput($"\"{component.ComponentName}\"{suffix};{Constants.ComponentParameters.Key}=\"{component.Key}\"", value);
+
+                    if (component is HttpHeaderComponent headerComponent && headerComponent.FromTrailers)
+                    {
+                        suffix += ParamFromTrailers;
+                    }
+
+                    AddInput(
+                        $"\"{component.ComponentName}\"{suffix};{Constants.ComponentParameters.Key}=\"{component.Key}\"",
+                        value);
                 }
                 else
                 {
@@ -305,6 +372,52 @@ namespace NSign.Signatures
             }
 
             /// <summary>
+            /// Adds a line to the signature input for the given HTTP field with byte-sequence encoding.
+            /// </summary>
+            /// <param name="component">
+            /// The <see cref="HttpHeaderComponent"/> for which to add the values as byte sequences.
+            /// </param>
+            /// <param name="values">
+            /// An <see cref="IEnumerable{T}"/> of string values representing the HTTP field's values.
+            /// </param>
+            private void AddByteSequenceInput(HttpHeaderComponent component, IEnumerable<string> values)
+            {
+                // Build the byte sequence list for the value of the input.
+                StringBuilder builder = new StringBuilder();
+                foreach (string value in values)
+                {
+                    if (builder.Length > 0)
+                    {
+                        builder.Append(", ");
+                    }
+
+                    builder.Append(GetByteSequence(value));
+                }
+
+                // Now add the encoded values to the input.
+                if (null == component.OriginalIdentifier)
+                {
+                    // The order of the parameters is relevant; it must match the order used when building the
+                    // '@signature-params' component (see BuildSignatureParamsComponentValueAndVisitComponents). If
+                    // they are not, signatures cannot correctly be validated, because input cannot be reconstruted.
+                    string suffix = component.BindRequest ? ParamBindRequest : String.Empty;
+
+                    suffix += ParamByteSequence;
+
+                    if (component.FromTrailers)
+                    {
+                        suffix += ParamFromTrailers;
+                    }
+
+                    AddInput($"\"{component.ComponentName}\"{suffix}", builder.ToString());
+                }
+                else
+                {
+                    AddInput(component.OriginalIdentifier, builder.ToString());
+                }
+            }
+
+            /// <summary>
             /// Adds a line to the signature input for the given component with the specified value.
             /// </summary>
             /// <param name="componentSpec">
@@ -321,6 +434,35 @@ namespace NSign.Signatures
                 }
 
                 signatureInput.Append($"{componentSpec}: {value}");
+            }
+
+            /// <summary>
+            /// Get the ASCII byte-sequence for the given input string.
+            /// </summary>
+            /// <param name="value">
+            /// The value to encode as byte-sequence.
+            /// </param>
+            /// <returns>
+            /// A string value that represents the byte-sequence encoded value.
+            /// </returns>
+            private static string GetByteSequence(string value)
+            {
+                value = value.Trim();
+                int byteLen = Encoding.ASCII.GetByteCount(value);
+
+                if (byteLen <= 1024)
+                {
+                    Span<byte> buffer = stackalloc byte[byteLen];
+                    byteLen = Encoding.ASCII.GetBytes(value, buffer);
+
+                    return ((ReadOnlySpan<byte>)buffer).SerializeAsString();
+                }
+                else
+                {
+                    ReadOnlyMemory<byte> buffer = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes(value));
+
+                    return buffer.SerializeAsString();
+                }
             }
 
             #endregion

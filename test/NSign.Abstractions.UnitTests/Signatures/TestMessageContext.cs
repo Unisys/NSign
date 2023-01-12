@@ -18,7 +18,9 @@ namespace NSign.Signatures
 
         internal Func<DerivedComponent, string?>? OnGetDerivedComponentValue { get; set; }
         internal Func<string, IEnumerable<string>>? OnGetHeaderValues { get; set; }
+        internal Func<string, IEnumerable<string>>? OnGetTrailerValues { get; set; }
         internal Func<string, IEnumerable<string>>? OnGetRequestHeaderValues { get; set; }
+        internal Func<string, IEnumerable<string>>? OnGetRequestTrailerValues { get; set; }
         internal Func<string, IEnumerable<string>>? OnGetQueryParamValues { get; set; }
 
         public override bool HasResponse => HasResponseValue;
@@ -40,6 +42,11 @@ namespace NSign.Signatures
             return OnGetHeaderValues!(headerName);
         }
 
+        public override IEnumerable<string> GetTrailerValues(string fieldName)
+        {
+            return OnGetTrailerValues!(fieldName);
+        }
+
         public override IEnumerable<string> GetQueryParamValues(string paramName)
         {
             return OnGetQueryParamValues!(paramName);
@@ -48,6 +55,11 @@ namespace NSign.Signatures
         public override IEnumerable<string> GetRequestHeaderValues(string headerName)
         {
             return OnGetRequestHeaderValues!(headerName);
+        }
+
+        public override IEnumerable<string> GetRequestTrailerValues(string fieldName)
+        {
+            return OnGetRequestTrailerValues!(fieldName);
         }
     }
 }

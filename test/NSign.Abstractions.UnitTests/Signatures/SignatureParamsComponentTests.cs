@@ -60,7 +60,8 @@ namespace NSign.Signatures
                 .WithCreatedNow()
                 .WithExpires(DateTimeOffset.UtcNow.AddSeconds(30))
                 .WithKeyId("MyKeyId")
-                .WithNonce("my-nonce");
+                .WithNonce("my-nonce")
+                .WithTag("my-tag");
 
             Assert.Collection(signatureParams.Components,
               (c) => Assert.Equal(SignatureComponent.Authority, c),
@@ -74,6 +75,7 @@ namespace NSign.Signatures
             Assert.InRange(signatureParams.Expires!.Value, DateTimeOffset.UtcNow.AddSeconds(29), DateTimeOffset.UtcNow.AddSeconds(31));
             Assert.Equal("MyKeyId", signatureParams.KeyId);
             Assert.Equal("my-nonce", signatureParams.Nonce);
+            Assert.Equal("my-tag", signatureParams.Tag);
 
             // More tests.
             signatureParams

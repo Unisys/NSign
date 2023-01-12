@@ -24,6 +24,7 @@ namespace NSign.Signatures
                 SignatureAlgorithm.RsaPkcs15Sha256 => Constants.SignatureAlgorithms.RsaPkcs15Sha256,
                 SignatureAlgorithm.HmacSha256 => Constants.SignatureAlgorithms.HmacSha256,
                 SignatureAlgorithm.EcdsaP256Sha256 => Constants.SignatureAlgorithms.EcdsaP256Sha256,
+                SignatureAlgorithm.EcdsaP384Sha384 => Constants.SignatureAlgorithms.EcdsaP384Sha384,
 
                 _ => throw new NotSupportedException($"Unsupported signature algorithm: {algorithm}"),
             };
@@ -46,6 +47,7 @@ namespace NSign.Signatures
                 Constants.SignatureAlgorithms.RsaPkcs15Sha256 => SignatureAlgorithm.RsaPkcs15Sha256,
                 Constants.SignatureAlgorithms.HmacSha256 => SignatureAlgorithm.HmacSha256,
                 Constants.SignatureAlgorithms.EcdsaP256Sha256 => SignatureAlgorithm.EcdsaP256Sha256,
+                Constants.SignatureAlgorithms.EcdsaP384Sha384 => SignatureAlgorithm.EcdsaP384Sha384,
 
                 _ => throw new NotSupportedException($"Unsupported signature algorithm: '{algorithm}'"),
             };
