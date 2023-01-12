@@ -137,6 +137,80 @@ namespace NSign.Signatures
             };
         }
 
+        [Fact]
+        public void HasSignatureComponentChecksTrailers()
+        {
+            context.HasResponseValue = true;
+            context.OnGetTrailerValues = (headerName) =>
+            {
+                return headerName switch
+                {
+                    "x-header" => new string[] { "text", },
+                    "x-header-empty" => new string[] { "", },
+                    "x-dict" => new string[] { "a=b, c", },
+                    "x-dict-malformed" => new string[] { "#", },
+                    _ => Array.Empty<string>(),
+                };
+            };
+            context.OnGetRequestTrailerValues = (headerName) =>
+            {
+                return headerName switch
+                {
+                    "y-header" => new string[] { "text", },
+                    "y-header-empty" => new string[] { "", },
+                    "y-dict" => new string[] { "a=b, c", },
+                    "y-dict-malformed" => new string[] { "#", },
+                    _ => Array.Empty<string>(),
+                };
+            };
+
+            Assert.True(context.HasSignatureComponent(
+                new HttpHeaderComponent("x-header", bindRequest: false, useByteSequence: false, fromTrailers: true)));
+            Assert.True(context.HasSignatureComponent(
+                new HttpHeaderComponent("x-header-empty", bindRequest: false, useByteSequence: false, fromTrailers: true)));
+            Assert.False(context.HasSignatureComponent(
+                new HttpHeaderComponent("x-missing", bindRequest: false, useByteSequence: false, fromTrailers: true)));
+
+            Assert.True(context.HasSignatureComponent(
+                new HttpHeaderDictionaryStructuredComponent("x-dict", "a", bindRequest: false, fromTrailers: true)));
+            Assert.True(context.HasSignatureComponent(
+                new HttpHeaderDictionaryStructuredComponent("x-dict", "c", bindRequest: false, fromTrailers: true)));
+            Assert.False(context.HasSignatureComponent(
+                new HttpHeaderDictionaryStructuredComponent("x-dict", "x", bindRequest: false, fromTrailers: true)));
+            Assert.False(context.HasSignatureComponent(
+                new HttpHeaderDictionaryStructuredComponent("x-missing-dict", "x", bindRequest: false, fromTrailers: true)));
+            Assert.False(context.HasSignatureComponent(
+                new HttpHeaderDictionaryStructuredComponent("x-dict-malformed", "x", bindRequest: false, fromTrailers: true)));
+
+            Assert.True(context.HasSignatureComponent(
+                new HttpHeaderStructuredFieldComponent("x-dict", bindRequest: false, fromTrailers: true)));
+            Assert.False(context.HasSignatureComponent(
+                new HttpHeaderStructuredFieldComponent("x-missing-dict", bindRequest: false, fromTrailers: true)));
+
+            Assert.True(context.HasSignatureComponent(
+                new HttpHeaderComponent("y-header", bindRequest: true, useByteSequence: false, fromTrailers: true)));
+            Assert.True(context.HasSignatureComponent(
+                new HttpHeaderComponent("y-header-empty", bindRequest: true, useByteSequence: false, fromTrailers: true)));
+            Assert.False(context.HasSignatureComponent(
+                new HttpHeaderComponent("y-missing", bindRequest: true, useByteSequence: false, fromTrailers: true)));
+
+            Assert.True(context.HasSignatureComponent(
+                new HttpHeaderDictionaryStructuredComponent("y-dict", "a", bindRequest: true, fromTrailers: true)));
+            Assert.True(context.HasSignatureComponent(
+                new HttpHeaderDictionaryStructuredComponent("y-dict", "c", bindRequest: true, fromTrailers: true)));
+            Assert.False(context.HasSignatureComponent(
+                new HttpHeaderDictionaryStructuredComponent("y-dict", "x", bindRequest: true, fromTrailers: true)));
+            Assert.False(context.HasSignatureComponent(
+                new HttpHeaderDictionaryStructuredComponent("y-missing-dict", "x", bindRequest: true, fromTrailers: true)));
+            Assert.False(context.HasSignatureComponent(
+                new HttpHeaderDictionaryStructuredComponent("y-dict-malformed", "x", bindRequest: true, fromTrailers: true)));
+
+            Assert.True(context.HasSignatureComponent(
+                new HttpHeaderStructuredFieldComponent("y-dict", bindRequest: true, fromTrailers: true)));
+            Assert.False(context.HasSignatureComponent(
+                new HttpHeaderStructuredFieldComponent("y-missing-dict", bindRequest: true, fromTrailers: true)));
+        }
+
         [Theory]
         [InlineData("@signature-params")]
         [InlineData("@query-param")]

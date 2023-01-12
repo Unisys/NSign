@@ -105,6 +105,18 @@ namespace NSign.Client
         }
 
         /// <inheritdoc/>
+        public override IEnumerable<string> GetTrailerValues(string fieldName)
+        {
+            throw new NotSupportedException("Trailers in signatures are not supported for request messages.");
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<string> GetRequestTrailerValues(string fieldName)
+        {
+            throw new NotSupportedException("Request-based trailers in signatures are not supported.");
+        }
+
+        /// <inheritdoc/>
         public override sealed IEnumerable<string> GetQueryParamValues(string paramName)
         {
             string[] values = queryParams.Value.GetValues(paramName);

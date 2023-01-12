@@ -173,6 +173,20 @@ namespace NSign.Client
             }
         }
 
+        [Fact]
+        public void GetTrailerValuesThrows()
+        {
+            NotSupportedException ex = Assert.Throws<NotSupportedException>(() => context.GetTrailerValues("blah"));
+            Assert.Equal("Trailers in signatures are not supported for request messages.", ex.Message);
+        }
+
+        [Fact]
+        public void GetRequestTrailerValuesThrows()
+        {
+            NotSupportedException ex = Assert.Throws<NotSupportedException>(() => context.GetRequestTrailerValues("blah"));
+            Assert.Equal("Request-based trailers in signatures are not supported.", ex.Message);
+        }
+
         [Theory]
         [InlineData("not-found", new string[0])]
         [InlineData("a", new string[] { "b", "bb", "B" })]

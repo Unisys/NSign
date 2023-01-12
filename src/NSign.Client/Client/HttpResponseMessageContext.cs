@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using NSign.Signatures;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
@@ -54,6 +55,30 @@ namespace NSign.Client
 
                 _ => base.GetDerivedComponentValue(component),
             };
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<string> GetTrailerValues(string fieldName)
+        {
+            if (Response.TrailingHeaders.TryGetValues(fieldName, out IEnumerable<string> values))
+            {
+                return values;
+            }
+
+            return Array.Empty<string>();
+        }
+
+        /// <inheritdoc/>
+        public override bool HasTrailer(bool bindRequest, string fieldName)
+        {
+            if (bindRequest)
+            {
+                throw new NotSupportedException("Request-based trailers in signatures are not supported.");
+            }
+            else
+            {
+                return Response.TrailingHeaders.TryGetValues(fieldName, out _);
+            }
         }
 
         #endregion

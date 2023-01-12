@@ -122,6 +122,11 @@
             /// The name of the 'bs' parameter.
             /// </summary>
             public const string ByteSequence = "bs";
+
+            /// <summary>
+            /// The name of the 'tr' parameter.
+            /// </summary>
+            public const string FromTrailers = "tr";
         }
 
         /// <summary>

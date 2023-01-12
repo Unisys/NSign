@@ -202,6 +202,31 @@ namespace NSign.Signatures
         public abstract IEnumerable<string> GetRequestHeaderValues(string headerName);
 
         /// <summary>
+        /// Gets the HTTP trailer values for the field with the given <paramref name="fieldName"/> from the message.
+        /// </summary>
+        /// <param name="fieldName">
+        /// The name of the field to retrieve.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of <see cref="String"/> that can be used to enumerate the field values.
+        /// If the field does not exist in the trailer, the enumerable is empty.
+        /// </returns>
+        public abstract IEnumerable<string> GetTrailerValues(string fieldName);
+
+        /// <summary>
+        /// Gets the HTTP trailer values for the field with the given <paramref name="fieldName"/> from the request
+        /// message.
+        /// </summary>
+        /// <param name="fieldName">
+        /// The name of the field to retrieve.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of <see cref="String"/> that can be used to enumerate the request field
+        /// values. If the field does not exist, the enumerable is empty.
+        /// </returns>
+        public abstract IEnumerable<string> GetRequestTrailerValues(string fieldName);
+
+        /// <summary>
         /// Gets the value of a simple derived components. Structured dictionary value components are not supported.
         /// </summary>
         /// <param name="component">
@@ -253,6 +278,31 @@ namespace NSign.Signatures
             else
             {
                 return GetHeaderValues(headerName).Any();
+            }
+        }
+
+        /// <summary>
+        /// Checks if a trailer with the given <paramref name="fieldName"/> is available in the message.
+        /// </summary>
+        /// <param name="bindRequest">
+        /// Whether or not the field's existence should checked on the request message (as opposed to the message from
+        /// the context).
+        /// </param>
+        /// <param name="fieldName">
+        /// The name of the field to check in the trailers.
+        /// </param>
+        /// <returns>
+        /// True if the trailer exists, or false otherwise.
+        /// </returns>
+        public virtual bool HasTrailer(bool bindRequest, string fieldName)
+        {
+            if (bindRequest)
+            {
+                return GetRequestTrailerValues(fieldName).Any();
+            }
+            else
+            {
+                return GetTrailerValues(fieldName).Any();
             }
         }
 

@@ -53,6 +53,43 @@ namespace NSign.Signatures
             public abstract void Visit(QueryParamComponent queryParam);
 
             /// <summary>
+            /// Tries to get the values of the given header or trailer.
+            /// </summary>
+            /// <param name="fromTrailers">
+            /// A flag which indicates whether to get the value from a trailer field.
+            /// </param>
+            /// <param name="bindRequest">
+            /// A flag which indicates whether the header or trailer values should be taken from the request message
+            /// when the context is for a response message.
+            /// </param>
+            /// <param name="fieldName">
+            /// The name of the header or trailer field to get the values from.
+            /// </param>
+            /// <param name="values">
+            /// If the header or trailer exists, is updated with the values of the field.
+            /// </param>
+            /// <returns>
+            /// True if the header or trailer exists, or false otherwise.
+            /// </returns>
+            protected bool TryGetHeaderOrTrailerValues(
+                bool fromTrailers,
+                bool bindRequest,
+                string fieldName,
+                out IEnumerable<string> values)
+            {
+                if (fromTrailers)
+                {
+                    return TryGetTrailerValues(bindRequest, fieldName, out values);
+                }
+                else
+                {
+                    return TryGetHeaderValues(bindRequest, fieldName, out values);
+                }
+            }
+
+            #region Headers
+
+            /// <summary>
             /// Tries to get the values of the given header.
             /// </summary>
             /// <param name="bindRequest">
@@ -115,6 +152,76 @@ namespace NSign.Signatures
                 values = context.GetRequestHeaderValues(headerName);
                 return values.Any();
             }
+
+            #endregion
+
+            #region Trailers
+
+            /// <summary>
+            /// Tries to get the values of the given trailer field.
+            /// </summary>
+            /// <param name="bindRequest">
+            /// A flag which indicates whether or not the trailer values should be taken from the request message when
+            /// the context is for a response message.
+            /// </param>
+            /// <param name="fieldName">
+            /// The name of the trailer field to get the values for.
+            /// </param>
+            /// <param name="values">
+            /// If the trailer exists, is updated with the values of the trailer.
+            /// </param>
+            /// <returns>
+            /// True if the trailer exists, or false otherwise.
+            /// </returns>
+            protected bool TryGetTrailerValues(bool bindRequest, string fieldName, out IEnumerable<string> values)
+            {
+                if (bindRequest)
+                {
+                    return TryGetRequestTrailerValues(fieldName, out values);
+                }
+                else
+                {
+                    return TryGetTrailerValues(fieldName, out values);
+                }
+            }
+
+            /// <summary>
+            /// Tries to get the message trailer values for the trailer with the given <paramref name="fieldName"/>.
+            /// </summary>
+            /// <param name="fieldName">
+            /// The name of the trailer to get the values for.
+            /// </param>
+            /// <param name="values">
+            /// If the trailer exists, is updated with the values of the trailer.
+            /// </param>
+            /// <returns>
+            /// True if the trailer exists, or false otherwise.
+            /// </returns>
+            protected bool TryGetTrailerValues(string fieldName, out IEnumerable<string> values)
+            {
+                values = context.GetTrailerValues(fieldName);
+                return values.Any();
+            }
+
+            /// <summary>
+            /// Tries to get the request message trailer values for the trailer with the given <paramref name="fieldName"/>.
+            /// </summary>
+            /// <param name="fieldName">
+            /// The name of the trailer to get the values for.
+            /// </param>
+            /// <param name="values">
+            /// If the trailer exists, is updated with the values of the trailer.
+            /// </param>
+            /// <returns>
+            /// True if the trailer exists, or false otherwise.
+            /// </returns>
+            protected bool TryGetRequestTrailerValues(string fieldName, out IEnumerable<string> values)
+            {
+                values = context.GetRequestTrailerValues(fieldName);
+                return values.Any();
+            }
+
+            #endregion
         }
     }
 }

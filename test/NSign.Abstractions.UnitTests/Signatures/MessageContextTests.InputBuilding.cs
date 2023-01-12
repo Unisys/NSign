@@ -12,8 +12,12 @@ namespace NSign.Signatures
         [Fact]
         public void GetSignatureInputThrowsForMissingComponents()
         {
-            context.OnGetHeaderValues = context.OnGetRequestHeaderValues = context.OnGetQueryParamValues =
-                (headerName) => Array.Empty<string>();
+            context.OnGetHeaderValues =
+                context.OnGetRequestHeaderValues =
+                context.OnGetQueryParamValues =
+                context.OnGetTrailerValues =
+                context.OnGetRequestTrailerValues =
+                (name) => Array.Empty<string>();
             context.HasResponseValue = true;
 
             SignatureComponentMissingException ex;
@@ -34,6 +38,18 @@ namespace NSign.Signatures
             ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
             Assert.Equal("The signature component 'my-header;sf' does not exist but is required.", ex.Message);
 
+            spec = MakeSignatureInput(new HttpHeaderComponent("my-trailer", bindRequest: false, useByteSequence: false, fromTrailers: true));
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            Assert.Equal("The signature component 'my-trailer;tr' does not exist but is required.", ex.Message);
+
+            spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("my-trailer", "a", bindRequest: false, fromTrailers: true));
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            Assert.Equal("The signature component 'my-trailer;tr;key=\"a\"' does not exist but is required.", ex.Message);
+
+            spec = MakeSignatureInput(new HttpHeaderStructuredFieldComponent("my-trailer", bindRequest: false, fromTrailers: true));
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            Assert.Equal("The signature component 'my-trailer;tr;sf' does not exist but is required.", ex.Message);
+
             spec = MakeSignatureInput(new QueryParamComponent("blotz"));
             ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
             Assert.Equal("The signature component '@query-param;name=\"blotz\"' does not exist but is required.", ex.Message);
@@ -41,25 +57,39 @@ namespace NSign.Signatures
             // With bindRequest: true
             spec = MakeSignatureInput(new HttpHeaderComponent("blah", bindRequest: true));
             ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
-            Assert.Equal("The signature component 'blah' does not exist but is required.", ex.Message);
+            Assert.Equal("The signature component 'blah;req' does not exist but is required.", ex.Message);
 
             spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("my-header", "a", bindRequest: true));
             ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
-            Assert.Equal("The signature component 'my-header;key=\"a\"' does not exist but is required.", ex.Message);
+            Assert.Equal("The signature component 'my-header;req;key=\"a\"' does not exist but is required.", ex.Message);
 
             spec = MakeSignatureInput(new HttpHeaderStructuredFieldComponent("my-header", bindRequest: true));
             ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
-            Assert.Equal("The signature component 'my-header;sf' does not exist but is required.", ex.Message);
+            Assert.Equal("The signature component 'my-header;req;sf' does not exist but is required.", ex.Message);
+
+            spec = MakeSignatureInput(new HttpHeaderComponent("x-trailer", bindRequest: true, useByteSequence: false, fromTrailers: true));
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            Assert.Equal("The signature component 'x-trailer;req;tr' does not exist but is required.", ex.Message);
+
+            spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("x-trailer", "a", bindRequest: true, fromTrailers: true));
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            Assert.Equal("The signature component 'x-trailer;req;tr;key=\"a\"' does not exist but is required.", ex.Message);
+
+            spec = MakeSignatureInput(new HttpHeaderStructuredFieldComponent("x-trailer", bindRequest: true, fromTrailers: true));
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            Assert.Equal("The signature component 'x-trailer;req;tr;sf' does not exist but is required.", ex.Message);
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void GetSignatureInputGetsCorrectHttpHeaders(bool bindRequest)
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void GetSignatureInputGetsCorrectHttpHeadersOrTrailers(bool bindRequest, bool fromTrailers)
         {
-            Func<string, IEnumerable<string>> getHeaderValues = (headerName) =>
+            Func<string, IEnumerable<string>> getValues = (fieldName) =>
             {
-                return headerName switch
+                return fieldName switch
                 {
                     "my-header" => new string[] { "blah", },
                     "my-generic-dict" => new string[] { "a=b, b=c, b=z, c" },
@@ -68,49 +98,68 @@ namespace NSign.Signatures
             };
             if (bindRequest)
             {
-                context.OnGetRequestHeaderValues = getHeaderValues;
+                if (fromTrailers)
+                {
+                    context.OnGetRequestTrailerValues = getValues;
+                }
+                else
+                {
+                    context.OnGetRequestHeaderValues = getValues;
+                }
             }
             else
             {
-                context.OnGetHeaderValues = getHeaderValues;
+                if (fromTrailers)
+                {
+                    context.OnGetTrailerValues = getValues;
+                }
+                else
+                {
+                    context.OnGetHeaderValues = getValues;
+                }
             }
+
             context.HasResponseValue = bindRequest;
             string suffix = bindRequest ? ";req" : String.Empty;
+            if (fromTrailers)
+            {
+                suffix += ";tr";
+            }
 
             SignatureInputSpec spec;
             string inputStr;
             ReadOnlyMemory<byte> input;
 
             // Simple HTTP header.
-            spec = MakeSignatureInput(new HttpHeaderComponent("my-Header", bindRequest));
+            spec = MakeSignatureInput(new HttpHeaderComponent("my-Header", bindRequest, useByteSequence: false, fromTrailers));
             input = context.GetSignatureInput(spec, out inputStr);
             Assert.Equal($"(\"my-header\"{suffix})", inputStr);
             Assert.Equal($"\"my-header\"{suffix}: blah\n\"@signature-params\": (\"my-header\"{suffix})",
                 Encoding.ASCII.GetString(input.Span));
 
             // Simple HTTP header that happens to be dictionary structured.
-            spec = MakeSignatureInput(new HttpHeaderComponent("my-generic-dict", bindRequest));
+            spec = MakeSignatureInput(new HttpHeaderComponent("my-generic-dict", bindRequest, useByteSequence: false, fromTrailers));
             input = context.GetSignatureInput(spec, out inputStr);
             Assert.Equal($"(\"my-generic-dict\"{suffix})", inputStr);
             Assert.Equal($"\"my-generic-dict\"{suffix}: a=b, b=c, b=z, c\n\"@signature-params\": (\"my-generic-dict\"{suffix})",
                 Encoding.ASCII.GetString(input.Span));
 
             // Dictionary-structured HTTP header.
-            spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("my-generic-dict", "b", bindRequest));
+            spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("my-generic-dict", "b", bindRequest, fromTrailers));
             input = context.GetSignatureInput(spec, out inputStr);
             Assert.Equal($"(\"my-generic-dict\"{suffix};key=\"b\")", inputStr);
             Assert.Equal($"\"my-generic-dict\"{suffix};key=\"b\": z\n\"@signature-params\": (\"my-generic-dict\"{suffix};key=\"b\")",
                 Encoding.ASCII.GetString(input.Span));
 
             // Dictionary-structured HTTP header with implicit 'true' value.
-            spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("my-generic-dict", "c", bindRequest));
+            spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("my-generic-dict", "c", bindRequest, fromTrailers));
             input = context.GetSignatureInput(spec, out inputStr);
             Assert.Equal($"(\"my-generic-dict\"{suffix};key=\"c\")", inputStr);
             Assert.Equal($"\"my-generic-dict\"{suffix};key=\"c\": ?1\n\"@signature-params\": (\"my-generic-dict\"{suffix};key=\"c\")",
                 Encoding.ASCII.GetString(input.Span));
 
             // Structured field HTTP header.
-            spec = MakeSignatureInput(new HttpHeaderStructuredFieldComponent("my-generic-dict", bindRequest));
+            spec = MakeSignatureInput(new HttpHeaderStructuredFieldComponent("my-generic-dict", bindRequest, fromTrailers));
             input = context.GetSignatureInput(spec, out inputStr);
             Assert.Equal($"(\"my-generic-dict\"{suffix};sf)", inputStr);
             Assert.Equal($"\"my-generic-dict\"{suffix};sf: a=b, b=z, c\n\"@signature-params\": (\"my-generic-dict\"{suffix};sf)",
@@ -382,56 +431,90 @@ namespace NSign.Signatures
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void GetInputSignatureUsesByteSequenceEncodingCorrectly(bool bindRequest)
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void GetInputSignatureUsesByteSequenceEncodingCorrectly(bool bindRequest, bool fromTrailers)
         {
             string suffix = bindRequest ? ";req" : String.Empty;
             string VeryLongValue = new String('*', 1025);
 
-            context.HasResponseValue = bindRequest;
-            context.OnGetHeaderValues = context.OnGetRequestHeaderValues = (headerName) =>
+            suffix += ";bs";
+
+            if (fromTrailers)
             {
-                return headerName switch
+                suffix += ";tr";
+            }
+
+            IEnumerable<string> GetHeaderOrTrailerValues(string fieldName)
+            {
+                return fieldName switch
                 {
                     "xyz" => new string[] { "  a = b   ", "", "c=d, e=f", VeryLongValue, },
                     _ => throw new Exception("Unexpected"),
                 };
-            };
+            }
+
+            context.HasResponseValue = bindRequest;
+            if (fromTrailers)
+            {
+                context.OnGetTrailerValues = context.OnGetRequestTrailerValues = GetHeaderOrTrailerValues;
+            }
+            else
+            {
+                context.OnGetHeaderValues = context.OnGetRequestHeaderValues = GetHeaderOrTrailerValues;
+            }
 
             SignatureInputSpec spec = new SignatureInputSpec("unitTest");
             spec.SignatureParameters
-                .AddComponent(new HttpHeaderComponent("xyz", bindRequest, useByteSequence: true, fromTrailers: false))
+                .AddComponent(new HttpHeaderComponent("xyz", bindRequest, useByteSequence: true, fromTrailers))
                 ;
 
             ReadOnlyMemory<byte> input = context.GetSignatureInput(spec, out string outputSigParams);
 
-            Assert.Equal($"(\"xyz\"{suffix};bs)", outputSigParams);
+            Assert.Equal($"(\"xyz\"{suffix})", outputSigParams);
             Assert.Equal(
-                $"\"xyz\"{suffix};bs: :YSA9IGI=:, ::, :Yz1kLCBlPWY=:, :{Convert.ToBase64String(Encoding.ASCII.GetBytes(VeryLongValue))}:\n" +
+                $"\"xyz\"{suffix}: :YSA9IGI=:, ::, :Yz1kLCBlPWY=:, :{Convert.ToBase64String(Encoding.ASCII.GetBytes(VeryLongValue))}:\n" +
                 $"\"@signature-params\": {outputSigParams}", Encoding.ASCII.GetString(input.Span));
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void GetInputSignatureUsesByteSequenceEncodingCorrectlyWithOriginalIdentifiers(bool bindRequest)
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void GetInputSignatureUsesByteSequenceEncodingCorrectlyWithOriginalIdentifiers(bool bindRequest, bool fromTrailers)
         {
             string suffix = bindRequest ? ";req" : String.Empty;
 
-            context.HasResponseValue = bindRequest;
-            context.OnGetHeaderValues = context.OnGetRequestHeaderValues = (headerName) =>
+            if (fromTrailers)
             {
-                return headerName switch
+                suffix += ";tr";
+            }
+
+            static IEnumerable<string> GetHeaderOrTrailerValues(string fieldName)
+            {
+                return fieldName switch
                 {
-                    "xyz" => new string[] { "  a = b   ", "c=d, e=f", },
+                    "xyz" => new string[] { "c=d, e=f", "  a = b   ", },
                     _ => throw new Exception("Unexpected"),
                 };
-            };
+            }
+
+            context.HasResponseValue = bindRequest;
+            if (fromTrailers)
+            {
+                context.OnGetTrailerValues = context.OnGetRequestTrailerValues = GetHeaderOrTrailerValues;
+            }
+            else
+            {
+                context.OnGetHeaderValues = context.OnGetRequestHeaderValues = GetHeaderOrTrailerValues;
+            }
 
             SignatureInputSpec spec = new SignatureInputSpec("unitTest");
             spec.SignatureParameters
-                .AddComponent(new HttpHeaderComponent("xyz", bindRequest, useByteSequence: true, fromTrailers: false)
+                .AddComponent(new HttpHeaderComponent("xyz", bindRequest, useByteSequence: true, fromTrailers)
                 {
                     // Introduce a mistake on purpose, so we can verify that the original identifier is passed.
                     OriginalIdentifier = $"\"test-xyz\";bs{suffix}",
@@ -442,7 +525,7 @@ namespace NSign.Signatures
 
             Assert.Equal($"(\"test-xyz\";bs{suffix})", outputSigParams);
             Assert.Equal(
-                $"\"test-xyz\";bs{suffix}: :YSA9IGI=:, :Yz1kLCBlPWY=:\n" +
+                $"\"test-xyz\";bs{suffix}: :Yz1kLCBlPWY=:, :YSA9IGI=:\n" +
                 $"\"@signature-params\": {outputSigParams}", Encoding.ASCII.GetString(input.Span));
         }
 

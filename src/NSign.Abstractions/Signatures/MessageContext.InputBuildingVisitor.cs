@@ -25,6 +25,16 @@ namespace NSign.Signatures
             private const string ParamByteSequence = ";" + Constants.ComponentParameters.ByteSequence;
 
             /// <summary>
+            /// The parameter to use to indicate that a HTTP field is to be taken from the trailers.
+            /// </summary>
+            private const string ParamFromTrailers = ";" + Constants.ComponentParameters.FromTrailers;
+
+            /// <summary>
+            /// The parameter to use to indicate that a HTTP field is to be serialized as a structured field.
+            /// </summary>
+            private const string ParamStructuredField = ";" + Constants.ComponentParameters.StructuredField;
+
+            /// <summary>
             /// The StringBuilder which builds the full signature input to be used.
             /// </summary>
             private readonly StringBuilder signatureInput = new StringBuilder();
@@ -50,9 +60,11 @@ namespace NSign.Signatures
             /// <inheritdoc/>
             public override void Visit(HttpHeaderComponent httpHeader)
             {
+                bool fromTrailers = httpHeader.FromTrailers;
                 bool bindRequest = httpHeader.BindRequest;
+                string fieldName = httpHeader.ComponentName;
 
-                if (TryGetHeaderValues(bindRequest, httpHeader.ComponentName, out IEnumerable<string> values))
+                if (TryGetHeaderOrTrailerValues(fromTrailers, bindRequest, fieldName, out IEnumerable<string> values))
                 {
                     if (httpHeader.UseByteSequence)
                     {
@@ -72,9 +84,11 @@ namespace NSign.Signatures
             /// <inheritdoc/>
             public override void Visit(HttpHeaderDictionaryStructuredComponent httpHeaderDictionary)
             {
+                bool fromTrailers = httpHeaderDictionary.FromTrailers;
                 bool bindRequest = httpHeaderDictionary.BindRequest;
+                string fieldName = httpHeaderDictionary.ComponentName;
 
-                if (TryGetHeaderValues(bindRequest, httpHeaderDictionary.ComponentName, out IEnumerable<string> values) &&
+                if (TryGetHeaderOrTrailerValues(fromTrailers, bindRequest, fieldName, out IEnumerable<string> values) &&
                     values.TryGetStructuredDictionaryValue(httpHeaderDictionary.Key, out ParsedItem? lastValue))
                 {
                     Debug.Assert(lastValue.HasValue, "lastValue must have a value.");
@@ -91,9 +105,11 @@ namespace NSign.Signatures
             /// <inheritdoc/>
             public override void Visit(HttpHeaderStructuredFieldComponent httpHeaderStructuredField)
             {
+                bool fromTrailers = httpHeaderStructuredField.FromTrailers;
                 bool bindRequest = httpHeaderStructuredField.BindRequest;
+                string fieldName = httpHeaderStructuredField.ComponentName;
 
-                if (TryGetHeaderValues(bindRequest, httpHeaderStructuredField.ComponentName, out IEnumerable<string> values) &&
+                if (TryGetHeaderOrTrailerValues(fromTrailers, bindRequest, fieldName, out IEnumerable<string> values) &&
                     values.TryParseStructuredFieldValue(out StructuredFieldValue structuredValue))
                 {
                     AddInput(httpHeaderStructuredField, structuredValue.Serialize());
@@ -192,7 +208,25 @@ namespace NSign.Signatures
                     }
                     else
                     {
-                        string prefix = $"\"{component.ComponentName}\"{(component.BindRequest ? ParamBindRequest : "")}";
+                        string prefix = $"\"{component.ComponentName}\"";
+
+                        if (component.BindRequest)
+                        {
+                            prefix += ParamBindRequest;
+                        }
+
+                        if (component is HttpHeaderComponent headerComponent)
+                        {
+                            if (headerComponent.UseByteSequence)
+                            {
+                                prefix += ParamByteSequence;
+                            }
+
+                            if (headerComponent.FromTrailers)
+                            {
+                                prefix += ParamFromTrailers;
+                            }
+                        }
 
                         if (component is ISignatureComponentWithKey componentWithKey)
                         {
@@ -204,11 +238,7 @@ namespace NSign.Signatures
                         }
                         else if (component is HttpHeaderStructuredFieldComponent)
                         {
-                            sb.Append($"{prefix};sf");
-                        }
-                        else if (component is HttpHeaderComponent headerComponent && headerComponent.UseByteSequence)
-                        {
-                            sb.Append($"{prefix};bs");
+                            sb.Append($"{prefix}{ParamStructuredField}");
                         }
                         else
                         {
@@ -268,9 +298,17 @@ namespace NSign.Signatures
                 {
                     string suffix = component.BindRequest ? ParamBindRequest : String.Empty;
 
-                    if (component is HttpHeaderStructuredFieldComponent)
+                    if (component is HttpHeaderComponent headerComponent)
                     {
-                        suffix += ";sf";
+                        if (headerComponent.FromTrailers)
+                        {
+                            suffix += ParamFromTrailers;
+                        }
+
+                        if (component is HttpHeaderStructuredFieldComponent)
+                        {
+                            suffix += ParamStructuredField;
+                        }
                     }
 
                     AddInput($"\"{component.ComponentName}\"{suffix}", value);
@@ -296,7 +334,14 @@ namespace NSign.Signatures
                 {
                     string suffix = component.BindRequest ? ParamBindRequest : String.Empty;
 
-                    AddInput($"\"{component.ComponentName}\"{suffix};{Constants.ComponentParameters.Key}=\"{component.Key}\"", value);
+                    if (component is HttpHeaderComponent headerComponent && headerComponent.FromTrailers)
+                    {
+                        suffix += ParamFromTrailers;
+                    }
+
+                    AddInput(
+                        $"\"{component.ComponentName}\"{suffix};{Constants.ComponentParameters.Key}=\"{component.Key}\"",
+                        value);
                 }
                 else
                 {
@@ -358,6 +403,11 @@ namespace NSign.Signatures
                     string suffix = component.BindRequest ? ParamBindRequest : String.Empty;
 
                     suffix += ParamByteSequence;
+
+                    if (component.FromTrailers)
+                    {
+                        suffix += ParamFromTrailers;
+                    }
 
                     AddInput($"\"{component.ComponentName}\"{suffix}", builder.ToString());
                 }

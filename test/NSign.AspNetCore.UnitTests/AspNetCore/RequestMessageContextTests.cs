@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Moq;
@@ -16,6 +17,8 @@ namespace NSign.AspNetCore
     public sealed class RequestMessageContextTests
     {
         private readonly DefaultHttpContext httpContext = new DefaultHttpContext();
+        private readonly Mock<IHttpRequestTrailersFeature> mockRequestTrailers =
+            new Mock<IHttpRequestTrailersFeature>(MockBehavior.Strict);
         private readonly SignatureVerificationOptions options = new SignatureVerificationOptions();
         private readonly RequestMessageContext context;
         private long numCallsToNext;
@@ -23,6 +26,8 @@ namespace NSign.AspNetCore
         public RequestMessageContextTests()
         {
             Mock<ILogger> mockLogger = new Mock<ILogger>(MockBehavior.Loose);
+
+            httpContext.Features.Set(mockRequestTrailers.Object);
 
             context = new RequestMessageContext(httpContext, options, CountingMiddleware, mockLogger.Object);
         }
@@ -166,6 +171,54 @@ namespace NSign.AspNetCore
 
         [Theory]
         [InlineData("not-found", new string[0])]
+        [InlineData("x-first-header", new string[] { "firstValue" })]
+        [InlineData("x-second-header", new string[] { "" })]
+        [InlineData("x-third-header", new string[] { "1", "2", "3" })]
+        public void GetTrailerValuesWorks(string name, string[] expectedValues)
+        {
+            HeaderDictionary trailers = new HeaderDictionary()
+            {
+                { "x-first-header", "firstValue" },
+                { "x-Second-Header", "" },
+                { "x-third-header", new StringValues(new string[] { "1", "2", "3", }) },
+            };
+            mockRequestTrailers.SetupGet(t => t.Trailers).Returns(trailers);
+
+            IEnumerable<string> actualValues = context.GetTrailerValues(name);
+
+            Assert.Collection(actualValues,
+                expectedValues
+                    .Select(expectedVal => (Action<string>)((actualVal) => Assert.Equal(expectedVal, actualVal)))
+                    .ToArray());
+        }
+
+        [Theory]
+        [InlineData("x-first", "value1, value2")]
+        [InlineData("x-second", "")]
+        [InlineData("inexistent", null)]
+        public void GetRequestTrailerValuesWorks(string name, string? expectedValue)
+        {
+            HeaderDictionary trailers = new HeaderDictionary()
+            {
+                { "x-first", "value1, value2" },
+                { "x-second", "" },
+            };
+            mockRequestTrailers.SetupGet(t => t.Trailers).Returns(trailers);
+
+            IEnumerable<string>? actualValues = context.GetRequestTrailerValues(name);
+
+            if (null != expectedValue)
+            {
+                Assert.Collection(actualValues, (val) => Assert.Equal(expectedValue, val));
+            }
+            else
+            {
+                Assert.Empty(actualValues);
+            }
+        }
+
+        [Theory]
+        [InlineData("not-found", new string[0])]
         [InlineData("a", new string[] { "b", "bb", "B", })]
         [InlineData("A", new string[] { "b", "bb", "B", })]
         [InlineData("c", new string[] { "d", })]
@@ -198,6 +251,24 @@ namespace NSign.AspNetCore
 
         [Theory]
         [InlineData("not-found", false)]
+        [InlineData("x-first-header", true)]
+        [InlineData("x-second-header", true)]
+        [InlineData("x-third-header", true)]
+        public void HasTrailerWorks(string name, bool expectedResult)
+        {
+            HeaderDictionary trailers = new HeaderDictionary()
+            {
+                { "x-first-header", "firstValue" },
+                { "x-Second-Header", "" },
+                { "x-third-header", new StringValues(new string[] { "1", "2", "3", }) },
+            };
+            mockRequestTrailers.SetupGet(t => t.Trailers).Returns(trailers);
+
+            Assert.Equal(expectedResult, context.HasTrailer(bindRequest: false, name));
+        }
+
+        [Theory]
+        [InlineData("not-found", false)]
         [InlineData("a", true)]
         [InlineData("A", true)]
         [InlineData("c", true)]
@@ -215,6 +286,15 @@ namespace NSign.AspNetCore
             PropertyInfo? prop = typeof(RequestMessageContext).GetProperty("MessageHeaders", BindingFlags.Instance | BindingFlags.NonPublic);
 
             Assert.Same(httpContext.Request.Headers, prop!.GetValue(context));
+        }
+
+        [Fact]
+        public void TrailerReferencesThrowWhenTrailerFeatureNotAvailable()
+        {
+            httpContext.Features.Set<IHttpRequestTrailersFeature>(null);
+
+            NotSupportedException ex = Assert.Throws<NotSupportedException>(() => context.HasTrailer(bindRequest: false, "xyx"));
+            Assert.Equal("This request does not support trailers.", ex.Message);
         }
 
         private Task CountingMiddleware(HttpContext context)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Moq;
@@ -13,6 +14,10 @@ namespace NSign.AspNetCore
     public sealed class RequestResponseMessageContextTests
     {
         private readonly DefaultHttpContext httpContext = new DefaultHttpContext();
+        private readonly Mock<IHttpRequestTrailersFeature> mockRequestTrailers =
+            new Mock<IHttpRequestTrailersFeature>(MockBehavior.Strict);
+        private readonly Mock<IHttpResponseTrailersFeature> mockResponseTrailers =
+            new Mock<IHttpResponseTrailersFeature>(MockBehavior.Strict);
         private readonly Mock<IMessageSigner> mockSigner;
         private readonly MessageSigningOptions options = new MessageSigningOptions();
         private readonly RequestResponseMessageContext context;
@@ -21,6 +26,9 @@ namespace NSign.AspNetCore
         {
             Mock<ILogger> mockLogger = new Mock<ILogger>(MockBehavior.Loose);
             mockSigner = new Mock<IMessageSigner>(MockBehavior.Strict);
+
+            httpContext.Features.Set(mockRequestTrailers.Object);
+            httpContext.Features.Set(mockResponseTrailers.Object);
 
             context = new RequestResponseMessageContext(mockSigner.Object, httpContext, options, mockLogger.Object);
         }
@@ -109,6 +117,33 @@ namespace NSign.AspNetCore
             PropertyInfo? prop = typeof(RequestMessageContext).GetProperty("MessageHeaders", BindingFlags.Instance | BindingFlags.NonPublic);
 
             Assert.Same(httpContext.Response.Headers, prop!.GetValue(context));
+        }
+
+        [Fact]
+        public void MessageTrailersReturnsResponseTrailers()
+        {
+            HeaderDictionary trailers = new HeaderDictionary()
+            {
+                { "x-first-header", "firstValue" },
+                { "x-Second-Header", "" },
+                { "x-third-header", new StringValues(new string[] { "1", "2", "3", }) },
+            };
+            mockResponseTrailers.SetupGet(t => t.Trailers).Returns(trailers);
+
+            PropertyInfo? prop = typeof(RequestMessageContext).GetProperty("MessageTrailers", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            Assert.Same(trailers, prop!.GetValue(context));
+        }
+
+        [Fact]
+        public void MessageTrailersThrowsWhenFeatureNotAvailable()
+        {
+            httpContext.Features.Set<IHttpResponseTrailersFeature>(null);
+
+            PropertyInfo? prop = typeof(RequestMessageContext).GetProperty("MessageTrailers", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            NotSupportedException ex = Assert.Throws<NotSupportedException>(() => context.HasTrailer(bindRequest: false, "blah"));
+            Assert.Equal("Trailers are not supported for this response.", ex.Message);
         }
     }
 }
