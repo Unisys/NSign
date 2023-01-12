@@ -6,7 +6,7 @@
 
 # NSign - HTTP message signatures and verification for .NET
 
-NSign (/ˈensaɪn/) provides libraries to sign HTTP messages based on recent drafts (currently: May 26th 2022) of the
+NSign (/ˈensaɪn/) provides libraries to sign HTTP messages based on recent drafts (currently: January 9th 2023) of the
 [HTTP Message Signatures](https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/) to-be standard from
 the IETF. The key motivation for the standard is to have a standard way to sign and verify HTTP messages e.g. used in
 webhook-like scenarios where a provider needs to sign HTTP request messages before sending them to subscribers, and
