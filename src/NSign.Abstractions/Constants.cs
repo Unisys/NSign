@@ -202,9 +202,14 @@
             public const string HmacSha256 = "hmac-sha256";
 
             /// <summary>
-            /// The name for signatures using ECDSA with curve P-256 and SHA-256;
+            /// The name for signatures using ECDSA with curve P-256 and SHA-256.
             /// </summary>
             public const string EcdsaP256Sha256 = "ecdsa-p256-sha256";
+
+            /// <summary>
+            /// The name for signatures using ECDSA with curve P-384 and SHA-384.
+            /// </summary>
+            public const string EcdsaP384Sha384 = "ecdsa-p384-sha384";
         }
     }
 }

@@ -7,6 +7,7 @@ namespace NSign.Signatures
     {
         [Theory]
         [InlineData(SignatureAlgorithm.EcdsaP256Sha256, "ecdsa-p256-sha256")]
+        [InlineData(SignatureAlgorithm.EcdsaP384Sha384, "ecdsa-p384-sha384")]
         [InlineData(SignatureAlgorithm.HmacSha256, "hmac-sha256")]
         [InlineData(SignatureAlgorithm.RsaPkcs15Sha256, "rsa-v1_5-sha256")]
         [InlineData(SignatureAlgorithm.RsaPssSha512, "rsa-pss-sha512")]
@@ -26,6 +27,7 @@ namespace NSign.Signatures
 
         [Theory]
         [InlineData("ecdsa-p256-sha256", SignatureAlgorithm.EcdsaP256Sha256)]
+        [InlineData("ecdsa-p384-sha384", SignatureAlgorithm.EcdsaP384Sha384)]
         [InlineData("hmac-sha256", SignatureAlgorithm.HmacSha256)]
         [InlineData("rsa-v1_5-sha256", SignatureAlgorithm.RsaPkcs15Sha256)]
         [InlineData("rsa-pss-sha512", SignatureAlgorithm.RsaPssSha512)]
