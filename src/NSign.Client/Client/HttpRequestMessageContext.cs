@@ -134,8 +134,17 @@ namespace NSign.Client
         /// <inheritdoc/>
         public override sealed bool HasHeader(bool bindRequest, string headerName)
         {
-            Debug.Assert(false == bindRequest, "Binding to the request message is not supported for this context.");
-            return TryGetHeaderValues(MessageHeaders, MessageContent, headerName, out _);
+            HttpHeaders headers = bindRequest ? Request.Headers : MessageHeaders;
+            return TryGetHeaderValues(headers, MessageContent, headerName, out _);
+        }
+
+        /// <inheritdoc/>
+        public override bool HasTrailer(bool bindRequest, string fieldName)
+        {
+            // Request messages for the HttpClient do not support trailers.
+            Debug.Assert(false == bindRequest,
+                         "Binding to the request message is not supported for HttpRequestMessageContext.");
+            return false;
         }
 
         /// <inheritdoc/>

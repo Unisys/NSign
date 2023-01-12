@@ -119,6 +119,34 @@ namespace NSign.AspNetCore
             Assert.Same(httpContext.Response.Headers, prop!.GetValue(context));
         }
 
+        [Theory]
+        [InlineData("not-found", false)]
+        [InlineData("x-first-header", true)]
+        [InlineData("x-second-header", true)]
+        [InlineData("x-third-header", true)]
+        public void HasHeaderWorksForRequestHeaders(string header, bool expectedResult)
+        {
+            httpContext.Request.Headers.Add("x-first-header", "firstValue");
+            httpContext.Request.Headers.Add("x-Second-Header", "");
+            httpContext.Request.Headers.Add("x-third-header", new StringValues(new string[] { "1", "2", "3", }));
+
+            Assert.Equal(expectedResult, context.HasHeader(bindRequest: true, header));
+        }
+
+        [Theory]
+        [InlineData("not-found", false)]
+        [InlineData("x-first-header", true)]
+        [InlineData("x-second-header", true)]
+        [InlineData("x-third-header", true)]
+        public void HasHeaderWorksForResponseHeaders(string header, bool expectedResult)
+        {
+            httpContext.Response.Headers.Add("x-first-header", "firstValue");
+            httpContext.Response.Headers.Add("x-Second-Header", "");
+            httpContext.Response.Headers.Add("x-third-header", new StringValues(new string[] { "1", "2", "3", }));
+
+            Assert.Equal(expectedResult, context.HasHeader(bindRequest: false, header));
+        }
+
         [Fact]
         public void MessageTrailersReturnsResponseTrailers()
         {
@@ -136,14 +164,45 @@ namespace NSign.AspNetCore
         }
 
         [Fact]
-        public void MessageTrailersThrowsWhenFeatureNotAvailable()
+        public void TrailersThrowsWhenFeatureNotAvailable()
         {
+            httpContext.Features.Set<IHttpRequestTrailersFeature>(null);
+            httpContext.Features.Set<IHttpResponseTrailersFeature>(null);
+            NotSupportedException ex;
+
+            ex = Assert.Throws<NotSupportedException>(() => context.GetTrailerValues("xyx"));
+            Assert.Equal("Trailers are not supported for this response.", ex.Message);
+
+            ex = Assert.Throws<NotSupportedException>(() => context.GetRequestTrailerValues("xyx"));
+            Assert.Equal("This request does not support trailers.", ex.Message);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void HasTrailerReturnsFalseWhenTrailerFeatureNotAvailable(bool bindRequest)
+        {
+            httpContext.Features.Set<IHttpRequestTrailersFeature>(null);
             httpContext.Features.Set<IHttpResponseTrailersFeature>(null);
 
-            PropertyInfo? prop = typeof(RequestMessageContext).GetProperty("MessageTrailers", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.False(context.HasTrailer(bindRequest, "xyz"));
+        }
 
-            NotSupportedException ex = Assert.Throws<NotSupportedException>(() => context.HasTrailer(bindRequest: false, "blah"));
-            Assert.Equal("Trailers are not supported for this response.", ex.Message);
+        [Theory]
+        [InlineData("x-first-header")]
+        [InlineData("x-Second-Header")]
+        [InlineData("x-third-header")]
+        public void HasTrailerWorksWhenResponseTrailersAreAvailable(string trailerName)
+        {
+            HeaderDictionary trailers = new HeaderDictionary()
+            {
+                { "x-first-header", "firstValue" },
+                { "x-Second-Header", "" },
+                { "x-third-header", new StringValues(new string[] { "1", "2", "3", }) },
+            };
+            mockResponseTrailers.SetupGet(t => t.Trailers).Returns(trailers);
+
+            Assert.True(context.HasTrailer(bindRequest: false, trailerName));
         }
     }
 }

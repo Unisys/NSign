@@ -226,6 +226,7 @@ namespace NSign.Client
             request.Headers.Add("x-third-header", new string[] { "1", "2", "3", });
 
             Assert.Equal(expectedResult, context.HasHeader(bindRequest: false, header));
+            Assert.Equal(expectedResult, context.HasHeader(bindRequest: true, header));
         }
 
         [Theory]
@@ -258,6 +259,16 @@ namespace NSign.Client
             PropertyInfo? prop = typeof(HttpRequestMessageContext).GetProperty("MessageContent", BindingFlags.Instance | BindingFlags.NonPublic);
 
             Assert.Same(content, prop!.GetValue(context));
+        }
+
+        [Theory]
+        [InlineData("not-found")]
+        [InlineData("x-first-header")]
+        [InlineData("x-second-header")]
+        [InlineData("x-third-header")]
+        public void HasTrailerAlwaysReturnsFalse(string name)
+        {
+            Assert.False(context.HasTrailer(bindRequest: false, name));
         }
     }
 }

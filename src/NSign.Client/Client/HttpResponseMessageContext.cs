@@ -73,12 +73,11 @@ namespace NSign.Client
         {
             if (bindRequest)
             {
-                throw new NotSupportedException("Request-based trailers in signatures are not supported.");
+                // The HttpRequestMessage for HttpClient does not support trailers.
+                return false;
             }
-            else
-            {
-                return Response.TrailingHeaders.TryGetValues(fieldName, out _);
-            }
+
+            return Response.TrailingHeaders.TryGetValues(fieldName, out _);
         }
 
         #endregion

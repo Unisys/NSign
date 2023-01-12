@@ -125,7 +125,12 @@ namespace NSign.AspNetCore
         {
             // This may still throw a NotSupportedException when trailers are not supported, or a InvalidOperationException
             // when trailers are not yet available. For now, let's bubble them up.
-            return HttpContext.Request.GetTrailer(fieldName);
+            if (TryGetHeaderValues(RequestTrailers, fieldName, out StringValues values))
+            {
+                return values;
+            }
+
+            return Enumerable.Empty<string>();
         }
 
         /// <inheritdoc/>
@@ -142,15 +147,45 @@ namespace NSign.AspNetCore
         /// <inheritdoc/>
         public override sealed bool HasHeader(bool bindRequest, string headerName)
         {
-            Debug.Assert(false == bindRequest, "Binding to the request message is not supported for this context.");
-            return TryGetHeaderValues(MessageHeaders, headerName, out _);
+            IHeaderDictionary headers;
+
+            if (!HasResponse || bindRequest)
+            {
+                headers = HttpContext.Request.Headers;
+            }
+            else // if (HasResponse && !bindRequest)
+            {
+                headers = HttpContext.Response.Headers;
+            }
+
+            return TryGetHeaderValues(headers, headerName, out _);
         }
 
         /// <inheritdoc/>
         public override bool HasTrailer(bool bindRequest, string fieldName)
         {
-            Debug.Assert(false == bindRequest, "Binding to the request message is not supported for this context.");
-            return TryGetHeaderValues(MessageTrailers, fieldName, out _);
+            IHeaderDictionary trailers;
+
+            if (!HasResponse || bindRequest)
+            {
+                if (!HttpContext.Request.SupportsTrailers())
+                {
+                    return false;
+                }
+
+                trailers = RequestTrailers;
+            }
+            else // if (HasResponse && !bindRequest)
+            {
+                if (!HttpContext.Response.SupportsTrailers())
+                {
+                    return false;
+                }
+
+                trailers = MessageTrailers;
+            }
+
+            return TryGetHeaderValues(trailers, fieldName, out _);
         }
 
         /// <inheritdoc/>
@@ -171,19 +206,7 @@ namespace NSign.AspNetCore
         /// <summary>
         /// Gets an <see cref="IHeaderDictionary"/> representing the trailers of the message the context is for.
         /// </summary>
-        protected virtual IHeaderDictionary MessageTrailers
-        {
-            get
-            {
-                IHttpRequestTrailersFeature? feature = HttpContext.Features.Get<IHttpRequestTrailersFeature>();
-                if (null == feature)
-                {
-                    throw new NotSupportedException("This request does not support trailers.");
-                }
-
-                return feature.Trailers;
-            }
-        }
+        protected virtual IHeaderDictionary MessageTrailers => RequestTrailers;
 
         /// <summary>
         /// Tries to get the message header values for the header with the given <paramref name="name"/>.
@@ -223,6 +246,27 @@ namespace NSign.AspNetCore
             }
 
             return false;
+        }
+
+        #endregion
+
+        #region Private Interface
+
+        /// <summary>
+        /// Gets an <see cref="IHeaderDictionary"/> representing the trailers of the request of the context.
+        /// </summary>
+        private IHeaderDictionary RequestTrailers
+        {
+            get
+            {
+                IHttpRequestTrailersFeature? feature = HttpContext.Features.Get<IHttpRequestTrailersFeature>();
+                if (null == feature)
+                {
+                    throw new NotSupportedException("This request does not support trailers.");
+                }
+
+                return feature.Trailers;
+            }
         }
 
         #endregion
