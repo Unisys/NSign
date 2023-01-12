@@ -19,18 +19,37 @@ namespace NSign.Signatures
             .Add(Constants.ComponentParameters.Request);
 
         /// <summary>
-        /// The set of component parameters supported by structured HTTP header field components. This includes the <c>sf</c>
-        /// and the <c>req</c> parameters.
+        /// The set of component parameters supported by structured HTTP field components. This includes the <c>sf</c>
+        /// and <c>tr</c> parameters, in addition to the parameters from <see cref="RequestTargetSupportedParameters"/>.
         /// </summary>
         private static readonly ImmutableHashSet<string> StucturedFieldSupportedParameters = RequestTargetSupportedParameters
-            .Add(Constants.ComponentParameters.StructuredField);
+            .Add(Constants.ComponentParameters.StructuredField)
+            .Add(Constants.ComponentParameters.FromTrailers);
 
         /// <summary>
-        /// The set of component parameters supported by HTTP header components. This includes the <c>key</c> and <c>sf</c>
-        /// parameters for structured header values, in addition to the <c>req</c> parameter.
+        /// The set of component parameters supported by structured dictionary HTTP field components. This includes the
+        /// <c>key</c> parameter, in addition to the parameters from <see cref="StucturedFieldSupportedParameters"/>.
         /// </summary>
-        private static readonly ImmutableHashSet<string> HttpHeaderSupportedParameters = StucturedFieldSupportedParameters
-            .Add(Constants.ComponentParameters.Key);
+        private static readonly ImmutableHashSet<string> StructuredDictionaryFieldSupportedParameters =
+            StucturedFieldSupportedParameters
+                .Add(Constants.ComponentParameters.Key);
+
+        /// <summary>
+        /// The set of component parameters supported by unstructured HTTP field components. This includes the <c>bs</c>
+        /// parameter, in addition to the parameters from <see cref="RequestTargetSupportedParameters"/>.
+        /// </summary>
+        private static readonly ImmutableHashSet<string> UnstructuredHttpFieldSupportedParameters =
+            RequestTargetSupportedParameters
+                .Add(Constants.ComponentParameters.ByteSequence)
+                .Add(Constants.ComponentParameters.FromTrailers);
+
+        /// <summary>
+        /// The set of component parameters available for all HTTP field components (headers or trailers), whether
+        /// structured or unstructured. This includes the <c>req</c>, <c>bs</c>, <c>tr</c>, <c>key</c>, and <c>sf</c>
+        /// parameters.
+        /// </summary>
+        private static readonly ImmutableHashSet<string> HttpFieldKnownParameters =
+            UnstructuredHttpFieldSupportedParameters.Union(StructuredDictionaryFieldSupportedParameters);
 
         /// <summary>
         /// The set of component parameters supported by the <c>@query-param</c> derived component. Aside from the <c>req</c>
@@ -333,31 +352,45 @@ namespace NSign.Signatures
             ReadOnlySpan<char> originalIdentifier,
             IReadOnlyList<KeyValuePair<string, string?>> componentParams)
         {
-            ThrowForUnsupportedParameters(originalIdentifier, componentParams, HttpHeaderSupportedParameters);
+            ThrowForUnsupportedParameters(originalIdentifier, componentParams, HttpFieldKnownParameters);
             TryGetParameterValue(componentParams, Constants.ComponentParameters.Request, out bool bindRequest);
             TryGetParameterValue(componentParams, Constants.ComponentParameters.StructuredField, out bool structuredField);
+            TryGetParameterValue(componentParams, Constants.ComponentParameters.FromTrailers, out bool fromTrailers);
+            TryGetParameterValue(componentParams, Constants.ComponentParameters.ByteSequence, out bool useByteSequence);
 
             string original = new String(originalIdentifier);
 
-            if (structuredField)
+
+            if (TryGetParameterValue(componentParams, Constants.ComponentParameters.Key, out string key))
             {
-                // If the 'sf' (structured field) parameter is present, the 'key' parameter must not be present.
-                ThrowForUnsupportedParameters(originalIdentifier, componentParams, StucturedFieldSupportedParameters);
-                signatureParams.AddComponent(new HttpHeaderStructuredFieldComponent(componentName, bindRequest)
-                {
-                    OriginalIdentifier = original,
-                });
+                // The 'key' parameter used for structured dictionary values allows for the 'sf' parameter to be present.
+                // Its presence has no additional effect, since structured dictionary values are provided normalized to
+                // signature input. The 'bs' parameter however is incompatible with both 'key' and 'sf' parameters, so
+                // we must guard against it.
+                ThrowForUnsupportedParameters(originalIdentifier, componentParams, StructuredDictionaryFieldSupportedParameters);
+                Debug.Assert(!useByteSequence, "Using 'bs' (byte-sequence) on a structured field is not allowed.");
+
+                signatureParams.AddComponent(
+                    new HttpHeaderDictionaryStructuredComponent(componentName, key, bindRequest, fromTrailers)
+                    {
+                        OriginalIdentifier = original,
+                    });
             }
-            else if (TryGetParameterValue(componentParams, Constants.ComponentParameters.Key, out string key))
+            else if (structuredField)
             {
-                signatureParams.AddComponent(new HttpHeaderDictionaryStructuredComponent(componentName, key, bindRequest)
+                // If the 'sf' parameter for structured fields is incompatible with the 'bs' parameter. So we must guard
+                // against it.
+                ThrowForUnsupportedParameters(originalIdentifier, componentParams, StucturedFieldSupportedParameters);
+                Debug.Assert(!useByteSequence, "Using 'bs' (byte-sequence) on a structured field is not allowed.");
+
+                signatureParams.AddComponent(new HttpHeaderStructuredFieldComponent(componentName, bindRequest, fromTrailers)
                 {
                     OriginalIdentifier = original,
                 });
             }
             else
             {
-                signatureParams.AddComponent(new HttpHeaderComponent(componentName, bindRequest)
+                signatureParams.AddComponent(new HttpHeaderComponent(componentName, bindRequest, useByteSequence, fromTrailers)
                 {
                     OriginalIdentifier = original,
                 });
