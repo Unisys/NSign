@@ -1298,7 +1298,7 @@
       "nsign.aspnetcore": {
         "type": "Project",
         "dependencies": {
-          "NSign.Abstractions": "[0.10.0, )",
+          "NSign.Abstractions": "[0.15.0, )",
           "StructuredFieldValues": "[0.*, )"
         }
       }
@@ -2600,7 +2600,7 @@
       "nsign.aspnetcore": {
         "type": "Project",
         "dependencies": {
-          "NSign.Abstractions": "[0.10.0, )",
+          "NSign.Abstractions": "[0.15.0, )",
           "StructuredFieldValues": "[0.*, )"
         }
       }

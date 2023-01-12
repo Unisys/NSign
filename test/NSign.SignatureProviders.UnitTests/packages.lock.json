@@ -1296,7 +1296,7 @@
       "nsign.signatureproviders": {
         "type": "Project",
         "dependencies": {
-          "NSign.Abstractions": "[0.10.0, )"
+          "NSign.Abstractions": "[0.15.0, )"
         }
       }
     },
@@ -2595,7 +2595,7 @@
       "nsign.signatureproviders": {
         "type": "Project",
         "dependencies": {
-          "NSign.Abstractions": "[0.10.0, )"
+          "NSign.Abstractions": "[0.15.0, )"
         }
       }
     }

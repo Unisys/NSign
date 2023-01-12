@@ -1358,7 +1358,7 @@
           "Microsoft.Extensions.Http": "[6.0.*, )",
           "Microsoft.Extensions.Logging.Abstractions": "[6.0.*, )",
           "Microsoft.Extensions.Options": "[6.0.*, )",
-          "NSign.Abstractions": "[0.10.0, )",
+          "NSign.Abstractions": "[0.15.0, )",
           "StructuredFieldValues": "[0.*, )",
           "System.Collections.Immutable": "[6.0.*, )",
           "System.IO.Pipelines": "[6.*, )"
@@ -2722,7 +2722,7 @@
           "Microsoft.Extensions.Http": "[6.0.*, )",
           "Microsoft.Extensions.Logging.Abstractions": "[6.0.*, )",
           "Microsoft.Extensions.Options": "[6.0.*, )",
-          "NSign.Abstractions": "[0.10.0, )",
+          "NSign.Abstractions": "[0.15.0, )",
           "StructuredFieldValues": "[0.*, )",
           "System.Collections.Immutable": "[6.0.*, )",
           "System.IO.Pipelines": "[6.*, )"
