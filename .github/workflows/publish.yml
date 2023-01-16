@@ -13,26 +13,45 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Get version
+      # Extract the version from the common.props' Version tag.
+      run: |
+        BUILD_VERSION=$(cat common.props | grep -Eo '<Version>(.*)</Version>' | sed -r 's|<Version>(.*)</Version>|\1|')
+        TAG_NAME=v$BUILD_VERSION
+        echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+        git show-ref --tags $TAG_NAME
+        # git show-ref ... return 0 when the tag exists, and 1 when it doesn't. Use that to decide
+        # whether we want to publish (and tag) a new version.
+        echo "PUBLISH=$?" >> $GITHUB_ENV
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
+      # Only execute this when we want to/can publish anything.
+      if: env.PUBLISH == '1'
       with:
         dotnet-version: |
             6.0.x
             7.0.x
 
     - name: Install dependencies
+      # Only execute this when we want to/can publish anything.
+      if: env.PUBLISH == '1'
       run: dotnet restore
     - name: Pack
+      # Only execute this when we want to/can publish anything.
+      if: env.PUBLISH == '1'
       run: dotnet pack -c Release --no-restore -o .
 
     - name: Publish Nuget packages
+      # Only execute this when we want to/can publish anything.
+      if: env.PUBLISH == '1'
       run: dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json --skip-duplicate -n -k ${{secrets.NUGET_API_KEY}}
     - name: Tag release
-      # Extract the version from the common.props' Version tag.
+      # Only execute this when we want to/can publish anything.
+      if: env.PUBLISH == '1'
       run: |
-        version=$(cat common.props | grep -Eo '<Version>(.*)</Version>' | sed -r 's|<Version>(.*)</Version>|\1|')
-        tagName=v$version
-        echo "Tagging version $version as '$tagName'"
-        git tag $tagName
-        git push origin $tagName
+        echo "Tagging version $version as '${{ env.TAG_NAME }}'"
+        git tag "${{ env.TAG_NAME }}"
+        git push origin "${{ env.TAG_NAME }}"
         echo 'Successfully tagged.'
