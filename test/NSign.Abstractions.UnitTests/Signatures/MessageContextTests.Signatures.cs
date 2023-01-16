@@ -20,6 +20,7 @@ namespace NSign.Signatures
                 return headerName switch
                 {
                     "signature" => new string[] { "bad=abcd, good=:abcd:, morebad=()", "other=blah", "#", },
+                    "signature-input" => new string[] { "bad=(), good=(), morebad=\"\"", "other=blah", "#", },
                     _ => Array.Empty<string>(),
                 };
             };
@@ -27,7 +28,7 @@ namespace NSign.Signatures
             SignatureContext? sig = context.GetRequestSignature("good");
             Assert.True(sig.HasValue);
             Assert.Equal("abcd", Convert.ToBase64String(sig!.Value.Signature.Span));
-            Assert.Null(sig.Value.InputSpec);
+            Assert.NotNull(sig.Value.InputSpec);
 
             Assert.False(context.GetRequestSignature("bad").HasValue);
             Assert.False(context.GetRequestSignature("morebad").HasValue);

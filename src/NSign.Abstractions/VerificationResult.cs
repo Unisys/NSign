@@ -11,11 +11,6 @@
         Unknown,
 
         /// <summary>
-        /// The signature input for a signature was not found.
-        /// </summary>
-        SignatureInputNotFound,
-
-        /// <summary>
         /// The signature input for a signature was malformed.
         /// </summary>
         SignatureInputMalformed,

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,17 +64,91 @@ namespace NSign.Signatures
 
             foreach (SignatureContext signatureContext in context.SignaturesForVerification)
             {
-                if (!options.ShouldVerify(signatureContext.Name))
+                try
+                {
+                    // Evaluate the SignatureParams now so we get any parser errors here.
+                    var _ = signatureContext.SignatureParams;
+                }
+                catch (Exception ex)
+                {
+                    string rawInputSpec = signatureContext.InputSpec;
+
+                    logger.LogDebug(ex, "Failed to parse input spec '{input}' for signature '{name}'.",
+                        rawInputSpec, signatureContext.Name);
+                    results.Add(signatureContext.Name, VerificationResult.SignatureInputMalformed);
+                    continue;
+                }
+
+                if (!options.ShouldVerify(signatureContext))
                 {
                     logger.LogDebug("Signature '{name}' does not need to be verified.", signatureContext.Name);
                     continue;
                 }
 
-                VerificationResult result = await VerifySignaturesAsync(context, signatureContext);
+                VerificationResult result = await VerifySignatureWithPolicyAsync(context, signatureContext);
                 logger.LogInformation("Verification of signature '{name}' resulted in '{result}'.",
                     signatureContext.Name, result);
                 results.Add(signatureContext.Name, result);
             }
+
+            await NotifyVerificationResultsAsync(context, results);
+        }
+
+        /// <summary>
+        /// Verifies the signature from the given context asynchronously by looking both at the configured verification
+        /// policy as well as the signature itself.
+        /// </summary>
+        /// <param name="context">
+        /// A MessageContext value describing context for verification.
+        /// </param>
+        /// <param name="signatureContext">
+        /// A SignatureContext value with details on the signature to verify.
+        /// </param>
+        /// <returns>
+        /// A Task which results in a VerificationResult value describing the outcome of the verification when it completes.
+        /// </returns>
+        private Task<VerificationResult> VerifySignatureWithPolicyAsync(
+            MessageContext context,
+            SignatureContext signatureContext)
+        {
+            Debug.Assert(null != signatureContext.InputSpec, "The input spec must not be null.");
+
+            SignatureParamsComponent signatureParams = signatureContext.SignatureParams;
+
+            if (IsExpired(context, signatureParams))
+            {
+                logger.LogDebug("Signature '{name}' with input '{input}' has already expired.",
+                    signatureContext.Name, signatureContext.InputSpec);
+                return Task.FromResult(VerificationResult.SignatureExpired);
+            }
+
+            if (!VerifyMandatoryComponentsPresent(context, signatureContext))
+            {
+                return Task.FromResult(VerificationResult.SignatureInputComponentMissing);
+            }
+
+            return VerifySignatureAsync(context, signatureContext);
+        }
+
+        /// <summary>
+        /// Notifies the options configured for the given <paramref name="context"/> of the verification results
+        /// asynchronously.
+        /// </summary>
+        /// <param name="context">
+        /// A MessageContext value describing context for notification.
+        /// </param>
+        /// <param name="results">
+        /// A Dictionary of string and VerificationResult that holds all the results from verification attempts.
+        /// </param>
+        /// <returns>
+        /// A Task that tracks completion of the operation.
+        /// </returns>
+        private async Task NotifyVerificationResultsAsync(
+            MessageContext context,
+            Dictionary<string, VerificationResult> results)
+        {
+            Debug.Assert(null != context.VerificationOptions, "The verification options of the context must not be null.");
+            SignatureVerificationOptions options = context.VerificationOptions;
 
             if (results.Count <= 0)
             {
@@ -113,71 +188,22 @@ namespace NSign.Signatures
         }
 
         /// <summary>
-        /// Verifies the signature from the given context asynchronously.
-        /// </summary>
-        /// <param name="context">
-        /// A MessageContext value describing context for verification.
-        /// </param>
-        /// <param name="signatureContext">
-        /// A SignatureContext value with details on the signature to verify.
-        /// </param>
-        /// <returns>
-        /// A Task which results in a VerificationResult value describing the outcome of the verification when it completes.
-        /// </returns>
-        private Task<VerificationResult> VerifySignaturesAsync(MessageContext context, SignatureContext signatureContext)
-        {
-            if (null == signatureContext.InputSpec)
-            {
-                logger.LogDebug("Missing Signature-Input for signature '{name}'.", signatureContext.Name);
-                return Task.FromResult(VerificationResult.SignatureInputNotFound);
-            }
-
-            string rawInputSpec = signatureContext.InputSpec;
-            SignatureInputSpec inputSpec;
-
-            try
-            {
-                inputSpec = new SignatureInputSpec(signatureContext.Name, rawInputSpec);
-            }
-            catch (Exception ex)
-            {
-                logger.LogDebug(ex, "Failed to parse input spec '{input}' for signature '{name}'.",
-                    rawInputSpec, signatureContext.Name);
-                return Task.FromResult(VerificationResult.SignatureInputMalformed);
-            }
-
-            if (IsExpired(context, inputSpec))
-            {
-                logger.LogDebug("Signature '{name}' with input '{input}' has already expired.",
-                    signatureContext.Name, signatureContext.InputSpec);
-                return Task.FromResult(VerificationResult.SignatureExpired);
-            }
-
-            if (!VerifyMandatoryComponentsPresent(context, inputSpec))
-            {
-                return Task.FromResult(VerificationResult.SignatureInputComponentMissing);
-            }
-
-            return VerifySignatureAsync(context, signatureContext, inputSpec);
-        }
-
-        /// <summary>
         /// Checks if the signature on the given input spec has expired.
         /// </summary>
         /// <param name="context">
         /// A MessageContext value describing context for verification.
         /// </param>
-        /// <param name="inputSpec">
-        /// The SignatureInputSpec to check.
+        /// <param name="signatureParams">
+        /// The SignatureParamsComponent to check.
         /// </param>
         /// <returns>
         /// True if the signature has expired, or false otherwise.
         /// </returns>
-        private bool IsExpired(MessageContext context, SignatureInputSpec inputSpec)
+        private bool IsExpired(MessageContext context, SignatureParamsComponent signatureParams)
         {
             SignatureVerificationOptions options = context.VerificationOptions!;
-            DateTimeOffset? created = inputSpec.SignatureParameters.Created;
-            DateTimeOffset? expires = inputSpec.SignatureParameters.Expires;
+            DateTimeOffset? created = signatureParams.Created;
+            DateTimeOffset? expires = signatureParams.Expires;
 
             if (options.MaxSignatureAge.HasValue && created.HasValue &&
                 created.Value + options.MaxSignatureAge.Value < DateTimeOffset.UtcNow)
@@ -200,68 +226,69 @@ namespace NSign.Signatures
         /// <param name="context">
         /// A MessageContext value describing context for verification.
         /// </param>
-        /// <param name="inputSpec">
-        /// The SignatureInputSpec value to verify.
+        /// <param name="signatureContext">
+        /// The SignatureContext to verify.
         /// </param>
         /// <returns>
         /// True if the verification passed, or false otherwise.
         /// </returns>
-        private bool VerifyMandatoryComponentsPresent(MessageContext context, SignatureInputSpec inputSpec)
+        private bool VerifyMandatoryComponentsPresent(MessageContext context, SignatureContext signatureContext)
         {
             SignatureVerificationOptions options = context.VerificationOptions!;
-            SignatureParamsComponent sigParams = inputSpec.SignatureParameters;
 
-            if (options.CreatedRequired && !sigParams.Created.HasValue)
+            if (options.CreatedRequired && !signatureContext.SignatureParams.Created.HasValue)
             {
                 logger.LogDebug(
                     "Verification failed ('created' parameter missing) for signature '{name}' with spec '{inputSpec}'.",
-                    inputSpec.Name, sigParams.OriginalValue);
+                    signatureContext.Name, signatureContext.SignatureParams.OriginalValue);
                 return false;
             }
-            else if (options.ExpiresRequired && !sigParams.Expires.HasValue)
+            else if (options.ExpiresRequired && !signatureContext.SignatureParams.Expires.HasValue)
             {
                 logger.LogDebug(
                     "Verification failed ('expires' parameter missing) for signature '{name}' with spec '{inputSpec}'.",
-                    inputSpec.Name, sigParams.OriginalValue);
+                    signatureContext.Name, signatureContext.SignatureParams.OriginalValue);
                 return false;
             }
-            else if (options.NonceRequired && String.IsNullOrWhiteSpace(sigParams.Nonce))
+            else if (options.NonceRequired && String.IsNullOrWhiteSpace(signatureContext.SignatureParams.Nonce))
             {
                 logger.LogDebug(
                     "Verification failed ('nonce' parameter missing) for signature '{name}' with spec '{inputSpec}'.",
-                    inputSpec.Name, sigParams.OriginalValue);
+                    signatureContext.Name, signatureContext.SignatureParams.OriginalValue);
                 return false;
             }
-            else if (options.AlgorithmRequired && String.IsNullOrWhiteSpace(sigParams.Algorithm))
+            else if (options.AlgorithmRequired && String.IsNullOrWhiteSpace(signatureContext.SignatureParams.Algorithm))
             {
                 logger.LogDebug(
                     "Verification failed ('alg' parameter missing) for signature '{name}' with spec '{inputSpec}'.",
-                    inputSpec.Name, sigParams.OriginalValue);
+                    signatureContext.Name, signatureContext.SignatureParams.OriginalValue);
                 return false;
             }
-            else if (options.KeyIdRequired && String.IsNullOrWhiteSpace(sigParams.KeyId))
+            else if (options.KeyIdRequired && String.IsNullOrWhiteSpace(signatureContext.SignatureParams.KeyId))
             {
                 logger.LogDebug(
                     "Verification failed ('keyid' parameter missing) for signature '{name}' with spec '{inputSpec}'.",
-                    inputSpec.Name, sigParams.OriginalValue);
+                    signatureContext.Name, signatureContext.SignatureParams.OriginalValue);
                 return false;
             }
-            else if (options.TagRequired && String.IsNullOrWhiteSpace(sigParams.Tag))
+            else if (options.TagRequired && String.IsNullOrWhiteSpace(signatureContext.SignatureParams.Tag))
             {
                 logger.LogDebug(
                     "Verification failed ('tag' parameter missing) for signature '{name}' with spec '{inputSpec}'.",
-                    inputSpec.Name, sigParams.OriginalValue);
+                    signatureContext.Name, signatureContext.SignatureParams.OriginalValue);
                 return false;
             }
-            else if (null != sigParams.Nonce && null != options.VerifyNonce && !options.VerifyNonce(inputSpec))
+            else if (null != signatureContext.SignatureParams.Nonce &&
+                     null != options.VerifyNonce &&
+                     !options.VerifyNonce(signatureContext.SignatureParams))
             {
                 logger.LogDebug(
                     "Nonce verification failed for signature '{name}' with spec '{inputSpec}'.",
-                    inputSpec.Name, sigParams.OriginalValue);
+                    signatureContext.Name, signatureContext.SignatureParams.OriginalValue);
                 return false;
             }
 
-            ImmutableHashSet<SignatureComponent> presentComponents = sigParams.Components.ToImmutableHashSet();
+            IReadOnlyCollection<SignatureComponent> presentComponents = signatureContext.SignatureParams.Components;
             bool allComponentsPresent = true;
 
             foreach (SignatureComponent component in options.RequiredSignatureComponents)
@@ -285,19 +312,13 @@ namespace NSign.Signatures
         /// <param name="signatureContext">
         /// A SignatureContext value with details on the signature to verify.
         /// </param>
-        /// <param name="inputSpec">
-        /// The SignatureInputSpec value to verify with.
-        /// </param>
         /// <returns>
         /// A Task which results in a VerificationResult value describing the outcome of the verification when it completes.
         /// </returns>
-        private async Task<VerificationResult> VerifySignatureAsync(
-            MessageContext context,
-            SignatureContext signatureContext,
-            SignatureInputSpec inputSpec)
+        private async Task<VerificationResult> VerifySignatureAsync(MessageContext context, SignatureContext signatureContext)
         {
             ReadOnlyMemory<byte> expectedSignature = signatureContext.Signature;
-            ReadOnlyMemory<byte> input = context.GetSignatureInput(inputSpec, out _);
+            ReadOnlyMemory<byte> input = context.GetSignatureInput(signatureContext.SignatureParams, out _);
 
             if (logger.IsEnabled(LogLevel.Debug))
             {
@@ -309,7 +330,7 @@ namespace NSign.Signatures
             try
             {
                 VerificationResult result = await verifier.VerifyAsync(
-                    inputSpec.SignatureParameters,
+                    signatureContext.SignatureParams,
                     input,
                     expectedSignature,
                     context.Aborted);

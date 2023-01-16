@@ -27,16 +27,25 @@ namespace NSign
         /// <summary>
         /// Gets an <see cref="ICollection{T}"/> of string values representing the names of signatures to verify.
         /// </summary>
+        [Obsolete(
+            "Signature selection/verification by name is no longer recommended and support for it will be cut in " +
+            "future versions. Use selection/verification by tag instead.",
+            error: false)]
         public ICollection<string> SignaturesToVerify { get; } = new Collection<string>();
 
         /// <summary>
-        /// Gets or sets a function which takes a string respresenting the name of a signature as input and returns a
-        /// boolean indicating whether or not the signature should be verified.
+        /// Gets an <see cref="ICollection{T}"/> of string values representing the tags of signatures to verify.
+        /// </summary>
+        public ICollection<string> TagsToVerify { get; } = new Collection<string>();
+
+        /// <summary>
+        /// Gets or sets a function which takes a <see cref="SignatureContext"/> representing a signature as input and
+        /// returns a boolean indicating whether the signature should be verified.
         /// </summary>
         /// <remarks>
         /// This defaults to return true for all signatures registered in the SignaturesToVerify collection.
         /// </remarks>
-        public Func<string, bool> ShouldVerify { get; set; }
+        public Func<SignatureContext, bool> ShouldVerify { get; set; }
 
         /// <summary>
         /// The callback to be invoked when signatures for verification are missing.
@@ -67,11 +76,10 @@ namespace NSign
         public Func<MessageContext, Task> OnSignatureVerificationSucceeded { get; set; }
 
         /// <summary>
-        /// Gets or sets a function which takes a SignatureInputSpec value as input, validates the nonce from the signature
-        /// parameters and returns a boolean indicating whether or not the nonce was accepted. If unset, does not verify
-        /// the nonce.
+        /// Gets or sets a function which takes a SignatureParamsComponent object as input, validates the nonce from it
+        /// and returns a boolean indicating whether or not the nonce was accepted. If unset, does not verify the nonce.
         /// </summary>
-        public Func<SignatureInputSpec, bool>? VerifyNonce { get; set; }
+        public Func<SignatureParamsComponent, bool>? VerifyNonce { get; set; }
 
         /// <summary>
         /// Gets an ICollection of SignatureComponent objects representing all the components a signature must present in
@@ -124,19 +132,28 @@ namespace NSign
         public TimeSpan? MaxSignatureAge { get; set; } = TimeSpan.FromMinutes(5);
 
         /// <summary>
-        /// Provides the default implementation for the <see cref="ShouldVerify"/> predicate: all signatures in
-        /// <see cref="SignaturesToVerify"/>.
+        /// Provides the default implementation for the <see cref="ShouldVerify"/> predicate:
+        /// 
+        /// <list type="bullet">
+        ///     <item>signatures with a tag matching a tag in <see cref="TagsToVerify"/> and</item>
+        ///     <item>signatures with a name matching a name in <see cref="SignaturesToVerify"/></item>
+        /// </list>
+        /// 
         /// should be verified.
         /// </summary>
-        /// <param name="signatureName">
-        /// The name of the signature to check.
+        /// <param name="context">
+        /// The <see cref="SignatureContext"/> representing the signature the check.
         /// </param>
         /// <returns>
-        /// True if the signature with the given name should be verified, or false otherwise.
+        /// True if the given signature should be verified, or false otherwise.
         /// </returns>
-        public bool DefaultShouldVerify(string signatureName)
+        public bool DefaultShouldVerify(SignatureContext context)
         {
-            return SignaturesToVerify.Contains(signatureName);
+#pragma warning disable CS0618 // Use of SignaturesToVerify will be removed in the future.
+            return
+                (null != context.SignatureParams.Tag && TagsToVerify.Contains(context.SignatureParams.Tag)) ||
+                SignaturesToVerify.Contains(context.Name);
+#pragma warning restore CS0618 // Use of SignaturesToVerify will be removed in the future.
         }
 
         /// <summary>

@@ -23,60 +23,74 @@ namespace NSign.Signatures
             SignatureComponentMissingException ex;
 
             SignatureInputSpec spec = MakeSignatureInput(SignatureComponent.ContentType);
-            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            SignatureParamsComponent sigParams = spec.SignatureParameters;
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(sigParams, out _));
             Assert.Equal("The signature component 'content-type' does not exist but is required.", ex.Message);
 
             spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("blah", "a"));
-            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            sigParams = spec.SignatureParameters;
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(sigParams, out _));
             Assert.Equal("The signature component 'blah;key=\"a\"' does not exist but is required.", ex.Message);
 
             spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("my-header", "a"));
-            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            sigParams = spec.SignatureParameters;
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(sigParams, out _));
             Assert.Equal("The signature component 'my-header;key=\"a\"' does not exist but is required.", ex.Message);
 
             spec = MakeSignatureInput(new HttpHeaderStructuredFieldComponent("my-header"));
-            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            sigParams = spec.SignatureParameters;
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(sigParams, out _));
             Assert.Equal("The signature component 'my-header;sf' does not exist but is required.", ex.Message);
 
             spec = MakeSignatureInput(new HttpHeaderComponent("my-trailer", bindRequest: false, useByteSequence: false, fromTrailers: true));
-            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            sigParams = spec.SignatureParameters;
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(sigParams, out _));
             Assert.Equal("The signature component 'my-trailer;tr' does not exist but is required.", ex.Message);
 
             spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("my-trailer", "a", bindRequest: false, fromTrailers: true));
-            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            sigParams = spec.SignatureParameters;
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(sigParams, out _));
             Assert.Equal("The signature component 'my-trailer;tr;key=\"a\"' does not exist but is required.", ex.Message);
 
             spec = MakeSignatureInput(new HttpHeaderStructuredFieldComponent("my-trailer", bindRequest: false, fromTrailers: true));
-            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            sigParams = spec.SignatureParameters;
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(sigParams, out _));
             Assert.Equal("The signature component 'my-trailer;tr;sf' does not exist but is required.", ex.Message);
 
             spec = MakeSignatureInput(new QueryParamComponent("blotz"));
-            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            sigParams = spec.SignatureParameters;
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(sigParams, out _));
             Assert.Equal("The signature component '@query-param;name=\"blotz\"' does not exist but is required.", ex.Message);
 
             // With bindRequest: true
             spec = MakeSignatureInput(new HttpHeaderComponent("blah", bindRequest: true));
-            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            sigParams = spec.SignatureParameters;
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(sigParams, out _));
             Assert.Equal("The signature component 'blah;req' does not exist but is required.", ex.Message);
 
             spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("my-header", "a", bindRequest: true));
-            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            sigParams = spec.SignatureParameters;
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(sigParams, out _));
             Assert.Equal("The signature component 'my-header;req;key=\"a\"' does not exist but is required.", ex.Message);
 
             spec = MakeSignatureInput(new HttpHeaderStructuredFieldComponent("my-header", bindRequest: true));
-            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            sigParams = spec.SignatureParameters;
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(sigParams, out _));
             Assert.Equal("The signature component 'my-header;req;sf' does not exist but is required.", ex.Message);
 
             spec = MakeSignatureInput(new HttpHeaderComponent("x-trailer", bindRequest: true, useByteSequence: false, fromTrailers: true));
-            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            sigParams = spec.SignatureParameters;
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(sigParams, out _));
             Assert.Equal("The signature component 'x-trailer;req;tr' does not exist but is required.", ex.Message);
 
             spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("x-trailer", "a", bindRequest: true, fromTrailers: true));
-            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            sigParams = spec.SignatureParameters;
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(sigParams, out _));
             Assert.Equal("The signature component 'x-trailer;req;tr;key=\"a\"' does not exist but is required.", ex.Message);
 
             spec = MakeSignatureInput(new HttpHeaderStructuredFieldComponent("x-trailer", bindRequest: true, fromTrailers: true));
-            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(spec, out _));
+            sigParams = spec.SignatureParameters;
+            ex = Assert.Throws<SignatureComponentMissingException>(() => context.GetSignatureInput(sigParams, out _));
             Assert.Equal("The signature component 'x-trailer;req;tr;sf' does not exist but is required.", ex.Message);
         }
 
@@ -127,40 +141,46 @@ namespace NSign.Signatures
             }
 
             SignatureInputSpec spec;
+            SignatureParamsComponent sigParams;
             string inputStr;
             ReadOnlyMemory<byte> input;
 
             // Simple HTTP header.
             spec = MakeSignatureInput(new HttpHeaderComponent("my-Header", bindRequest, useByteSequence: false, fromTrailers));
-            input = context.GetSignatureInput(spec, out inputStr);
+            sigParams = spec.SignatureParameters;
+            input = context.GetSignatureInput(sigParams, out inputStr);
             Assert.Equal($"(\"my-header\"{suffix})", inputStr);
             Assert.Equal($"\"my-header\"{suffix}: blah\n\"@signature-params\": (\"my-header\"{suffix})",
                 Encoding.ASCII.GetString(input.Span));
 
             // Simple HTTP header that happens to be dictionary structured.
             spec = MakeSignatureInput(new HttpHeaderComponent("my-generic-dict", bindRequest, useByteSequence: false, fromTrailers));
-            input = context.GetSignatureInput(spec, out inputStr);
+            sigParams = spec.SignatureParameters;
+            input = context.GetSignatureInput(sigParams, out inputStr);
             Assert.Equal($"(\"my-generic-dict\"{suffix})", inputStr);
             Assert.Equal($"\"my-generic-dict\"{suffix}: a=b, b=c, b=z, c\n\"@signature-params\": (\"my-generic-dict\"{suffix})",
                 Encoding.ASCII.GetString(input.Span));
 
             // Dictionary-structured HTTP header.
             spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("my-generic-dict", "b", bindRequest, fromTrailers));
-            input = context.GetSignatureInput(spec, out inputStr);
+            sigParams = spec.SignatureParameters;
+            input = context.GetSignatureInput(sigParams, out inputStr);
             Assert.Equal($"(\"my-generic-dict\"{suffix};key=\"b\")", inputStr);
             Assert.Equal($"\"my-generic-dict\"{suffix};key=\"b\": z\n\"@signature-params\": (\"my-generic-dict\"{suffix};key=\"b\")",
                 Encoding.ASCII.GetString(input.Span));
 
             // Dictionary-structured HTTP header with implicit 'true' value.
             spec = MakeSignatureInput(new HttpHeaderDictionaryStructuredComponent("my-generic-dict", "c", bindRequest, fromTrailers));
-            input = context.GetSignatureInput(spec, out inputStr);
+            sigParams = spec.SignatureParameters;
+            input = context.GetSignatureInput(sigParams, out inputStr);
             Assert.Equal($"(\"my-generic-dict\"{suffix};key=\"c\")", inputStr);
             Assert.Equal($"\"my-generic-dict\"{suffix};key=\"c\": ?1\n\"@signature-params\": (\"my-generic-dict\"{suffix};key=\"c\")",
                 Encoding.ASCII.GetString(input.Span));
 
             // Structured field HTTP header.
             spec = MakeSignatureInput(new HttpHeaderStructuredFieldComponent("my-generic-dict", bindRequest, fromTrailers));
-            input = context.GetSignatureInput(spec, out inputStr);
+            sigParams = spec.SignatureParameters;
+            input = context.GetSignatureInput(sigParams, out inputStr);
             Assert.Equal($"(\"my-generic-dict\"{suffix};sf)", inputStr);
             Assert.Equal($"\"my-generic-dict\"{suffix};sf: a=b, b=z, c\n\"@signature-params\": (\"my-generic-dict\"{suffix};sf)",
                 Encoding.ASCII.GetString(input.Span));
@@ -176,7 +196,7 @@ namespace NSign.Signatures
 
             SignatureInputSpec spec = new SignatureInputSpec("foo");
             spec.SignatureParameters.AddComponent(new DerivedComponent(name));
-            Assert.Throws<NotSupportedException>(() => context.GetSignatureInput(spec, out _));
+            Assert.Throws<NotSupportedException>(() => context.GetSignatureInput(spec.SignatureParameters, out _));
         }
 
         [Fact]
@@ -189,7 +209,8 @@ namespace NSign.Signatures
                 .Callback((ISignatureComponentVisitor visitor) => visitor.Visit(mockComp.Object));
 
             spec.SignatureParameters.AddComponent(mockComp.Object);
-            NotSupportedException ex = Assert.Throws<NotSupportedException>(() => context.GetSignatureInput(spec, out _));
+            NotSupportedException ex = Assert.Throws<NotSupportedException>(
+                () => context.GetSignatureInput(spec.SignatureParameters, out _));
             Assert.Equal("Custom classes derived from SignatureComponent are not supported; component 'test-component'.", ex.Message);
         }
 
@@ -229,7 +250,7 @@ namespace NSign.Signatures
 
             SignatureInputSpec spec = new SignatureInputSpec("blah");
             spec.SignatureParameters.AddComponent(new DerivedComponent(name, bindRequest));
-            ReadOnlyMemory<byte> input = context.GetSignatureInput(spec, out string inputStr);
+            ReadOnlyMemory<byte> input = context.GetSignatureInput(spec.SignatureParameters, out string inputStr);
 
             Assert.Equal($"(\"{name}\"{suffix})", inputStr);
             Assert.Equal($"\"{name}\"{suffix}: {expectedValue}\n\"@signature-params\": {inputStr}", Encoding.ASCII.GetString(input.Span));
@@ -261,7 +282,7 @@ namespace NSign.Signatures
 
             SignatureInputSpec spec = new SignatureInputSpec("blah");
             spec.SignatureParameters.AddComponent(new QueryParamComponent(paramName, bindRequest));
-            ReadOnlyMemory<byte> input = context.GetSignatureInput(spec, out string inputStr);
+            ReadOnlyMemory<byte> input = context.GetSignatureInput(spec.SignatureParameters, out string inputStr);
 
             Assert.Equal($"(\"@query-param\"{suffix};name=\"{paramName.ToLower()}\")", inputStr);
             string expectedValue = String.Join("", expectedValues.Select(v => $"\"@query-param\"{suffix};name=\"{paramName.ToLower()}\": {v}\n"));
@@ -319,7 +340,7 @@ namespace NSign.Signatures
             spec.SignatureParameters.Expires = DateTimeOffset.UnixEpoch.AddMinutes(6);
             spec.SignatureParameters.Algorithm = "my";
 
-            ReadOnlyMemory<byte> input = context.GetSignatureInput(spec, out string inputStr);
+            ReadOnlyMemory<byte> input = context.GetSignatureInput(spec.SignatureParameters, out string inputStr);
             Assert.Equal(
                 "(\"@status\" \"signature\";req;key=\"test\" \"content-type\" \"content-length\" \"@authority\")" +
                 ";created=60;expires=360;nonce=\"test-nonce\";alg=\"my\";keyid=\"my-key\";tag=\"abc\"",
@@ -357,7 +378,7 @@ namespace NSign.Signatures
                 };
             };
 
-            ReadOnlyMemory<byte> input = context.GetSignatureInput(spec, out string outputSigParams);
+            ReadOnlyMemory<byte> input = context.GetSignatureInput(spec.SignatureParameters, out string outputSigParams);
 
             Assert.Equal(inputSigParams, outputSigParams);
             Assert.Equal(
@@ -418,7 +439,7 @@ namespace NSign.Signatures
                 })
                 ;
 
-            ReadOnlyMemory<byte> input = context.GetSignatureInput(spec, out string outputSigParams);
+            ReadOnlyMemory<byte> input = context.GetSignatureInput(spec.SignatureParameters, out string outputSigParams);
 
             Assert.Equal($"(\"@test-authority\"{suffix} \"test-xyz\"{suffix};key=\"test-a\" \"@query-param\"{suffix};name=\"test-abc\")",
                 outputSigParams);
@@ -471,7 +492,7 @@ namespace NSign.Signatures
                 .AddComponent(new HttpHeaderComponent("xyz", bindRequest, useByteSequence: true, fromTrailers))
                 ;
 
-            ReadOnlyMemory<byte> input = context.GetSignatureInput(spec, out string outputSigParams);
+            ReadOnlyMemory<byte> input = context.GetSignatureInput(spec.SignatureParameters, out string outputSigParams);
 
             Assert.Equal($"(\"xyz\"{suffix})", outputSigParams);
             Assert.Equal(
@@ -521,7 +542,7 @@ namespace NSign.Signatures
                 })
                 ;
 
-            ReadOnlyMemory<byte> input = context.GetSignatureInput(spec, out string outputSigParams);
+            ReadOnlyMemory<byte> input = context.GetSignatureInput(spec.SignatureParameters, out string outputSigParams);
 
             Assert.Equal($"(\"test-xyz\";bs{suffix})", outputSigParams);
             Assert.Equal(

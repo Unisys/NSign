@@ -6,12 +6,12 @@
 
 # NSign - HTTP message signatures and verification for .NET
 
-NSign (/ˈensaɪn/) provides libraries to sign HTTP messages based on recent drafts (currently: May 26th 2022) of the
+NSign (/ˈensaɪn/) provides libraries to sign HTTP messages based on recent drafts (currently: January 9th 2023) of the
 [HTTP Message Signatures](https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/) to-be standard from
 the IETF. The key motivation for the standard is to have a standard way to sign and verify HTTP messages e.g. used in
 webhook-like scenarios where a provider needs to sign HTTP request messages before sending them to subscribers, and
-subscribers need to verify incoming messages' signatures for authentication. Signatures can however also be applied to
-HTTP response messages for a client to verify on receipt.
+subscribers need to verify incoming messages' signatures for authentication. Signatures can also be applied to HTTP
+response messages for a client to verify on receipt.
 
 >__*Disclaimer*__
 >
@@ -24,12 +24,8 @@ HTTP response messages for a client to verify on receipt.
 |---|---|---|
 | NSign.Abstractions | Abstractions (interfaces, object model, etc) for all NSign libraries. | [![Nuget](https://img.shields.io/nuget/v/NSign.Abstractions)](https://nuget.org/packages/NSign.Abstractions) |
 | NSign.SignatureProviders | Signature providers (signers and verifiers) for symmetric and asymmetric signatures. | [![Nuget](https://img.shields.io/nuget/v/NSign.SignatureProviders)](https://nuget.org/packages/NSign.SignatureProviders) |
-| NSign.AspNetCore | Middleware for verifying signatures on HTTP requests. | [![Nuget](https://img.shields.io/nuget/v/NSign.AspNetCore)](https://nuget.org/packages/NSign.AspNetCore) |
-| NSign.Client | HTTP message pipeline handlers for signing HTTP request messages. | [![Nuget](https://img.shields.io/nuget/v/NSign.Client)](https://nuget.org/packages/NSign.Client) |
-
-Please note that initially the `NSign.AspNetCore` and `NSign.Client` libraries are targeting HTTP *request* messages only.
-It's planned however to add support for signing HTTP *response* messages in `NSign.AspNetCore` and verify signatures on
-them in `NSign.Client` at a later stage too.
+| NSign.AspNetCore | Middleware for verifying signatures on HTTP requests and signing HTTP responses. | [![Nuget](https://img.shields.io/nuget/v/NSign.AspNetCore)](https://nuget.org/packages/NSign.AspNetCore) |
+| NSign.Client | HTTP message pipeline handlers (for the `System.Net.Http.HttpClient` class) for signing HTTP request messages and verifying signatures on HTTP response messages. | [![Nuget](https://img.shields.io/nuget/v/NSign.Client)](https://nuget.org/packages/NSign.Client) |
 
 ## Usage
 
@@ -82,7 +78,11 @@ namespace WebhooksEndpoint
                     options.SignatureName = "resp";
                     options.SetParameters = (sigParams) =>
                     {
-                        sigParams.WithCreatedNow().WithExpires(TimeSpan.FromMinutes(5));
+                        sigParams
+                            .WithCreatedNow()
+                            .WithExpires(TimeSpan.FromMinutes(5))
+                            .WithTag("server-signed")
+                            ;
                     };
                 })
                 .ValidateOnStart()
@@ -114,7 +114,7 @@ namespace WebhooksEndpoint
 
         private void ConfigureSignatureVerification(RequestSignatureVerificationOptions options)
         {
-            options.SignaturesToVerify.Add("sample");
+            options.TagsToVerify.Add("client-signed");
 
             options.RequiredSignatureComponents.Add(SignatureComponent.Method);
             options.RequiredSignatureComponents.Add(SignatureComponent.RequestTargetUri);
@@ -213,7 +213,11 @@ namespace WebhooksCaller
 
         private static void SetSignatureCreatedAndExpries(SignatureParamsComponent signatureParams)
         {
-            signatureParams.WithCreatedNow().WithExpires(TimeSpan.FromMinutes(5));
+            signatureParams
+                .WithCreatedNow()
+                .WithExpires(TimeSpan.FromMinutes(5))
+                .WithTag("client-signed")
+                ;
         }
 
         private static void ConfigureCallerClient(HttpClient client)

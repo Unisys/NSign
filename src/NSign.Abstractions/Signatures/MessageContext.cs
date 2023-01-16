@@ -89,21 +89,23 @@ namespace NSign.Signatures
         /// Gets <see cref="ReadOnlyMemory{T}"/> of <see cref="byte"/> representing the signature input (the signature
         /// base) for signing and verification.
         /// </summary>
-        /// <param name="inputSpec">
-        /// The <see cref="SignatureInputSpec"/> value that specifies the different parts to include in the input.
+        /// <param name="signatureParams">
+        /// The <see cref="SignatureParamsComponent"/> value that specifies the different parts to include in the input.
         /// </param>
         /// <param name="signatureParamsValue">
         /// A string that receives the representation of the '@signature-params' component for the given
-        /// <paramref name="inputSpec"/> when the method returns.
+        /// <paramref name="signatureParams"/> when the method returns.
         /// </param>
         /// <returns>
         /// A <see cref="ReadOnlyMemory{T}"/> of <see cref="byte"/> representing the signature input.
         /// </returns>
-        public ReadOnlyMemory<byte> GetSignatureInput(SignatureInputSpec inputSpec, out string signatureParamsValue)
+        public ReadOnlyMemory<byte> GetSignatureInput(
+            SignatureParamsComponent signatureParams,
+            out string signatureParamsValue)
         {
             InputBuildingVisitor visitor = new InputBuildingVisitor(this);
 
-            inputSpec.SignatureParameters.Accept(visitor);
+            signatureParams.Accept(visitor);
             signatureParamsValue = visitor.SignatureParamsValue!;
 
             return Encoding.ASCII.GetBytes(visitor.SignatureInput);

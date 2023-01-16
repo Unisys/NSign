@@ -21,11 +21,27 @@ namespace NSign
         [Fact]
         public void ShouldVerifyUsesDefault()
         {
-            Assert.False(options.ShouldVerify("blah"));
+            byte[] buffer = new byte[16];
+            SignatureContext ctx = new SignatureContext("blah", "()", buffer);
+
+            Assert.False(options.ShouldVerify(ctx));
 
             options.SignaturesToVerify.Add("blah");
 
-            Assert.True(options.ShouldVerify("blah"));
+            Assert.True(options.ShouldVerify(ctx));
+        }
+
+        [Fact]
+        public void DefaultShouldVerifyDecidesByTag()
+        {
+            byte[] buffer = new byte[16];
+            SignatureContext ctx = new SignatureContext("blah", "();tag=\"unit-test\"", buffer);
+
+            Assert.False(options.ShouldVerify(ctx));
+
+            options.TagsToVerify.Add("unit-test");
+
+            Assert.True(options.ShouldVerify(ctx));
         }
 
         [Fact]

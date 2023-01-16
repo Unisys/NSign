@@ -138,7 +138,7 @@ namespace NSign.Signatures
 
             await verifier.VerifyMessageAsync(mockContext.Object);
 
-            Assert.Equal("SignatureInputError:first=SignatureInputNotFound|second=SignatureInputMalformed", result);
+            Assert.Equal("SignatureInputError:second=SignatureInputMalformed", result);
         }
 
         [Theory]
@@ -302,9 +302,9 @@ namespace NSign.Signatures
 
             options.SignaturesToVerify.Add("unittest");
             options.ExpiresRequired = false;
-            options.VerifyNonce = (input) =>
+            options.VerifyNonce = (sigParams) =>
             {
-                Assert.Equal("aaa555", input.SignatureParameters.Nonce);
+                Assert.Equal("aaa555", sigParams.Nonce);
                 nonceVerificationCalled = true;
                 return false;
             };
