@@ -8,6 +8,11 @@ namespace NSign.Signatures
     public readonly struct SignatureContext
     {
         /// <summary>
+        /// Lazily evaluates signature input into a <see cref="SignatureParamsComponent"/> object.
+        /// </summary>
+        private readonly Lazy<SignatureParamsComponent> signatureParams;
+
+        /// <summary>
         /// Initializes a new instance of SignatureContext.
         /// </summary>
         /// <param name="name">
@@ -19,11 +24,19 @@ namespace NSign.Signatures
         /// <param name="signature">
         /// A <see cref="ReadOnlyMemory{T}"/> of <see cref="byte"/> representing the signature.
         /// </param>
-        public SignatureContext(string name, string? inputSpec, ReadOnlyMemory<byte> signature)
+        public SignatureContext(string name, string inputSpec, ReadOnlyMemory<byte> signature)
         {
             Name = name;
             InputSpec = inputSpec;
             Signature = signature;
+
+            signatureParams = new Lazy<SignatureParamsComponent>(() =>
+            {
+                SignatureInputSpec spec;
+                spec = new SignatureInputSpec(name, inputSpec);
+
+                return spec.SignatureParameters;
+            });
         }
 
         /// <summary>
@@ -34,7 +47,12 @@ namespace NSign.Signatures
         /// <summary>
         /// Gets the (unparsed) input spec string for the signature.
         /// </summary>
-        public string? InputSpec { get; }
+        public string InputSpec { get; }
+
+        /// <summary>
+        /// Gets the parsed input spec returned as a <see cref="SignatureParamsComponent"/> object.
+        /// </summary>
+        public SignatureParamsComponent SignatureParams => signatureParams.Value;
 
         /// <summary>
         /// Gets a <see cref="ReadOnlyMemory{T}"/> of <see cref="byte"/> representing the signature.

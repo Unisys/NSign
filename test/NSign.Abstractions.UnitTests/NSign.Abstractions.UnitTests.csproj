@@ -5,6 +5,7 @@
     <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <RootNamespace>NSign</RootNamespace>
+    <NoWarn>0618</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

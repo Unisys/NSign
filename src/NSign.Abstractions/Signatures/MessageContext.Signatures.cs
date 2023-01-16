@@ -163,7 +163,8 @@ namespace NSign.Signatures
             /// </param>
             /// <returns>
             /// A <see cref="Dictionary{TKey, TValue}"/> of string and <see cref="SignatureContext"/> that represents
-            /// the parsed signatures with optional signature input specs.
+            /// the parsed signatures with signature input specs. Inputs or signatures that lack their counterpart are
+            /// not included.
             /// </returns>
             private Dictionary<string, SignatureContext> LoadSignatures(
                 IEnumerable<string> sigValues,
@@ -174,9 +175,8 @@ namespace NSign.Signatures
 
                 return (from sig in signatures
                         join input in inputs
-                        on sig.Key equals input.Key into sigWithInput
-                        from optionalInput in sigWithInput.DefaultIfEmpty()
-                        select new SignatureContext(sig.Key, optionalInput.Value, sig.Value))
+                        on sig.Key equals input.Key
+                        select new SignatureContext(sig.Key, input.Value, sig.Value))
                         .ToDictionary(ctx => ctx.Name);
             }
 

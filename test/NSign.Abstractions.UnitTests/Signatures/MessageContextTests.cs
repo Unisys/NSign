@@ -34,7 +34,7 @@ namespace NSign.Signatures
         }
 
         [Theory]
-        [InlineData("sig1", "blah", null)]
+        [InlineData("sig1", "blah", "();tag=\"sig1\"")]
         [InlineData("test", "qwer", "(\"@query-param\";name=\"test\");key=\"test\"")]
         [InlineData("inexistent", null, null)]
         public void GetRequestSignatureWorks(string sigName, string? expectedSignature, string? expectedInput)
@@ -44,7 +44,7 @@ namespace NSign.Signatures
                 return header.ToLowerInvariant() switch
                 {
                     "signature" => new string[] { "sig1=:blah:, sig2=:asdf:,test=:qwer:" },
-                    "signature-input" => new string[] { "test=(\"@query-param\";name=\"test\");key=\"test\"" },
+                    "signature-input" => new string[] { "test=(\"@query-param\";name=\"test\");key=\"test\", sig1=();tag=\"sig1\"" },
                     _ => Array.Empty<string>(),
                 };
             };
@@ -73,7 +73,7 @@ namespace NSign.Signatures
         }
 
         [Theory]
-        [InlineData("sig1", "blah", null)]
+        [InlineData("sig1", "blah", "()")]
         [InlineData("test", "qwer", "(\"x-header\";key=\"test\");alg=\"test\"")]
         [InlineData("inexistent", null, null)]
         public void GetResponseSignatureWorksWhenHasResponse(string sigName, string? expectedSignature, string? expectedInput)
@@ -83,8 +83,8 @@ namespace NSign.Signatures
             {
                 return header.ToLowerInvariant() switch
                 {
-                    "signature" => new string[] { "sig1=:blah:, sig2=:asdf:,test=:qwer:" },
-                    "signature-input" => new string[] { "test=(\"x-header\";key=\"test\");alg=\"test\"" },
+                    "signature" => new string[] { "sig1=:blah:, sig2=:asdf:,test=:qwer:", },
+                    "signature-input" => new string[] { "test=(\"x-header\";key=\"test\");alg=\"test\", sig1=()", },
                     _ => Array.Empty<string>(),
                 };
             };
@@ -128,6 +128,7 @@ namespace NSign.Signatures
                 return header.ToLowerInvariant() switch
                 {
                     "signature" => new string[] { "test=:qwer:" },
+                    "signature-input" => new string[] { "test=()" },
                     _ => Array.Empty<string>(),
                 };
             };
@@ -149,6 +150,7 @@ namespace NSign.Signatures
                 return header.ToLowerInvariant() switch
                 {
                     "signature" => new string[] { "test=:qwer:" },
+                    "signature-input" => new string[] { "test=()" },
                     _ => Array.Empty<string>(),
                 };
             };
@@ -170,6 +172,7 @@ namespace NSign.Signatures
                 return header.ToLowerInvariant() switch
                 {
                     "signature" => new string[] { "test=:qwer:" },
+                    "signature-input" => new string[] { "test=()", },
                     _ => Array.Empty<string>(),
                 };
             };
@@ -185,7 +188,8 @@ namespace NSign.Signatures
             {
                 return header.ToLowerInvariant() switch
                 {
-                    "signature" => new string[] { "test=:qwer:" },
+                    "signature" => new string[] { "test=:qwer:", },
+                    "signature-input" => new string[] { "test=()", },
                     _ => Array.Empty<string>(),
                 };
             };

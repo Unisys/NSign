@@ -70,7 +70,7 @@ namespace NSign.Signatures
             }
 
             ReadOnlyMemory<byte> signature = await signer.SignAsync(
-                context.GetSignatureInput(inputSpec, out string sigInput),
+                context.GetSignatureInput(inputSpec.SignatureParameters, out string sigInput),
                 context.Aborted);
 
             if (logger.IsEnabled(LogLevel.Debug))

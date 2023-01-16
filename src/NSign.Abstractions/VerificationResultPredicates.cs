@@ -33,7 +33,6 @@ namespace NSign
         public static bool SignatureInputError(KeyValuePair<string, VerificationResult> result)
         {
             return result.Value == VerificationResult.SignatureInputMalformed ||
-                result.Value == VerificationResult.SignatureInputNotFound ||
                 result.Value == VerificationResult.SignatureInputComponentMissing;
         }
     }
