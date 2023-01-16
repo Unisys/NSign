@@ -20,10 +20,16 @@ jobs:
         BUILD_VERSION=$(cat common.props | grep -Eo '<Version>(.*)</Version>' | sed -r 's|<Version>(.*)</Version>|\1|')
         TAG_NAME=v$BUILD_VERSION
         echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-        git show-ref --tags $TAG_NAME
-        # git show-ref ... return 0 when the tag exists, and 1 when it doesn't. Use that to decide
+        # git show-ref ... returns 0 (ok) when the tag exists, and 1 (error) when it doesn't. Use that to decide
         # whether we want to publish (and tag) a new version.
-        echo "PUBLISH=$?" >> $GITHUB_ENV
+        if git show-ref --tags $TAG_NAME;
+        then
+            echo "Tag $TAG_NAME already exists."
+            echo "PUBLISH=0" >> $GITHUB_ENV
+        else
+            echo "Tag $TAG_NAME does not exist yet."
+            echo "PUBLISH=1" >> $GITHUB_ENV
+        fi
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
