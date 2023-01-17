@@ -109,14 +109,23 @@ namespace NSign.Signatures
                 bool bindRequest = httpHeaderStructuredField.BindRequest;
                 string fieldName = httpHeaderStructuredField.ComponentName;
 
-                if (TryGetHeaderOrTrailerValues(fromTrailers, bindRequest, fieldName, out IEnumerable<string> values) &&
-                    values.TryParseStructuredFieldValue(out StructuredFieldValue structuredValue))
+                if (TryGetHeaderOrTrailerValues(fromTrailers, bindRequest, fieldName, out IEnumerable<string> values))
                 {
+                    // Let's look up the type of the structured field so we know how to parse it.
+                    if (!context.HttpFieldOptions.StructuredFieldsMap.TryGetValue(fieldName, out StructuredFieldType type))
+                    {
+                        throw new UnknownStructuredFieldComponentException(httpHeaderStructuredField);
+                    }
+
+                    if (!type.TryParseStructuredFieldValue(values, out StructuredFieldValue structuredValue))
+                    {
+                        throw new StructuredFieldParsingException(fieldName, type);
+                    }
+
                     AddInput(httpHeaderStructuredField, structuredValue.Serialize());
                 }
                 else
                 {
-                    // TODO: consider separate exception in case the values are not parsable.
                     throw new SignatureComponentMissingException(httpHeaderStructuredField);
                 }
             }

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Moq;
+using NSign.Http;
 using NSign.Signatures;
 using System;
 using System.Threading;
@@ -16,7 +17,8 @@ namespace NSign.AspNetCore
     {
         private readonly DefaultHttpContext httpContext = new DefaultHttpContext();
         private readonly Mock<IMessageSigner> mockSigner = new Mock<IMessageSigner>(MockBehavior.Strict);
-        private readonly MessageSigningOptions options = new MessageSigningOptions();
+        private readonly HttpFieldOptions httpFieldOptions = new HttpFieldOptions();
+        private readonly MessageSigningOptions signingOptions = new MessageSigningOptions();
         private readonly ResponseSigningMiddleware middleware;
         private long numCallsToNext;
 
@@ -26,10 +28,10 @@ namespace NSign.AspNetCore
                 new Mock<ILogger<ResponseSigningMiddleware>>(MockBehavior.Loose);
             mockLogger.Setup(l => l.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
 
-            middleware = new ResponseSigningMiddleware(
-                mockLogger.Object,
-                new OptionsWrapper<MessageSigningOptions>(options),
-                mockSigner.Object);
+            middleware = new ResponseSigningMiddleware(mockLogger.Object,
+                                                       new OptionsWrapper<HttpFieldOptions>(httpFieldOptions),
+                                                       new OptionsWrapper<MessageSigningOptions>(signingOptions),
+                                                       mockSigner.Object);
         }
 
         //[Theory]

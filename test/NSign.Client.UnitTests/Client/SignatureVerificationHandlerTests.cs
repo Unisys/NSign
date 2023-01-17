@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Moq;
 using Moq.Protected;
+using NSign.Http;
 using NSign.Signatures;
 using System.Net.Http;
 using System.Threading;
@@ -16,7 +17,8 @@ namespace NSign.Client
         private readonly HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:8080/UnitTests/");
         private readonly HttpResponseMessage response = new HttpResponseMessage();
         private readonly Mock<IMessageVerifier> mockVerifier = new Mock<IMessageVerifier>(MockBehavior.Strict);
-        private readonly SignatureVerificationOptions options = new SignatureVerificationOptions();
+        private readonly HttpFieldOptions httpFieldOptions = new HttpFieldOptions();
+        private readonly SignatureVerificationOptions signatureVerificationOptions = new SignatureVerificationOptions();
         private readonly SignatureVerificationHandler handler;
 
         public SignatureVerificationHandlerTests()
@@ -30,10 +32,10 @@ namespace NSign.Client
                 new Mock<ILogger<SignatureVerificationHandler>>(MockBehavior.Loose);
             mockLogger.Setup(l => l.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
 
-            handler = new SignatureVerificationHandler(
-                mockLogger.Object,
-                mockVerifier.Object,
-                new OptionsWrapper<SignatureVerificationOptions>(options))
+            handler = new SignatureVerificationHandler(mockLogger.Object,
+                                                       mockVerifier.Object,
+                                                       new OptionsWrapper<HttpFieldOptions>(httpFieldOptions),
+                                                       new OptionsWrapper<SignatureVerificationOptions>(signatureVerificationOptions))
             {
                 InnerHandler = mockInnerHandler.Object,
             };

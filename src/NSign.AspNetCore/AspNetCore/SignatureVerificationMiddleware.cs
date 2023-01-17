@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NSign.Http;
 using NSign.Signatures;
 using System.Threading.Tasks;
 
@@ -25,10 +26,16 @@ namespace NSign.AspNetCore
         private readonly IMessageVerifier verifier;
 
         /// <summary>
+        /// The <see cref="IOptions{TOptions}"/> of <see cref="HttpFieldOptions"/> that should be used for both signing
+        /// messages and verifying message signatures.
+        /// </summary>
+        private readonly IOptions<HttpFieldOptions> httpFieldOptions;
+
+        /// <summary>
         /// An <see cref="IOptions{TOptions}"/> of <see cref="RequestSignatureVerificationOptions"></see> object holding
         /// the options to use for signature verification.
         /// </summary>
-        private readonly IOptions<RequestSignatureVerificationOptions> options;
+        private readonly IOptions<RequestSignatureVerificationOptions> signatureVerificationOptions;
 
         #endregion
 
@@ -41,24 +48,34 @@ namespace NSign.AspNetCore
         /// <param name="verifier">
         /// The <see cref="IMessageVerifier"/> to use for request message signature verification.
         /// </param>
-        /// <param name="options">
+        /// <param name="httpFieldOptions">
+        /// The <see cref="IOptions{TOptions}"/> of <see cref="HttpFieldOptions"/> that should be used for both signing
+        /// messages and verifying message signatures.
+        /// </param>
+        /// <param name="signatureVerificationOptions">
         /// An <see cref="IOptions{TOptions}"/> of <see cref="RequestSignatureVerificationOptions"></see> object holding
         /// the options to use for signature verification.
         /// </param>
         public SignatureVerificationMiddleware(
             ILogger<SignatureVerificationMiddleware> logger,
             IMessageVerifier verifier,
-            IOptions<RequestSignatureVerificationOptions> options)
+            IOptions<HttpFieldOptions> httpFieldOptions,
+            IOptions<RequestSignatureVerificationOptions> signatureVerificationOptions)
         {
             this.logger = logger;
             this.verifier = verifier;
-            this.options = options;
+            this.httpFieldOptions = httpFieldOptions;
+            this.signatureVerificationOptions = signatureVerificationOptions;
         }
 
         /// <inheritdoc/>
         public Task InvokeAsync(HttpContext httpContext, RequestDelegate next)
         {
-            RequestMessageContext messageContext = new RequestMessageContext(httpContext, options.Value, next, logger);
+            RequestMessageContext messageContext = new RequestMessageContext(httpContext,
+                                                                             httpFieldOptions.Value,
+                                                                             signatureVerificationOptions.Value,
+                                                                             next,
+                                                                             logger);
 
             // The middleware is relying on the verification options to use the next delegate when verification passed,
             // so it is not invoked here.

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NSign.Http;
 using NSign.Signatures;
 using System;
 using System.Collections.Generic;
@@ -13,13 +14,36 @@ namespace NSign.Client
     /// </summary>
     internal sealed class HttpResponseMessageContext : HttpRequestMessageContext
     {
+        /// <summary>
+        /// Initializes a new instance of <see cref="HttpResponseMessageContext"/>.
+        /// </summary>
+        /// <param name="logger">
+        /// The ILogger to use.
+        /// </param>
+        /// <param name="httpFieldOptions">
+        /// The <see cref="HttpFieldOptions"/> that should be used for both signing messages and verifying message
+        /// signatures.
+        /// </param>
+        /// <param name="request">
+        /// The <see cref="HttpRequestMessage"/> this context is for.
+        /// </param>
+        /// <param name="response">
+        /// The <see cref="HttpResponseMessage"/> this context is for.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> value that tracks cancellation of the request/response pipeline.
+        /// </param>
+        /// <param name="verificationOptions">
+        /// The <see cref="SignatureVerificationOptions"/> to use for signature verifiation.
+        /// </param>
         internal HttpResponseMessageContext(
             ILogger logger,
+            HttpFieldOptions httpFieldOptions,
             HttpRequestMessage request,
             HttpResponseMessage response,
             CancellationToken cancellationToken,
             SignatureVerificationOptions verificationOptions)
-            : base(logger, request, cancellationToken, null)
+            : base(logger, httpFieldOptions, request, cancellationToken, null)
         {
             Response = response;
             VerificationOptions = verificationOptions;

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NSign.Http;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -7,7 +8,7 @@ namespace NSign.Signatures
 {
     internal sealed class TestMessageContext : MessageContext
     {
-        public TestMessageContext(ILogger logger) : base(logger)
+        public TestMessageContext(ILogger logger) : base(logger, new HttpFieldOptions())
         { }
 
         internal bool HasResponseValue { get; set; }

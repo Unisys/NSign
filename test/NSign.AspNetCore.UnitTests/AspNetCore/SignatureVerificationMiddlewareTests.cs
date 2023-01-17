@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using NSign.Http;
 using NSign.Signatures;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,7 +14,8 @@ namespace NSign.AspNetCore
     {
         private readonly DefaultHttpContext httpContext = new DefaultHttpContext();
         private readonly Mock<IMessageVerifier> mockVerifier = new Mock<IMessageVerifier>(MockBehavior.Strict);
-        private readonly RequestSignatureVerificationOptions options = new RequestSignatureVerificationOptions();
+        private readonly HttpFieldOptions httpFieldOptions = new HttpFieldOptions();
+        private readonly RequestSignatureVerificationOptions signatureVerificationOptions = new RequestSignatureVerificationOptions();
         private readonly SignatureVerificationMiddleware middleware;
         private long numCallsToNext;
 
@@ -26,7 +28,8 @@ namespace NSign.AspNetCore
             middleware = new SignatureVerificationMiddleware(
                 mockLogger.Object,
                 mockVerifier.Object,
-                new OptionsWrapper<RequestSignatureVerificationOptions>(options));
+                new OptionsWrapper<HttpFieldOptions>(httpFieldOptions),
+                new OptionsWrapper<RequestSignatureVerificationOptions>(signatureVerificationOptions));
         }
 
         [Fact]

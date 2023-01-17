@@ -314,6 +314,10 @@ namespace NSign.Http
         /// <summary>
         /// Tries to parse a <see cref="StructuredFieldValue"/> from the given HTTP header values.
         /// </summary>
+        /// <param name="type">
+        /// A <see cref="StructuredFieldType"/> value that defines the expected type of the structured field. A type
+        /// mismatch will cause the method to return <c>false</c>.
+        /// </param>
         /// <param name="values">
         /// An <see cref="IEnumerable{T}"/> of <see cref="string"/> that represent the values of the HTTP header to try
         /// to parsed as a structured field.
@@ -325,22 +329,42 @@ namespace NSign.Http
         /// <returns>
         /// True if successful, or false otherwise.
         /// </returns>
-        public static bool TryParseStructuredFieldValue(this IEnumerable<string> values, out StructuredFieldValue value)
+        public static bool TryParseStructuredFieldValue(
+            this StructuredFieldType type,
+            IEnumerable<string> values,
+            out StructuredFieldValue value)
         {
             string combinedValues = String.Join(',', values);
-            if (null == SfvParser.ParseList(combinedValues, out IReadOnlyList<ParsedItem> list))
+
+            switch (type)
             {
-                value = new StructuredFieldValue(list);
-                return true;
+                case StructuredFieldType.Dictionary:
+                    if (null == SfvParser.ParseDictionary(combinedValues, out IReadOnlyDictionary<string, ParsedItem> dict))
+                    {
+                        value = new StructuredFieldValue(dict);
+                        return true;
+                    }
+                    break;
+
+                case StructuredFieldType.List:
+                    if (null == SfvParser.ParseList(combinedValues, out IReadOnlyList<ParsedItem> list))
+                    {
+                        value = new StructuredFieldValue(list);
+                        return true;
+                    }
+                    break;
+
+                case StructuredFieldType.Item:
+                    if (null == SfvParser.ParseItem(combinedValues, out ParsedItem item))
+                    {
+                        value = new StructuredFieldValue(item);
+                        return true;
+                    }
+                    break;
+
+                default:
+                    break;
             }
-            else if (null == SfvParser.ParseDictionary(combinedValues, out IReadOnlyDictionary<string, ParsedItem> dict))
-            {
-                value = new StructuredFieldValue(dict);
-                return true;
-            }
-            // The parser would always parse single items as a list (because a single item is a list with a single
-            // element), thus we can't expect SfvParser.ParseItem to succeed when SfvParser.ParseList has not succeeded.
-            // Accordingly, there's no point in trying SfvParser.ParseItem(...) here.
 
             value = default;
             return false;

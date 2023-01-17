@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
+using NSign.Http;
 using NSign.Signatures;
 using System;
 using System.Threading.Tasks;
@@ -24,6 +25,10 @@ namespace NSign.AspNetCore
         /// <param name="httpContext">
         /// The <see cref="HttpContext"/> defining the request/response pipeline.
         /// </param>
+        /// <param name="httpFieldOptions">
+        /// The <see cref="HttpFieldOptions"/> that should be used for both signing messages and verifying message
+        /// signatures.
+        /// </param>
         /// <param name="signingOptions">
         /// The <see cref="MessageSigningOptions"/> object that describes the details of how messages should be signed.
         /// </param>
@@ -33,9 +38,10 @@ namespace NSign.AspNetCore
         internal RequestResponseMessageContext(
             IMessageSigner signer,
             HttpContext httpContext,
+            HttpFieldOptions httpFieldOptions,
             MessageSigningOptions signingOptions,
             ILogger logger)
-            : base(httpContext, null, null, logger)
+            : base(httpContext, httpFieldOptions, null, null, logger)
         {
             Signer = signer;
             this.signingOptions = signingOptions;

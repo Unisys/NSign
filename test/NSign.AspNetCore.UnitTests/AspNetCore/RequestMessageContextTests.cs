@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Moq;
+using NSign.Http;
 using NSign.Signatures;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,8 @@ namespace NSign.AspNetCore
         private readonly DefaultHttpContext httpContext = new DefaultHttpContext();
         private readonly Mock<IHttpRequestTrailersFeature> mockRequestTrailers =
             new Mock<IHttpRequestTrailersFeature>(MockBehavior.Strict);
-        private readonly SignatureVerificationOptions options = new SignatureVerificationOptions();
+        private readonly HttpFieldOptions httpFieldOptions = new HttpFieldOptions();
+        private readonly SignatureVerificationOptions signatureVerificationOptions = new SignatureVerificationOptions();
         private readonly RequestMessageContext context;
         private long numCallsToNext;
 
@@ -29,13 +31,17 @@ namespace NSign.AspNetCore
 
             httpContext.Features.Set(mockRequestTrailers.Object);
 
-            context = new RequestMessageContext(httpContext, options, CountingMiddleware, mockLogger.Object);
+            context = new RequestMessageContext(httpContext,
+                                                httpFieldOptions,
+                                                signatureVerificationOptions,
+                                                CountingMiddleware,
+                                                mockLogger.Object);
         }
 
         [Fact]
         public void VerificationOptionsArePassed()
         {
-            Assert.Same(options, context.VerificationOptions);
+            Assert.Same(signatureVerificationOptions, context.VerificationOptions);
         }
 
         [Fact]

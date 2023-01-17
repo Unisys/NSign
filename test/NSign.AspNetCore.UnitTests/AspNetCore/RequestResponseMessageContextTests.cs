@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Moq;
+using NSign.Http;
 using NSign.Signatures;
 using System;
 using System.Reflection;
@@ -19,7 +20,8 @@ namespace NSign.AspNetCore
         private readonly Mock<IHttpResponseTrailersFeature> mockResponseTrailers =
             new Mock<IHttpResponseTrailersFeature>(MockBehavior.Strict);
         private readonly Mock<IMessageSigner> mockSigner;
-        private readonly MessageSigningOptions options = new MessageSigningOptions();
+        private readonly HttpFieldOptions httpFieldOptions = new HttpFieldOptions();
+        private readonly MessageSigningOptions signingOptions = new MessageSigningOptions();
         private readonly RequestResponseMessageContext context;
 
         public RequestResponseMessageContextTests()
@@ -30,7 +32,11 @@ namespace NSign.AspNetCore
             httpContext.Features.Set(mockRequestTrailers.Object);
             httpContext.Features.Set(mockResponseTrailers.Object);
 
-            context = new RequestResponseMessageContext(mockSigner.Object, httpContext, options, mockLogger.Object);
+            context = new RequestResponseMessageContext(mockSigner.Object,
+                                                        httpContext,
+                                                        httpFieldOptions,
+                                                        signingOptions,
+                                                        mockLogger.Object);
         }
 
         [Fact]
@@ -42,7 +48,7 @@ namespace NSign.AspNetCore
         [Fact]
         public void SigningOptionsArePassed()
         {
-            Assert.Same(options, context.SigningOptions);
+            Assert.Same(signingOptions, context.SigningOptions);
         }
 
         [Fact]
