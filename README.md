@@ -176,7 +176,7 @@ namespace WebhooksCaller
             services
                 .Configure<AddDigestOptions>(options => options.WithHash(AddDigestOptions.Hash.Sha256))
                 .ConfigureMessageSigningOptions(ConfigureRequestSigner)
-                # If you also want to verify signatures on responses:
+                // If you also want to verify signatures on responses:
                 .Configure<SignatureVerificationOptions>((options) => {
                     // Configure options for response signature verification here.
                 })
@@ -184,7 +184,7 @@ namespace WebhooksCaller
                 .AddHttpClient<ICaller, Caller>("WebhooksCaller")
                 .ConfigureHttpClient(ConfigureCallerClient)
                 .AddDigestAndSigningHandlers()
-                # If you also want to verify signatures on responses:
+                // If you also want to verify signatures on responses:
                 .AddSignatureVerifiationHandler()
                 .Services
 
