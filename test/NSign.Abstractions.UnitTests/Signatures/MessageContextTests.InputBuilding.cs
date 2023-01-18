@@ -94,6 +94,38 @@ namespace NSign.Signatures
             Assert.Equal("The signature component 'x-trailer;req;tr;sf' does not exist but is required.", ex.Message);
         }
 
+        [Fact]
+        public void GetSignatureInputThrowsForUnknownStructuredFields()
+        {
+            UnknownStructuredFieldComponentException ex;
+            SignatureInputSpec spec;
+            SignatureParamsComponent sigParams;
+
+            context.OnGetHeaderValues = (name) => new string[] { "", };
+
+            spec = MakeSignatureInput(new HttpHeaderStructuredFieldComponent("my-header"));
+            sigParams = spec.SignatureParameters;
+            ex = Assert.Throws<UnknownStructuredFieldComponentException>(() => context.GetSignatureInput(sigParams, out _));
+            Assert.Equal("The HTTP field 'my-header' is not registered as a structured field. Did you forget to " +
+                "register this field in HttpFieldOptions.StructuredFieldsMap?", ex.Message);
+        }
+
+        [Fact]
+        public void GetSignatureInputThrowsForStructuredFieldParsingException()
+        {
+            StructuredFieldParsingException ex;
+            SignatureInputSpec spec;
+            SignatureParamsComponent sigParams;
+
+            context.OnGetHeaderValues = (name) => new string[] { "abc123=def456", };
+
+            spec = MakeSignatureInput(new HttpHeaderStructuredFieldComponent("content-type"));
+            sigParams = spec.SignatureParameters;
+            ex = Assert.Throws<StructuredFieldParsingException>(() => context.GetSignatureInput(sigParams, out _));
+            Assert.Equal("The value of the structured HTTP field 'content-type' of type Item could not be parsed.",
+                         ex.Message);
+        }
+
         [Theory]
         [InlineData(false, false)]
         [InlineData(false, true)]
@@ -101,6 +133,7 @@ namespace NSign.Signatures
         [InlineData(true, true)]
         public void GetSignatureInputGetsCorrectHttpHeadersOrTrailers(bool bindRequest, bool fromTrailers)
         {
+            context.HttpFieldOptions.StructuredFieldsMap.Add("My-Generic-Dict", Http.StructuredFieldType.Dictionary);
             Func<string, IEnumerable<string>> getValues = (fieldName) =>
             {
                 return fieldName switch

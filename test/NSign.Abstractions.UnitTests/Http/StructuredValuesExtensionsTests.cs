@@ -123,10 +123,12 @@ namespace NSign.Http
         }
 
         [Theory]
-        [InlineData(@"""abc")]
-        public void TryParseStructuredFieldValueFailsForInvalidInput(string input)
+        [InlineData(StructuredFieldType.Dictionary, @"""abc")]
+        [InlineData(StructuredFieldType.Item, @"""abc")]
+        [InlineData(StructuredFieldType.List, @"""abc")]
+        public void TryParseStructuredFieldValueFailsForInvalidInput(StructuredFieldType type, string input)
         {
-            Assert.False(new string[] { input }.TryParseStructuredFieldValue(out StructuredFieldValue value));
+            Assert.False(type.TryParseStructuredFieldValue(new string[] { input }, out StructuredFieldValue value));
             Assert.Equal(StructuredFieldType.Unknown, value.Type);
 
             try
@@ -158,14 +160,24 @@ namespace NSign.Http
         [InlineData(@"a=(1  2), b=3,  c=4; aa=bb, d=(5  6); valid", StructuredFieldType.Dictionary,
             @"a=(1 2), b=3, c=4;aa=bb, d=(5 6);valid")]
         [InlineData(@"5; foo=bar", StructuredFieldType.List, @"5;foo=bar")]
+        [InlineData(@"5; foo=bar", StructuredFieldType.Item, @"5;foo=bar")]
         public void TryParseStructuredFieldValueWithSubsequentSerializationNormalizes(
             string input,
             StructuredFieldType expectedType,
             string expectedOutout)
         {
-            Assert.True(new string[] { input, }.TryParseStructuredFieldValue(out StructuredFieldValue value));
+            Assert.True(expectedType.TryParseStructuredFieldValue(new string[] { input, }, out StructuredFieldValue value));
             Assert.Equal(expectedType, value.Type);
             Assert.Equal(expectedOutout, value.Serialize());
+        }
+
+        [Theory]
+        [InlineData(StructuredFieldType.Unknown, "blah")]
+        [InlineData((StructuredFieldType)999, "blah")]
+        public void TryParseStructuredFieldValueFailsForUnsupportedTypes(StructuredFieldType type, string input)
+        {
+            Assert.False(type.TryParseStructuredFieldValue(new string[] { input, }, out StructuredFieldValue value));
+            Assert.Equal(StructuredFieldType.Unknown, value.Type);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Moq;
+using NSign.Http;
 using NSign.Signatures;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace NSign
 
         public SignatureVerificationOptionsTests()
         {
-            mockContext = new Mock<MessageContext>(MockBehavior.Strict, mockLogger.Object);
+            mockContext = new Mock<MessageContext>(MockBehavior.Strict, mockLogger.Object, new HttpFieldOptions());
         }
 
         [Fact]

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NSign.Http;
 using NSign.Signatures;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,10 @@ namespace NSign.Client
         /// <param name="logger">
         /// The ILogger to use.
         /// </param>
+        /// <param name="httpFieldOptions">
+        /// The <see cref="HttpFieldOptions"/> that should be used for both signing messages and verifying message
+        /// signatures.
+        /// </param>
         /// <param name="request">
         /// The <see cref="HttpRequestMessage"/> this context is for.
         /// </param>
@@ -40,10 +45,11 @@ namespace NSign.Client
         /// </param>
         internal HttpRequestMessageContext(
             ILogger logger,
+            HttpFieldOptions httpFieldOptions,
             HttpRequestMessage request,
             CancellationToken cancellationToken,
             MessageSigningOptions? signingOptions)
-            : base(logger)
+            : base(logger, httpFieldOptions)
         {
             Debug.Assert(null != request, "The request must not be null.");
 

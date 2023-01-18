@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NSign.Http;
 using NSign.Signatures;
 using System.Net.Http;
 using System.Threading;
@@ -24,9 +25,15 @@ namespace NSign.Client
         private readonly IMessageSigner signer;
 
         /// <summary>
+        /// The <see cref="IOptions{TOptions}"/> of <see cref="HttpFieldOptions"/> that should be used for both signing
+        /// messages and verifying message signatures.
+        /// </summary>
+        private readonly IOptions<HttpFieldOptions> httpFieldOptions;
+
+        /// <summary>
         /// The IOptions of <see cref="MessageSigningOptions"/> to define how to sign requests.
         /// </summary>
-        private readonly IOptions<MessageSigningOptions> options;
+        private readonly IOptions<MessageSigningOptions> signingOptions;
 
         /// <summary>
         /// Initializes a new instance of SigningHandler.
@@ -37,17 +44,23 @@ namespace NSign.Client
         /// <param name="signer">
         /// The <see cref="IMessageSigner"/> to use to sign outgoing request messages.
         /// </param>
-        /// <param name="options">
+        /// <param name="httpFieldOptions">
+        /// The <see cref="IOptions{TOptions}"/> of <see cref="HttpFieldOptions"/> that should be used for both signing
+        /// messages and verifying message signatures.
+        /// </param>
+        /// <param name="signingOptions">
         /// The IOptions of <see cref="MessageSigningOptions"/> to define how to sign requests.
         /// </param>
         public SigningHandler(
             ILogger<SigningHandler> logger,
             IMessageSigner signer,
-            IOptions<MessageSigningOptions> options)
+            IOptions<HttpFieldOptions> httpFieldOptions,
+            IOptions<MessageSigningOptions> signingOptions)
         {
             this.logger = logger;
             this.signer = signer;
-            this.options = options;
+            this.httpFieldOptions = httpFieldOptions;
+            this.signingOptions = signingOptions;
         }
 
         /// <inheritdoc/>
@@ -55,8 +68,11 @@ namespace NSign.Client
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            HttpRequestMessageContext context = new HttpRequestMessageContext(
-                logger, request, cancellationToken, options.Value);
+            HttpRequestMessageContext context = new HttpRequestMessageContext(logger,
+                                                                              httpFieldOptions.Value,
+                                                                              request,
+                                                                              cancellationToken,
+                                                                              signingOptions.Value);
 
             await signer.SignMessageAsync(context);
 

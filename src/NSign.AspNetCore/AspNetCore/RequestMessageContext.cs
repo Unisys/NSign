@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
+using NSign.Http;
 using NSign.Signatures;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,10 @@ namespace NSign.AspNetCore
         /// <param name="httpContext">
         /// The <see cref="HttpContext"/> defining the request/response pipeline.
         /// </param>
+        /// <param name="httpFieldOptions">
+        /// The <see cref="HttpFieldOptions"/> that should be used for both signing messages and verifying message
+        /// signatures.
+        /// </param>
         /// <param name="verificationOptions">
         /// The <see cref="SignatureVerificationOptions"/> object that describes the details of signature verification.
         /// Can be null only when this context is not used for signature verification.
@@ -40,10 +45,11 @@ namespace NSign.AspNetCore
         /// </param>
         internal RequestMessageContext(
             HttpContext httpContext,
+            HttpFieldOptions httpFieldOptions,
             SignatureVerificationOptions? verificationOptions,
             RequestDelegate? nextMiddleware,
             ILogger logger)
-            : base(logger)
+            : base(logger, httpFieldOptions)
         {
             Debug.Assert(null != httpContext, "The httpContext must not be null.");
 

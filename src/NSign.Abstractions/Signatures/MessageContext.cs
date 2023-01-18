@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NSign.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,13 +29,24 @@ namespace NSign.Signatures
         /// <param name="logger">
         /// Gets the <see cref="ILogger"/> to use.
         /// </param>
-        public MessageContext(ILogger logger)
+        /// <param name="httpFieldOptions">
+        /// The <see cref="HttpFieldOptions"/> that should be used for both signing messages and verifying message
+        /// signatures.
+        /// </param>
+        public MessageContext(ILogger logger, HttpFieldOptions httpFieldOptions)
         {
             signatures = new Signatures(this);
             Logger = logger;
+            HttpFieldOptions = httpFieldOptions;
         }
 
         #region Public Interface
+
+        /// <summary>
+        /// The <see cref="HttpFieldOptions"/> that should be used for both signing messages and verifying message
+        /// signatures.
+        /// </summary>
+        public HttpFieldOptions HttpFieldOptions { get; }
 
         /// <summary>
         /// The <see cref="MessageSigningOptions"/> that should be used for signing messages. The default implementation

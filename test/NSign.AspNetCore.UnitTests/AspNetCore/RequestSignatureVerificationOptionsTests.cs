@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NSign.Signatures;
+using NSign.Http;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,20 +14,25 @@ namespace NSign.AspNetCore
         private readonly Mock<ILogger> mockLogger = new Mock<ILogger>(MockBehavior.Loose);
         private readonly DefaultHttpContext httpContext = new DefaultHttpContext();
         private readonly RequestMessageContext messageContext;
-        private readonly RequestSignatureVerificationOptions options = new RequestSignatureVerificationOptions();
+        private readonly HttpFieldOptions httpFieldOptions = new HttpFieldOptions();
+        private readonly RequestSignatureVerificationOptions signatureVerificationOptions = new RequestSignatureVerificationOptions();
         private long numCallsToNext;
 
         public RequestSignatureVerificationOptionsTests()
         {
-            messageContext = new RequestMessageContext(httpContext, options, CountingMiddleware, mockLogger.Object);
+            messageContext = new RequestMessageContext(httpContext,
+                                                       httpFieldOptions,
+                                                       signatureVerificationOptions,
+                                                       CountingMiddleware,
+                                                       mockLogger.Object);
         }
 
         [Fact]
         public async Task OnMissingSignaturesUsesDefault()
         {
-            options.MissingSignatureResponseStatus = 123;
+            signatureVerificationOptions.MissingSignatureResponseStatus = 123;
 
-            await options.OnMissingSignatures(messageContext);
+            await signatureVerificationOptions.OnMissingSignatures(messageContext);
 
             Assert.Equal(123, httpContext.Response.StatusCode);
             Assert.Equal(0, numCallsToNext);
@@ -36,7 +41,7 @@ namespace NSign.AspNetCore
         [Fact]
         public async Task OnSignatureInputErrorUsesDefault()
         {
-            options.SignatureInputErrorResponseStatus = 234;
+            signatureVerificationOptions.SignatureInputErrorResponseStatus = 234;
 
             Dictionary<string, VerificationResult> map = new Dictionary<string, VerificationResult>()
             {
@@ -44,7 +49,7 @@ namespace NSign.AspNetCore
                 { "second", VerificationResult.Unknown },
             };
 
-            await options.OnSignatureInputError(messageContext, map);
+            await signatureVerificationOptions.OnSignatureInputError(messageContext, map);
 
             Assert.Equal(234, httpContext.Response.StatusCode);
             Assert.Equal(0, numCallsToNext);
@@ -53,7 +58,7 @@ namespace NSign.AspNetCore
         [Fact]
         public async Task OnSignatureVerificationFailedDefault()
         {
-            options.VerificationErrorResponseStatus = 345;
+            signatureVerificationOptions.VerificationErrorResponseStatus = 345;
 
             Dictionary<string, VerificationResult> map = new Dictionary<string, VerificationResult>()
             {
@@ -61,7 +66,7 @@ namespace NSign.AspNetCore
                 { "b", VerificationResult.Unknown },
             };
 
-            await options.OnSignatureVerificationFailed(messageContext, map);
+            await signatureVerificationOptions.OnSignatureVerificationFailed(messageContext, map);
 
             Assert.Equal(345, httpContext.Response.StatusCode);
             Assert.Equal(0, numCallsToNext);
@@ -70,7 +75,7 @@ namespace NSign.AspNetCore
         [Fact]
         public void OnSignatureVerificationSucceededUsesDefault()
         {
-            Assert.Same(Task.CompletedTask, options.OnSignatureVerificationSucceeded(messageContext));
+            Assert.Same(Task.CompletedTask, signatureVerificationOptions.OnSignatureVerificationSucceeded(messageContext));
 
             Assert.Equal(1, numCallsToNext);
         }

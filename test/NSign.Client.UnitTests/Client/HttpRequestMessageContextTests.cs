@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Moq;
+using NSign.Http;
 using NSign.Signatures;
 using System;
 using System.Collections.Generic;
@@ -16,14 +17,18 @@ namespace NSign.Client
         private readonly Mock<ILogger> mockLogger = new Mock<ILogger>(MockBehavior.Strict);
         private readonly HttpRequestMessage request = new HttpRequestMessage(
             HttpMethod.Options, "https://localhost:8443/blah/blotz?a=b&a=c&A=B&d=");
+        private readonly HttpFieldOptions httpFieldOptions = new HttpFieldOptions();
         private readonly MessageSigningOptions signingOptions = new MessageSigningOptions();
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly HttpRequestMessageContext context;
 
         public HttpRequestMessageContextTests()
         {
-            context = new HttpRequestMessageContext(
-                mockLogger.Object, request, cancellationTokenSource.Token, signingOptions);
+            context = new HttpRequestMessageContext(mockLogger.Object,
+                                                    httpFieldOptions,
+                                                    request,
+                                                    cancellationTokenSource.Token,
+                                                    signingOptions);
         }
 
         public void Dispose()

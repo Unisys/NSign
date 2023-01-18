@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Moq;
+using NSign.Http;
 using System;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,7 @@ namespace NSign.Signatures
 
             mockLogger.Setup(l => l.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
 
-            mockContext = new Mock<MessageContext>(MockBehavior.Strict, mockLogger.Object);
+            mockContext = new Mock<MessageContext>(MockBehavior.Strict, mockLogger.Object, new HttpFieldOptions());
 
             options.OnMissingSignatures = (ctx) =>
             {

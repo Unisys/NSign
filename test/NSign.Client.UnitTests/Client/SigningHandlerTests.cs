@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Moq;
 using Moq.Protected;
+using NSign.Http;
 using NSign.Signatures;
 using System.Net.Http;
 using System.Threading;
@@ -16,7 +17,8 @@ namespace NSign.Client
         private readonly HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:8080/UnitTests/");
         private readonly HttpResponseMessage response = new HttpResponseMessage();
         private readonly Mock<IMessageSigner> mockSigner = new Mock<IMessageSigner>(MockBehavior.Strict);
-        private readonly MessageSigningOptions options = new MessageSigningOptions();
+        private readonly HttpFieldOptions httpFieldOptions = new HttpFieldOptions();
+        private readonly MessageSigningOptions signingOptions = new MessageSigningOptions();
         private readonly SigningHandler handler;
 
         public SigningHandlerTests()
@@ -29,10 +31,11 @@ namespace NSign.Client
             handler = new SigningHandler(
                 new NullLogger<SigningHandler>(),
                 mockSigner.Object,
-                new OptionsWrapper<MessageSigningOptions>(options))
-            {
-                InnerHandler = mockInnerHandler.Object,
-            };
+                new OptionsWrapper<HttpFieldOptions>(httpFieldOptions),
+                new OptionsWrapper<MessageSigningOptions>(signingOptions))
+                {
+                    InnerHandler = mockInnerHandler.Object,
+                };
         }
 
         [Fact]

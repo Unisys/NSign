@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Moq;
+using NSign.Http;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace NSign.Signatures
             Mock<ILogger<DefaultMessageSigner>> mockLogger = new Mock<ILogger<DefaultMessageSigner>>(MockBehavior.Loose);
             mockLogger.Setup(l => l.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
 
-            mockContext = new Mock<MessageContext>(MockBehavior.Strict, mockLogger.Object);
+            mockContext = new Mock<MessageContext>(MockBehavior.Strict, mockLogger.Object, new HttpFieldOptions());
 
             signer = new DefaultMessageSigner(mockLogger.Object, mockSigner.Object);
         }
