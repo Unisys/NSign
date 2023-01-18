@@ -29,7 +29,8 @@ response messages for a client to verify on receipt.
 
 ## Usage
 
-Below are some usage examples of the `NSign.*` libraries. Sample code will be added to the repository at a later time.
+Below are some usage examples of the `NSign.*` libraries. Additional sample code can also be found under
+[examples/](examples/).
 
 ### Validate signed requests in AspNetCore Server (.Net 6.0 and 7.0)
 

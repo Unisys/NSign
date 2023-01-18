@@ -1,0 +1,68 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Subscriber", "Subscriber\Subscriber.csproj", "{D5D4EA20-FC0B-45E8-B87F-1258C566F68F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Publisher", "Publisher\Publisher.csproj", "{D07B51D9-0EF8-4ECA-AAA7-47F2C6BFE624}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NSign", "NSign", "{D9E9203A-D50B-45C5-8764-58843FA32725}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NSign.Abstractions", "..\src\NSign.Abstractions\NSign.Abstractions.csproj", "{53048365-7E67-4A00-9253-4399BEAB4EBA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NSign.AspNetCore", "..\src\NSign.AspNetCore\NSign.AspNetCore.csproj", "{38123EE0-96C5-4A61-89D4-C19DE179702B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NSign.Client", "..\src\NSign.Client\NSign.Client.csproj", "{53F8ABC0-23DC-42F1-BCF5-9C1F477DC4A1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NSign.SignatureProviders", "..\src\NSign.SignatureProviders\NSign.SignatureProviders.csproj", "{A1BF8AC2-910C-4741-8FE7-8A4C23DAC283}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E861284A-A541-49CD-8A3F-67674AAC44B9}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D5D4EA20-FC0B-45E8-B87F-1258C566F68F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5D4EA20-FC0B-45E8-B87F-1258C566F68F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5D4EA20-FC0B-45E8-B87F-1258C566F68F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5D4EA20-FC0B-45E8-B87F-1258C566F68F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D07B51D9-0EF8-4ECA-AAA7-47F2C6BFE624}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D07B51D9-0EF8-4ECA-AAA7-47F2C6BFE624}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D07B51D9-0EF8-4ECA-AAA7-47F2C6BFE624}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D07B51D9-0EF8-4ECA-AAA7-47F2C6BFE624}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53048365-7E67-4A00-9253-4399BEAB4EBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53048365-7E67-4A00-9253-4399BEAB4EBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53048365-7E67-4A00-9253-4399BEAB4EBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53048365-7E67-4A00-9253-4399BEAB4EBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38123EE0-96C5-4A61-89D4-C19DE179702B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38123EE0-96C5-4A61-89D4-C19DE179702B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38123EE0-96C5-4A61-89D4-C19DE179702B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38123EE0-96C5-4A61-89D4-C19DE179702B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53F8ABC0-23DC-42F1-BCF5-9C1F477DC4A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53F8ABC0-23DC-42F1-BCF5-9C1F477DC4A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53F8ABC0-23DC-42F1-BCF5-9C1F477DC4A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53F8ABC0-23DC-42F1-BCF5-9C1F477DC4A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1BF8AC2-910C-4741-8FE7-8A4C23DAC283}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1BF8AC2-910C-4741-8FE7-8A4C23DAC283}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1BF8AC2-910C-4741-8FE7-8A4C23DAC283}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1BF8AC2-910C-4741-8FE7-8A4C23DAC283}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{53048365-7E67-4A00-9253-4399BEAB4EBA} = {D9E9203A-D50B-45C5-8764-58843FA32725}
+		{38123EE0-96C5-4A61-89D4-C19DE179702B} = {D9E9203A-D50B-45C5-8764-58843FA32725}
+		{53F8ABC0-23DC-42F1-BCF5-9C1F477DC4A1} = {D9E9203A-D50B-45C5-8764-58843FA32725}
+		{A1BF8AC2-910C-4741-8FE7-8A4C23DAC283} = {D9E9203A-D50B-45C5-8764-58843FA32725}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {32E7FC77-684C-4DE5-8C3A-D75829F9D208}
+	EndGlobalSection
+EndGlobal
