@@ -34,7 +34,7 @@ namespace NSign.Client
         /// A <see cref="CancellationToken"/> value that tracks cancellation of the request/response pipeline.
         /// </param>
         /// <param name="verificationOptions">
-        /// The <see cref="SignatureVerificationOptions"/> to use for signature verifiation.
+        /// The <see cref="SignatureVerificationOptions"/> to use for signature verification.
         /// </param>
         internal HttpResponseMessageContext(
             ILogger logger,

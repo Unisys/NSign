@@ -16,6 +16,7 @@
         <Copyright>Copyright © Unify Square (a Unisys company)</Copyright>
         <PackageIcon>icon.png</PackageIcon>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <DebugType>Embedded</DebugType>
         <EmbedAllSources>True</EmbedAllSources>
@@ -31,5 +32,6 @@
 
     <ItemGroup Label="NuSpec">
         <None Include="..\..\icon.png" Pack="true" PackagePath="\" Visible="false" />
+        <None Include="README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 </Project>

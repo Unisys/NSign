@@ -69,7 +69,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>
         /// An <see cref="IHttpClientBuilder"/> that can be used to configure the client.
         /// </returns>
-        public static IHttpClientBuilder AddSignatureVerifiationHandler(this IHttpClientBuilder clientBuilder)
+        public static IHttpClientBuilder AddSignatureVerificationHandler(this IHttpClientBuilder clientBuilder)
         {
             clientBuilder.Services
                 .AddTransient<SignatureVerificationHandler>()
