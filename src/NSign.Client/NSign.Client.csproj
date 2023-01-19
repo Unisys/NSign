@@ -8,9 +8,9 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <Description>NSign for HTTP clients (System.Net.Http.HttpClient) for signing of HTTP requests and verification of HTTP responses.</Description>
         <PackageDescription>
-            NSign for HTTP clients (`System.Net.Http.HttpClient`) for signing of HTTP requests and verification of HTTP responses.
+NSign for HTTP clients (`System.Net.Http.HttpClient`) for signing of HTTP requests and verification of HTTP responses.
 
-            See also: https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/
+See also: https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/
         </PackageDescription>
         <PackageTags>nsign;sign;signing;verify;http message;request;response;client</PackageTags>
     </PropertyGroup>

@@ -186,7 +186,7 @@ namespace WebhooksCaller
                 .ConfigureHttpClient(ConfigureCallerClient)
                 .AddDigestAndSigningHandlers()
                 // If you also want to verify signatures on responses:
-                .AddSignatureVerifiationHandler()
+                .AddSignatureVerificationHandler()
                 .Services
 
                 .AddHostedService<CallerService>()
