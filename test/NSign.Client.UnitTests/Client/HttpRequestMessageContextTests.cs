@@ -106,6 +106,29 @@ namespace NSign.Client
         }
 
         [Theory]
+        [InlineData("https", 443, "localhost")]
+        [InlineData("http", 80, "localhost")]
+        [InlineData("https", null, "localhost")]
+        [InlineData("http", null, "localhost")]
+        [InlineData("https", 8443, "localhost:8443")]
+        [InlineData("http", 8080, "localhost:8080")]
+        public void GetDerivedComponentValueReturnsNormalizedAuthority(string scheme, int? port, string expectedValue)
+        {
+            HttpRequestMessage request = new HttpRequestMessage(
+                HttpMethod.Options, $"{scheme}://localhost{(port.HasValue ? ":" + port : "")}/test");
+            HttpRequestMessageContext context = new HttpRequestMessageContext(mockLogger.Object,
+                                                                              httpFieldOptions,
+                                                                              request,
+                                                                              cancellationTokenSource.Token,
+                                                                              signingOptions);
+
+            DerivedComponent comp = new DerivedComponent("@authority");
+            string? actualValue = context.GetDerivedComponentValue(comp);
+
+            Assert.Equal(expectedValue, actualValue);
+        }
+
+        [Theory]
         [InlineData("not-found", new string[0])]
         [InlineData("x-first-header", new string[] { "firstValue" })]
         [InlineData("x-second-header", new string[] { "" })]

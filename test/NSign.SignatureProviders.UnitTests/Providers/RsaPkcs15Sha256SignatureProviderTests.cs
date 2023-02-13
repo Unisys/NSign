@@ -54,6 +54,46 @@ namespace NSign.Providers
         }
 
         [Fact]
+        public async Task Standard_4_3_Sign_Updated_Draft16()
+        {
+            RsaPkcs15Sha256SignatureProvider provider = Make(true, "test-key-rsa", "test-key-rsa");
+
+            string input =
+                "\"signature\";key=\"sig1\": :hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:\n" +
+                "\"@authority\": origin.host.internal.example\n" +
+                "\"forwarded\": for=192.0.2.123\n" +
+                "\"@signature-params\": (\"signature\";key=\"sig1\" \"@authority\" \"forwarded\");created=1618884480;keyid=\"test-key-rsa\";alg=\"rsa-v1_5-sha256\";expires=1618884540";
+
+            ReadOnlyMemory<byte> signature = await provider.SignAsync(Encoding.ASCII.GetBytes(input), default);
+            string sigBase64 = Convert.ToBase64String(signature.Span);
+            Assert.Equal(
+                "YvYVO11F+Q+N4WZNeBdjFKluswwE3vQ4cTXpBwEiMz2hwu0J+wSJLRhHlIZ1N83epfnKDxY9cbNaVlbtr2UOLkw5O5Q5M5yrjx3s1mgDOsV7fuItD6iDyNISCiKRuevl+M+TyYBo10ubG83As5CeeoUdmrtI4G6QX7RqEeX0Xj/CYofHljr/dVzARxskjHEQbTztYVg4WD+LWo1zjx9w5fw26tsOMagfXLpDb4zb4/lgpgyNKoXFwG7c89KId5q+0BC+kryWuA35ZcQGaRPAz/NqzeKq/c7p7b/fmHS71fy1jOaFgWFmD+Z77bJLO8AVKuF0y2fpL3KUYHyITQHOsA==",
+                sigBase64);
+        }
+
+        [Fact]
+        public async Task Standard_4_3_Verify_Updated_Draft16()
+        {
+            RsaPkcs15Sha256SignatureProvider provider = Make(false, "test-key-rsa", "test-key-rsa");
+
+            string input =
+                "\"signature\";key=\"sig1\": :hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:\n" +
+                "\"@authority\": origin.host.internal.example\n" +
+                "\"forwarded\": for=192.0.2.123\n" +
+                "\"@signature-params\": (\"signature\";key=\"sig1\" \"@authority\" \"forwarded\");created=1618884480;keyid=\"test-key-rsa\";alg=\"rsa-v1_5-sha256\";expires=1618884540";
+            SignatureParamsComponent sigParams = new SignatureParamsComponent(
+                "(\"signature\";key=\"sig1\" \"@authority\" \"forwarded\");created=1618884480;keyid=\"test-key-rsa\";alg=\"rsa-v1_5-sha256\";expires=1618884540");
+
+            VerificationResult result = await provider.VerifyAsync(
+                sigParams,
+                Encoding.ASCII.GetBytes(input),
+                Convert.FromBase64String(
+                    "YvYVO11F+Q+N4WZNeBdjFKluswwE3vQ4cTXpBwEiMz2hwu0J+wSJLRhHlIZ1N83epfnKDxY9cbNaVlbtr2UOLkw5O5Q5M5yrjx3s1mgDOsV7fuItD6iDyNISCiKRuevl+M+TyYBo10ubG83As5CeeoUdmrtI4G6QX7RqEeX0Xj/CYofHljr/dVzARxskjHEQbTztYVg4WD+LWo1zjx9w5fw26tsOMagfXLpDb4zb4/lgpgyNKoXFwG7c89KId5q+0BC+kryWuA35ZcQGaRPAz/NqzeKq/c7p7b/fmHS71fy1jOaFgWFmD+Z77bJLO8AVKuF0y2fpL3KUYHyITQHOsA=="),
+                default);
+            Assert.Equal(VerificationResult.SuccessfullyVerified, result);
+        }
+
+        [Fact]
         public async Task Standard_4_3_Verify_PublicKeyOnly()
         {
             RsaPkcs15Sha256SignatureProvider provider = new RsaPkcs15Sha256SignatureProvider(null, publicKeyFromStandard, "test-key-rsa");

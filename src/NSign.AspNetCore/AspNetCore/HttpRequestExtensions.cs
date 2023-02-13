@@ -35,7 +35,7 @@ namespace NSign.AspNetCore
                 Constants.DerivedComponents.Method => request.Method,
                 // TODO: Need to figure out a way to deal with reverse proxies changing paths, i.e. getting the original path/prefix.
                 Constants.DerivedComponents.TargetUri => $"{request.Scheme}://{request.Host}{request.PathBase}{request.Path}{request.QueryString}",
-                Constants.DerivedComponents.Authority => request.Host.Value.ToLower(),
+                Constants.DerivedComponents.Authority => NormalizeAuthority(request),
                 Constants.DerivedComponents.Scheme => request.Scheme.ToLower(),
                 // TODO: Need to figure out a way to deal with reverse proxies changing paths, i.e. getting the original path/prefix.
                 Constants.DerivedComponents.RequestTarget => $"{request.PathBase}{request.Path}{request.QueryString}",
@@ -51,6 +51,33 @@ namespace NSign.AspNetCore
             };
 
             return value!;
+        }
+
+        /// <summary>
+        /// Normalizes the value for the <c>@authority</c> derived component: default ports are omitted and host values
+        /// are lower-cased.
+        /// </summary>
+        /// <param name="request">
+        /// The <see cref="HttpRequest"/> defining the values to use for the <c>@authority</c> derived component value.
+        /// </param>
+        /// <returns>
+        /// A string value representing the <c>@authority</c> derived component value for the message.
+        /// </returns>
+        private static string NormalizeAuthority(HttpRequest request)
+        {
+            string scheme = request.Scheme;
+            HostString host = request.Host;
+
+            if (host.Port.HasValue)
+            {
+                if ((StringComparer.OrdinalIgnoreCase.Equals("http", scheme) && host.Port.Value == 80) ||
+                    (StringComparer.OrdinalIgnoreCase.Equals("https", scheme) && host.Port.Value == 443))
+                {
+                    return host.Host.ToLower();
+                }
+            }
+
+            return host.Value.ToLower();
         }
     }
 }
