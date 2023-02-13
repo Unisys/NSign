@@ -37,6 +37,30 @@ namespace NSign.Providers
         }
 
         [Fact]
+        public async Task Standard_4_3_Verify_OnReverseProxy_Draft16()
+        {
+            ECDsaP256Sha256SignatureProvider provider = Make(false, "test-key-ecc-p256", "test-key-ecc-p256");
+
+            string input =
+                "\"@method\": POST\n" +
+                "\"@authority\": example.com\n" +
+                "\"@path\": /foo\n" +
+                "\"content-digest\": sha-512=:WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+TaPm+AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew==:\n" +
+                "\"content-type\": application/json\n" +
+                "\"content-length\": 18\n" +
+                "\"@signature-params\": (\"@method\" \"@authority\" \"@path\" \"content-digest\" \"content-type\" \"content-length\");created=1618884475;keyid=\"test-key-ecc-p256\"";
+            SignatureParamsComponent sigParams = new SignatureParamsComponent(
+                "(\"@method\" \"@authority\" \"@path\" \"content-digest\" \"content-type\" \"content-length\");created=1618884475;keyid=\"test-key-ecc-p256\"");
+
+            VerificationResult result = await provider.VerifyAsync(
+                sigParams,
+                Encoding.ASCII.GetBytes(input),
+                Convert.FromBase64String("hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g=="),
+                default);
+            Assert.Equal(VerificationResult.SuccessfullyVerified, result);
+        }
+
+        [Fact]
         public async Task Standard_B_2_4_Verify()
         {
             ECDsaP256Sha256SignatureProvider provider = Make(false, "test-key-ecc-p256", "test-key-ecc-p256");
