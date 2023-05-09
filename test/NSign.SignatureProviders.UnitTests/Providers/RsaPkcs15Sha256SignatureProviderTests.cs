@@ -113,6 +113,53 @@ namespace NSign.Providers
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
+        [Fact]
+        public async Task Draft17_4_3_Example1_Sign()
+        {
+            RsaPkcs15Sha256SignatureProvider provider = Make(true, "test-key-rsa", "test-key-rsa");
+
+            string input =
+                "\"@method\": POST\n" +
+                "\"@authority\": origin.host.internal.example\n" +
+                "\"@path\": /foo\n" +
+                "\"content-digest\": sha-512=:WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+TaPm+AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew==:\n" +
+                "\"content-type\": application/json\n" +
+                "\"content-length\": 18\n" +
+                "\"forwarded\": for=192.0.2.123;host=example.com;proto=https\n" +
+                "\"@signature-params\": (\"@method\" \"@authority\" \"@path\" \"content-digest\" \"content-type\" \"content-length\" \"forwarded\");created=1618884480;keyid=\"test-key-rsa\";alg=\"rsa-v1_5-sha256\";expires=1618884540";
+
+            ReadOnlyMemory<byte> signature = await provider.SignAsync(Encoding.ASCII.GetBytes(input), default);
+            string sigBase64 = Convert.ToBase64String(signature.Span);
+            Assert.Equal(
+                "S6ZzPXSdAMOPjN/6KXfXWNO/f7V6cHm7BXYUh3YD/fRad4BCaRZxP+JH+8XY1I6+8Cy+CM5g92iHgxtRPz+MjniOaYmdkDcnL9cCpXJleXsOckpURl49GwiyUpZ10KHgOEe11sx3G2gxI8S0jnxQB+Pu68U9vVcasqOWAEObtNKKZd8tSFu7LB5YAv0RAGhB8tmpv7sFnIm9y+7X5kXQfi8NMaZaA8i2ZHwpBdg7a6CMfwnnrtflzvZdXAsD3LH2TwevU+/PBPv0B6NMNk93wUs/vfJvye+YuI87HU38lZHowtznbLVdp770I6VHR6WfgS9ddzirrswsE1w5o0LV/g==",
+                sigBase64);
+        }
+
+        [Fact]
+        public async Task Draft17_4_3_Example1_Verify()
+        {
+            RsaPkcs15Sha256SignatureProvider provider = Make(false, "test-key-rsa", "test-key-rsa");
+
+            string input =
+                "\"@method\": POST\n" +
+                "\"@authority\": origin.host.internal.example\n" +
+                "\"@path\": /foo\n" +
+                "\"content-digest\": sha-512=:WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+TaPm+AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew==:\n" +
+                "\"content-type\": application/json\n" +
+                "\"content-length\": 18\n" +
+                "\"forwarded\": for=192.0.2.123;host=example.com;proto=https\n" +
+                "\"@signature-params\": (\"@method\" \"@authority\" \"@path\" \"content-digest\" \"content-type\" \"content-length\" \"forwarded\");created=1618884480;keyid=\"test-key-rsa\";alg=\"rsa-v1_5-sha256\";expires=1618884540";
+            SignatureParamsComponent sigParams = new SignatureParamsComponent(
+                "(\"@method\" \"@authority\" \"@path\" \"content-digest\" \"content-type\" \"content-length\" \"forwarded\");created=1618884480;keyid=\"test-key-rsa\";alg=\"rsa-v1_5-sha256\";expires=1618884540");
+
+            VerificationResult result = await provider.VerifyAsync(
+                sigParams,
+                Encoding.ASCII.GetBytes(input),
+                Convert.FromBase64String("S6ZzPXSdAMOPjN/6KXfXWNO/f7V6cHm7BXYUh3YD/fRad4BCaRZxP+JH+8XY1I6+8Cy+CM5g92iHgxtRPz+MjniOaYmdkDcnL9cCpXJleXsOckpURl49GwiyUpZ10KHgOEe11sx3G2gxI8S0jnxQB+Pu68U9vVcasqOWAEObtNKKZd8tSFu7LB5YAv0RAGhB8tmpv7sFnIm9y+7X5kXQfi8NMaZaA8i2ZHwpBdg7a6CMfwnnrtflzvZdXAsD3LH2TwevU+/PBPv0B6NMNk93wUs/vfJvye+YuI87HU38lZHowtznbLVdp770I6VHR6WfgS9ddzirrswsE1w5o0LV/g=="),
+                default);
+            Assert.Equal(VerificationResult.SuccessfullyVerified, result);
+        }
+
         #endregion
 
         [Theory]
