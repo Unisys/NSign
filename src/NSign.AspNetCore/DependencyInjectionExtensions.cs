@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
         #region Digest Verification Middleware
 
         /// <summary>
-        /// Adds the <see cref="DigestVerificationMiddleware"/> to the request pipeline.
+        /// Adds the <see cref="ContentDigestVerificationMiddleware"/> to the request pipeline.
         /// </summary>
         /// <param name="app">
         /// The <see cref="IApplicationBuilder"/> instance.
@@ -22,13 +22,13 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>
         /// The <see cref="IApplicationBuilder"/> instance.
         /// </returns>
-        public static IApplicationBuilder UseDigestVerification(this IApplicationBuilder app)
+        public static IApplicationBuilder UseContentDigestVerification(this IApplicationBuilder app)
         {
-            return app.UseMiddleware<DigestVerificationMiddleware>();
+            return app.UseMiddleware<ContentDigestVerificationMiddleware>();
         }
 
         /// <summary>
-        /// Adds the <see cref="DigestVerificationMiddleware"/> as a transient service.
+        /// Adds the <see cref="ContentDigestVerificationMiddleware"/> as a transient service.
         /// </summary>
         /// <param name="services">
         /// The <see cref="IServiceCollection"/> instance.
@@ -36,9 +36,9 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>
         /// The <see cref="IServiceCollection"/> instance.
         /// </returns>
-        public static IServiceCollection AddDigestVerification(this IServiceCollection services)
+        public static IServiceCollection AddContentDigestVerification(this IServiceCollection services)
         {
-            return services.AddTransient<DigestVerificationMiddleware>();
+            return services.AddTransient<ContentDigestVerificationMiddleware>();
         }
 
         #endregion

@@ -54,7 +54,7 @@ namespace NSign.Signatures
         {
             signatureParams
                 .AddComponent(SignatureComponent.Authority)
-                .AddComponent(SignatureComponent.Digest)
+                .AddComponent(SignatureComponent.ContentDigest)
                 .AddComponent(SignatureComponent.Path)
                 .WithAlgorithm(SignatureAlgorithm.HmacSha256)
                 .WithCreatedNow()
@@ -65,7 +65,7 @@ namespace NSign.Signatures
 
             Assert.Collection(signatureParams.Components,
               (c) => Assert.Equal(SignatureComponent.Authority, c),
-              (c) => Assert.Equal(SignatureComponent.Digest, c),
+              (c) => Assert.Equal(SignatureComponent.ContentDigest, c),
               (c) => Assert.Equal(SignatureComponent.Path, c));
 
             Assert.Equal("hmac-sha256", signatureParams.Algorithm);

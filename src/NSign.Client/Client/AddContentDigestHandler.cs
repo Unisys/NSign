@@ -7,28 +7,28 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
-using static NSign.Client.AddDigestOptions;
+using static NSign.Client.AddContentDigestOptions;
 
 namespace NSign.Client
 {
     /// <summary>
-    /// Implements a <see cref="DelegatingHandler"/> that adds <c>Digest</c> headers with hashes for request bodies to
-    /// outgoing requests.
+    /// Implements a <see cref="DelegatingHandler"/> that adds <c>Content-Digest</c> headers with hashes for request
+    /// bodies to outgoing requests.
     /// </summary>
-    public sealed class AddDigestHandler : DelegatingHandler
+    public sealed class AddContentDigestHandler : DelegatingHandler
     {
         /// <summary>
-        /// The IOptions of AddDigestOptions defining which hashes to add.
+        /// The IOptions of <see cref="AddContentDigestOptions"/> defining which hashes to add.
         /// </summary>
-        private readonly IOptions<AddDigestOptions> options;
+        private readonly IOptions<AddContentDigestOptions> options;
 
         /// <summary>
-        /// Initializes a new instance of AddDigestHandler.
+        /// Initializes a new instance of <see cref="AddContentDigestHandler"/>.
         /// </summary>
         /// <param name="options">
-        /// The IOptions of AddDigestOptions defining which hashes to add.
+        /// The IOptions of <see cref="AddContentDigestOptions"/> defining which hashes to add.
         /// </param>
-        public AddDigestHandler(IOptions<AddDigestOptions> options)
+        public AddContentDigestHandler(IOptions<AddContentDigestOptions> options)
         {
             this.options = options;
         }
@@ -36,13 +36,13 @@ namespace NSign.Client
         /// <inheritdoc/>
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            AddDigestOptions options = this.options.Value;
+            AddContentDigestOptions options = this.options.Value;
 
             if (null != request.Content)
             {
                 foreach (Hash hash in options.Hashes)
                 {
-                    request.Content.Headers.Add(Constants.Headers.Digest, await GetDigestValueAsync(request.Content, hash));
+                    request.Content.Headers.Add(Constants.Headers.ContentDigest, await GetDigestValueAsync(request.Content, hash));
                 }
             }
 
@@ -50,7 +50,7 @@ namespace NSign.Client
         }
 
         /// <summary>
-        /// Gets the digest header value for the given content and hashAlgorithm asynchronously.
+        /// Gets the 'content-digest' header value for the given content and hashAlgorithm asynchronously.
         /// </summary>
         /// <param name="content">
         /// The HttpContext object describing the content to hash.
@@ -59,7 +59,7 @@ namespace NSign.Client
         /// The Hash algorithm to use for hashing.
         /// </param>
         /// <returns>
-        /// A string value that represents the value for the 'Digest' for the content.
+        /// A string value that represents the value for the 'Content-Digest' for the content.
         /// </returns>
         private static Task<string> GetDigestValueAsync(HttpContent content, Hash hashAlgorithm)
         {
@@ -80,13 +80,13 @@ namespace NSign.Client
         }
 
         /// <summary>
-        /// Gets the HashAlgorithm and the corresponding name for the 'Digest' header.
+        /// Gets the HashAlgorithm and the corresponding name for the 'Content-Digest' header.
         /// </summary>
         /// <param name="alg">
-        /// The Hash value that defines which hash algorithm to use for the 'Digest' header.
+        /// The Hash value that defines which hash algorithm to use for the 'Content-Digest' header.
         /// </param>
         /// <param name="algName">
-        /// If successful, holds the name of the hash algorithm to be used as the key for the 'Digest' header value.
+        /// If successful, holds the name of the hash algorithm to be used as the key for the 'Content-Digest' header value.
         /// </param>
         /// <returns>
         /// An instance of HashAlgorithm that can be used to hash the request body.

@@ -10,39 +10,39 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using static NSign.Client.AddDigestOptions;
+using static NSign.Client.AddContentDigestOptions;
 
 namespace NSign.Client
 {
-    public sealed class AddDigestHandlerTests
+    public sealed class AddContentDigestHandlerTests
     {
         private readonly Mock<HttpMessageHandler> mockInnerHandler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
         private readonly HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:8080/UnitTests/");
         private readonly HttpResponseMessage response = new HttpResponseMessage();
-        private readonly AddDigestOptions options = new AddDigestOptions();
-        private readonly AddDigestHandler handler;
+        private readonly AddContentDigestOptions options = new AddContentDigestOptions();
+        private readonly AddContentDigestHandler handler;
 
-        public AddDigestHandlerTests()
+        public AddContentDigestHandlerTests()
         {
             mockInnerHandler.Protected().Setup("Dispose", ItExpr.Is<bool>(d => d == true));
 
-            options.WithHash(AddDigestOptions.Hash.Sha256).WithHash(AddDigestOptions.Hash.Sha512);
+            options.WithHash(AddContentDigestOptions.Hash.Sha256).WithHash(AddContentDigestOptions.Hash.Sha512);
 
-            handler = new AddDigestHandler(new OptionsWrapper<AddDigestOptions>(options))
+            handler = new AddContentDigestHandler(new OptionsWrapper<AddContentDigestOptions>(options))
             {
                 InnerHandler = mockInnerHandler.Object,
             };
         }
 
         [Fact]
-        public async Task SendAsyncDoesNotAddDigestIfRequestDoesNotHaveContent()
+        public async Task SendAsyncDoesNotAddContentDigestIfRequestDoesNotHaveContent()
         {
             using HttpMessageInvoker invoker = new HttpMessageInvoker(handler);
 
             request.Method = HttpMethod.Get;
 
             mockInnerHandler.Protected().Setup<Task<HttpResponseMessage>>("SendAsync",
-                ItExpr.Is<HttpRequestMessage>(r => r == request && !r.Headers.Contains("digest")),
+                ItExpr.Is<HttpRequestMessage>(r => r == request && !r.Headers.Contains("digest") && !r.Headers.Contains("content-digest")),
                 ItExpr.Is<CancellationToken>(c => c == CancellationToken.None))
                 .ReturnsAsync(response);
 
@@ -138,7 +138,7 @@ namespace NSign.Client
 
         private static bool VerifyDigestHeader(HttpRequestMessage request, params string[] expectedValues)
         {
-            if (!request.Content!.Headers.TryGetValues("digest", out IEnumerable<string>? values))
+            if (!request.Content!.Headers.TryGetValues("content-digest", out IEnumerable<string>? values))
             {
                 return false;
             }

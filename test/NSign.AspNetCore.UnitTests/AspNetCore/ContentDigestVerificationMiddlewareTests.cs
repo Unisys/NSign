@@ -6,24 +6,24 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using static NSign.AspNetCore.DigestVerificationOptions;
+using static NSign.AspNetCore.ContentDigestVerificationOptions;
 
 namespace NSign.AspNetCore
 {
-    public sealed class DigestVerificationMiddlewareTests
+    public sealed class ContentDigestVerificationMiddlewareTests
     {
         private readonly DefaultHttpContext httpContext = new DefaultHttpContext();
-        private readonly DigestVerificationOptions options;
-        private readonly DigestVerificationMiddleware middleware;
+        private readonly ContentDigestVerificationOptions options;
+        private readonly ContentDigestVerificationMiddleware middleware;
         private long numCallsToNext;
 
-        public DigestVerificationMiddlewareTests()
+        public ContentDigestVerificationMiddlewareTests()
         {
-            options = new DigestVerificationOptions();
+            options = new ContentDigestVerificationOptions();
 
-            middleware = new DigestVerificationMiddleware(
-                new NullLogger<DigestVerificationMiddleware>(),
-                new OptionsWrapper<DigestVerificationOptions>(options));
+            middleware = new ContentDigestVerificationMiddleware(
+                new NullLogger<ContentDigestVerificationMiddleware>(),
+                new OptionsWrapper<ContentDigestVerificationOptions>(options));
         }
 
         [Fact]
@@ -108,7 +108,7 @@ namespace NSign.AspNetCore
 
             using Stream bodyStream = MakeStream(body);
             httpContext.Request.Body = bodyStream;
-            httpContext.Request.Headers.Add("Digest", headers);
+            httpContext.Request.Headers.Add("Content-Digest", headers);
 
             await middleware.InvokeAsync(httpContext, CountingMiddleware);
 
@@ -123,7 +123,7 @@ namespace NSign.AspNetCore
         {
             options.VerificationFailuresResponseStatus = 555;
 
-            httpContext.Request.Headers.Add("Digest", headers);
+            httpContext.Request.Headers.Add("Content-Digest", headers);
 
             await middleware.InvokeAsync(httpContext, CountingMiddleware);
 
@@ -139,7 +139,7 @@ namespace NSign.AspNetCore
             options.VerificationFailuresResponseStatus = 999;
             options.Behavior = behavior;
 
-            httpContext.Request.Headers.Add("Digest", headers);
+            httpContext.Request.Headers.Add("Content-Digest", headers);
 
             await middleware.InvokeAsync(httpContext, CountingMiddleware);
 
@@ -164,7 +164,7 @@ namespace NSign.AspNetCore
 
         //    using Stream bodyStream = MakeStream(body);
         //    httpContext.Request.Body = bodyStream;
-        //    httpContext.Request.Headers.Add("Digest", headers);
+        //    httpContext.Request.Headers.Add("Content-Digest", headers);
 
         //    await middleware.InvokeAsync(httpContext, CountingMiddleware);
 

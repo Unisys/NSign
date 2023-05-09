@@ -6,7 +6,7 @@
 
 # NSign - HTTP message signatures and verification for .NET
 
-NSign (/ˈensaɪn/) provides libraries to sign HTTP messages based on recent drafts (currently: February 6th 2023) of the
+NSign (/ˈensaɪn/) provides libraries to sign HTTP messages based on recent drafts (currently: May 2nd 2023) of the
 [HTTP Message Signatures](https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/) to-be standard from
 the IETF. The key motivation for the standard is to have a standard way to sign and verify HTTP messages e.g. used in
 webhook-like scenarios where a provider needs to sign HTTP request messages before sending them to subscribers, and
@@ -40,12 +40,12 @@ components in their input:
 - the request method
 - the requested target URI
 - the `content-type` header of the request
-- the `digest` header of the request
+- the `content-digest` header of the request
 - the timestamp when the signature was created (by default)
 - the expiration of the signature (by default)
 
 Then, after signature verification has succeeded, it will also make sure that the digest of the request body matches the
-digest from the header.
+values from the 'content-digest' header.
 
 ```csharp
 namespace WebhooksEndpoint
@@ -61,7 +61,7 @@ namespace WebhooksEndpoint
                 .Services
 
                 .Configure<RequestSignatureVerificationOptions>(ConfigureSignatureVerification)
-                .AddDigestVerification()
+                .AddContentDigestVerification()
                 .AddSignatureVerification(CreateRsaPssSha512())
 
                 // If you want to sign responses, configure services like this:
@@ -119,7 +119,7 @@ namespace WebhooksEndpoint
 
             options.RequiredSignatureComponents.Add(SignatureComponent.Method);
             options.RequiredSignatureComponents.Add(SignatureComponent.RequestTargetUri);
-            options.RequiredSignatureComponents.Add(SignatureComponent.Digest);
+            options.RequiredSignatureComponents.Add(SignatureComponent.ContentDigest);
             options.RequiredSignatureComponents.Add(SignatureComponent.ContentType);
         }
 
@@ -127,7 +127,7 @@ namespace WebhooksEndpoint
         {
             app
                 .UseSignatureVerification()
-                .UseDigestVerification()
+                .UseContentDigestVerification()
                 ;
         }
 
@@ -152,8 +152,8 @@ namespace WebhooksEndpoint
 ### Service sending signed requests
 
 The following example shows a very simple console app setting up hosting with dependency injection. It will make sure to
-sign all requests made through the `HttpClient` named `WebhooksCaller` are updated with a `digest` header holding the
-SHA-256 hash of the request content, and a signature secured with the private key of the certificate in
+sign all requests made through the `HttpClient` named `WebhooksCaller` are updated with a `content-digest` header holding
+the SHA-256 hash of the request content, and a signature secured with the private key of the certificate in
 `path\to\certificate.pfx`. It ensures that signatures include number of mandatory fields, as well as optionally the
 `content-length` header of the request, and that signatures are valid for 5 minutes only.
 
@@ -175,7 +175,7 @@ namespace WebhooksCaller
         private static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
             services
-                .Configure<AddDigestOptions>(options => options.WithHash(AddDigestOptions.Hash.Sha256))
+                .Configure<AddContentDigestOptions>(options => options.WithHash(AddContentDigestOptions.Hash.Sha256))
                 .ConfigureMessageSigningOptions(ConfigureRequestSigner)
                 // If you also want to verify signatures on responses:
                 .Configure<SignatureVerificationOptions>((options) => {
@@ -184,7 +184,7 @@ namespace WebhooksCaller
 
                 .AddHttpClient<ICaller, Caller>("WebhooksCaller")
                 .ConfigureHttpClient(ConfigureCallerClient)
-                .AddDigestAndSigningHandlers()
+                .AddContentDigestAndSigningHandlers()
                 // If you also want to verify signatures on responses:
                 .AddSignatureVerificationHandler()
                 .Services
@@ -205,7 +205,7 @@ namespace WebhooksCaller
                 .WithMandatoryComponent(SignatureComponent.RequestTargetUri)
                 .WithMandatoryComponent(SignatureComponent.Scheme)
                 .WithMandatoryComponent(SignatureComponent.Query)
-                .WithMandatoryComponent(SignatureComponent.Digest)
+                .WithMandatoryComponent(SignatureComponent.ContentDigest)
                 .WithMandatoryComponent(SignatureComponent.ContentType)
                 .WithOptionalComponent(SignatureComponent.ContentLength)
                 .SetParameters = SetSignatureCreatedAndExpries
