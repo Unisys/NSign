@@ -96,5 +96,38 @@ namespace NSign.Signatures
             ex = Assert.Throws<InvalidOperationException>(() => signatureParams.AddComponent(new DerivedComponent("@signature-params")));
             Assert.Equal("Cannot add a '@signature-params' component to a SignatureParamsComponent.", ex.Message);
         }
+
+        [Fact]
+        public void AddComponentThrowsForDuplicateComponents()
+        {
+            InvalidOperationException ex;
+
+            signatureParams
+                .AddComponent(SignatureComponent.RequestBoundQuery)
+                .AddComponent(SignatureComponent.Query)
+                .AddComponent(new QueryParamComponent("abc", bindRequest: true))
+                .AddComponent(new QueryParamComponent("abcdef", bindRequest: false))
+                ;
+
+            ex = Assert.Throws<InvalidOperationException>(() => signatureParams.AddComponent(SignatureComponent.RequestBoundQuery));
+            Assert.Equal(
+                "The component '@query;req' has already been added. Adding the same component twice is not allowed", 
+                ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => signatureParams.AddComponent(SignatureComponent.Query));
+            Assert.Equal(
+                "The component '@query' has already been added. Adding the same component twice is not allowed",
+                ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => signatureParams.AddComponent(new QueryParamComponent("abc", bindRequest: true)));
+            Assert.Equal(
+                "The component '@query-param;name=abc' has already been added. Adding the same component twice is not allowed",
+                ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => signatureParams.AddComponent(new QueryParamComponent("abcdef", bindRequest: false)));
+            Assert.Equal(
+                "The component '@query-param;name=abcdef' has already been added. Adding the same component twice is not allowed",
+                ex.Message);
+        }
     }
 }

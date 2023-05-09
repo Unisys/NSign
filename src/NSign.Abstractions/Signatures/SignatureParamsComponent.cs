@@ -108,6 +108,12 @@ namespace NSign.Signatures
                 throw new InvalidOperationException("Cannot add a '@signature-params' component to a SignatureParamsComponent.");
             }
 
+            if (components.Contains(component))
+            {
+                throw new InvalidOperationException($"The component '{component}' has already been added. " +
+                    "Adding the same component twice is not allowed");
+            }
+
             components.Add(component);
 
             return this;
