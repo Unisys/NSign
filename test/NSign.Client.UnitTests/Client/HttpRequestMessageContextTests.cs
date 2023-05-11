@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NSign.Http;
 using NSign.Signatures;
@@ -264,11 +264,13 @@ namespace NSign.Client
         [InlineData("c", true)]
         [InlineData("e", true)]
         [InlineData("E", true)]
+        [InlineData("b", false)]
+        [InlineData("B", false)]
         public void HasQueryParamWorks(string name, bool expectedResult)
         {
-            request.RequestUri = new Uri("http://localhost:8080/?a=b&a=bb&c=d&A=B&e=");
+            request.RequestUri = new Uri("http://localhost:8080/?a=b&b=bb&b=b&c=d&D=B&e=");
 
-            Assert.Equal(expectedResult, context.HasQueryParam(name));
+            Assert.Equal(expectedResult, context.HasExactlyOneQueryParamValue(name));
         }
 
         [Fact]

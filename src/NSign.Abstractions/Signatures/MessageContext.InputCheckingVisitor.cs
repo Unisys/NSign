@@ -95,7 +95,7 @@ namespace NSign.Signatures
             /// <inheritdoc/>
             public override void Visit(QueryParamComponent queryParam)
             {
-                Found &= context.HasQueryParam(queryParam.Name);
+                Found &= context.HasExactlyOneQueryParamValue(queryParam.Name);
             }
 
             /// <summary>

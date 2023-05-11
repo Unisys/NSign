@@ -333,7 +333,7 @@ namespace NSign.Signatures
         {
             if (component is QueryParamComponent queryParam)
             {
-                return HasQueryParam(queryParam.Name);
+                return HasExactlyOneQueryParamValue(queryParam.Name);
             }
 
             if (HasResponse)
@@ -354,17 +354,22 @@ namespace NSign.Signatures
         }
 
         /// <summary>
-        /// Checks if a query parameter with the given <paramref name="paramName"/> is available on the request URL.
+        /// Checks if a query parameter with the given <paramref name="paramName"/> is available on the request URL and
+        /// has exactly one value.
         /// </summary>
         /// <param name="paramName">
         /// The name of the query parameter to check.
         /// </param>
         /// <returns>
-        /// True if the query parameter exists, false otherwise.
+        /// True if the query parameter exists and has exactly one value, false otherwise.
         /// </returns>
-        public virtual bool HasQueryParam(string paramName)
+        public virtual bool HasExactlyOneQueryParamValue(string paramName)
         {
-            return GetQueryParamValues(paramName).Any();
+            IEnumerable<string> values = GetQueryParamValues(paramName);
+            using IEnumerator<string> enumerator = values.GetEnumerator();
+
+            // We have exactly one value if we can move the enumerator once (to the first element), but not beyond that.
+            return enumerator.MoveNext() && !enumerator.MoveNext();
         }
 
         /// <summary>

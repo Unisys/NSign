@@ -30,10 +30,15 @@ namespace NSign.Signatures
             Assert.Equal("@query-param", queryParam.ComponentName);
         }
 
-        [Fact]
-        public void NameParameterIsNormalized()
+        [Theory]
+        [InlineData("a", "a")]
+        [InlineData("résumé", "résumé")]
+        [InlineData("r%C3%A9sum%C3%A9", "résumé")]
+        [InlineData("r%C3%A9sumé", "résumé")]
+        public void NameParameterIsNormalized(string inputName, string parameterName)
         {
-            Assert.Equal("myparam", queryParam.Name);
+            QueryParamComponent queryParam = new QueryParamComponent(inputName);
+            Assert.Equal(parameterName, queryParam.Name);
         }
 
         [Fact]

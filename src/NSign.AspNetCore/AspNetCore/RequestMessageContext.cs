@@ -195,9 +195,10 @@ namespace NSign.AspNetCore
         }
 
         /// <inheritdoc/>
-        public override sealed bool HasQueryParam(string paramName)
+        public override sealed bool HasExactlyOneQueryParamValue(string paramName)
         {
-            return HttpContext.Request.Query.ContainsKey(paramName);
+            return HttpContext.Request.Query.TryGetValue(paramName, out StringValues values)
+                && values.Count == 1;
         }
 
         #endregion

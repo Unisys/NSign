@@ -279,11 +279,13 @@ namespace NSign.AspNetCore
         [InlineData("A", true)]
         [InlineData("c", true)]
         [InlineData("e", true)]
+        [InlineData("b", false)]
+        [InlineData("B", false)]
         public void HasQueryParamWorks(string name, bool expectedResult)
         {
-            httpContext.Request.QueryString = new QueryString("?a=b&a=bb&c=d&e=");
+            httpContext.Request.QueryString = new QueryString("?a=b&b=bb&b=b&c=d&e=");
 
-            Assert.Equal(expectedResult, context.HasQueryParam(name));
+            Assert.Equal(expectedResult, context.HasExactlyOneQueryParamValue(name));
         }
 
         [Fact]
