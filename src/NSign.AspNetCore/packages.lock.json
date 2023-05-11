@@ -5,8 +5,8 @@
       "StructuredFieldValues": {
         "type": "Direct",
         "requested": "[0.*, )",
-        "resolved": "0.5.2",
-        "contentHash": "Ze846JAvsWDreOvoIBFY247Sa6W+gUzf//t6pNg8uEBmec6HTzhPvFV2E1LViYq/jCxJ1qKPwgaezfNLKb19lA==",
+        "resolved": "0.5.3",
+        "contentHash": "G0uqNU82bf3dloMYkzHyThT35D64SpDK8pe2/xO1TDU39R2t1PTNuzIv1HT7OgdVOWDyZ6kKxS5H0hVVcMhvPw==",
         "dependencies": {
           "System.Memory": "4.5.5"
         }
@@ -86,8 +86,8 @@
       "StructuredFieldValues": {
         "type": "Direct",
         "requested": "[0.*, )",
-        "resolved": "0.5.2",
-        "contentHash": "Ze846JAvsWDreOvoIBFY247Sa6W+gUzf//t6pNg8uEBmec6HTzhPvFV2E1LViYq/jCxJ1qKPwgaezfNLKb19lA==",
+        "resolved": "0.5.3",
+        "contentHash": "G0uqNU82bf3dloMYkzHyThT35D64SpDK8pe2/xO1TDU39R2t1PTNuzIv1HT7OgdVOWDyZ6kKxS5H0hVVcMhvPw==",
         "dependencies": {
           "System.Memory": "4.5.5"
         }
