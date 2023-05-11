@@ -279,7 +279,11 @@ namespace NSign.Signatures
                     {
                         throw new SignatureInputException("The @query-param component requires the 'name' parameter.");
                     }
-                    signatureParams.AddComponent(new QueryParamComponent(name, bindRequest));
+                    signatureParams.AddComponent(
+                        new QueryParamComponent(name, bindRequest)
+                        {
+                            OriginalIdentifier = new String(originalIdentifier),
+                        });
                     break;
 
                 // Handle known cases without parameters too, so we can reuse existing components rather than creating more.
@@ -359,7 +363,6 @@ namespace NSign.Signatures
             TryGetParameterValue(componentParams, Constants.ComponentParameters.ByteSequence, out bool useByteSequence);
 
             string original = new String(originalIdentifier);
-
 
             if (TryGetParameterValue(componentParams, Constants.ComponentParameters.Key, out string key))
             {
