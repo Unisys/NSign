@@ -154,9 +154,10 @@ namespace NSign.Client
         }
 
         /// <inheritdoc/>
-        public override sealed bool HasQueryParam(string paramName)
+        public override sealed bool HasExactlyOneQueryParamValue(string paramName)
         {
-            return null != queryParams.Value.GetValues(paramName);
+            string[] values = queryParams.Value.GetValues(paramName);
+            return null != values && 1 == values.Length;
         }
 
         #endregion

@@ -4,25 +4,25 @@ using System.Collections.ObjectModel;
 namespace NSign.Client
 {
     /// <summary>
-    /// Options class to control the creation/adding of 'Digest' headers for outgoing messages.
+    /// Options class to control the creation/adding of 'Content-Digest' headers for outgoing messages.
     /// </summary>
-    public sealed class AddDigestOptions
+    public sealed class AddContentDigestOptions
     {
         /// <summary>
-        /// Gets an ICollection of <see cref="Hash"/> values defining the hash algorithms to use for the 'Digest' header.
+        /// Gets an ICollection of <see cref="Hash"/> values defining the hash algorithms to use for the 'Content-Digest' header.
         /// </summary>
         public ICollection<Hash> Hashes { get; } = new Collection<Hash>();
 
         /// <summary>
-        /// Instructs the <see cref="AddDigestHandler"/> to add the given <see cref="Hash"/> to the 'Digest' header.
+        /// Instructs the <see cref="AddContentDigestHandler"/> to add the given <see cref="Hash"/> to the 'Content-Digest' header.
         /// </summary>
         /// <param name="hash">
-        /// The <see cref="Hash"/> value defining the hash algorithm to create a 'Digest' header value for.
+        /// The <see cref="Hash"/> value defining the hash algorithm to create a 'Content-Digest' header value for.
         /// </param>
         /// <returns>
-        /// The <see cref="AddDigestOptions"/> instance.
+        /// The <see cref="AddContentDigestOptions"/> instance.
         /// </returns>
-        public AddDigestOptions WithHash(Hash hash)
+        public AddContentDigestOptions WithHash(Hash hash)
         {
             Hashes.Add(hash);
 

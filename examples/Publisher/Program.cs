@@ -24,15 +24,15 @@ static void SetupServices(IServiceCollection services)
         {
             client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("NSignExample.Publisher", "0.1"));
         })
-        .AddDigestAndSigningHandlers()
+        .AddContentDigestAndSigningHandlers()
         .Services
 
-        .Configure<AddDigestOptions>(options => options.WithHash(AddDigestOptions.Hash.Sha256))
+        .Configure<AddContentDigestOptions>(options => options.WithHash(AddContentDigestOptions.Hash.Sha256))
         .ConfigureMessageSigningOptions(options =>
         {
             options.SignatureName = "pubsig";
             options
-                .WithMandatoryComponent(SignatureComponent.Digest)
+                .WithMandatoryComponent(SignatureComponent.ContentDigest)
                 .WithMandatoryComponent(new HttpHeaderStructuredFieldComponent(Constants.Headers.ContentType))
                 .WithOptionalComponent(SignatureComponent.ContentLength)
                 .SetParameters = (signingOptions) => signingOptions

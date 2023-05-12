@@ -14,8 +14,8 @@ using System.Threading.Tasks;
 namespace NSign.AspNetCore
 {
     /// <summary>
-    /// Implements an AspNetCore middleware that verifies the 'digest' header of incoming requests against the request
-    /// body's corresponding digest. The only supported hashes are SHA-256 and SHA-512.
+    /// Implements an AspNetCore middleware that verifies the 'content-digest' header of incoming requests against the
+    /// request body's corresponding digest. The only supported hashes are SHA-256 and SHA-512.
     /// <para/>
     /// <b>Note</b>: This middleware turns on buffering on the request body such that it can be read multiple times,
     /// since this is necessary to verify potentially multiple different digests of the body; plus it allows middleware
@@ -23,7 +23,7 @@ namespace NSign.AspNetCore
     /// <para/>
     /// <seealso cref="HttpRequestRewindExtensions.EnableBuffering(HttpRequest)"/>
     /// </summary>
-    public sealed class DigestVerificationMiddleware : IMiddleware
+    public sealed class ContentDigestVerificationMiddleware : IMiddleware
     {
         /// <summary>
         /// The max expected hash size is 512 bits from SHA-512.
@@ -31,7 +31,7 @@ namespace NSign.AspNetCore
         private const int MaxHashSizeBits = 512;
 
         /// <summary>
-        /// The regular expression to parse the 'digest' header.
+        /// The regular expression to parse the 'content-digest' header.
         /// See also <seealso href="https://www.rfc-editor.org/rfc/rfc3230"/>
         /// </summary>
         private static readonly Regex HeaderValueParser = new Regex(@"(?<= ^|,\s*) ([\w_\-]+) = ([0-9a-zA-Z+/=]+) (?= $|,\s*)",
@@ -40,25 +40,25 @@ namespace NSign.AspNetCore
         /// <summary>
         /// The ILogger to use.
         /// </summary>
-        private readonly ILogger<DigestVerificationMiddleware> logger;
+        private readonly ILogger<ContentDigestVerificationMiddleware> logger;
 
         /// <summary>
-        /// The IOptions of DigestVerificationOptions that holds options for this middleware.
+        /// The IOptions of <see cref="ContentDigestVerificationOptions"/> that holds options for this middleware.
         /// </summary>
-        private readonly IOptions<DigestVerificationOptions> options;
+        private readonly IOptions<ContentDigestVerificationOptions> options;
 
         /// <summary>
-        /// Initializes a new instance of DigestVerificationMiddleware.
+        /// Initializes a new instance of <see cref="ContentDigestVerificationMiddleware"/>.
         /// </summary>
         /// <param name="logger">
         /// The ILogger to use.
         /// </param>
         /// <param name="options">
-        /// An IOptions of DigestVerificationOptions that holds options for this middleware.
+        /// An IOptions of <see cref="ContentDigestVerificationOptions"/> that holds options for this middleware.
         /// </param>
-        public DigestVerificationMiddleware(
-            ILogger<DigestVerificationMiddleware> logger,
-            IOptions<DigestVerificationOptions> options)
+        public ContentDigestVerificationMiddleware(
+            ILogger<ContentDigestVerificationMiddleware> logger,
+            IOptions<ContentDigestVerificationOptions> options)
         {
             this.logger = logger;
             this.options = options;
@@ -67,12 +67,12 @@ namespace NSign.AspNetCore
         /// <inheritdoc/>
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            DigestVerificationOptions options = this.options.Value;
+            ContentDigestVerificationOptions options = this.options.Value;
 
-            if (!context.Request.Headers.TryGetValue(Constants.Headers.Digest, out StringValues values))
+            if (!context.Request.Headers.TryGetValue(Constants.Headers.ContentDigest, out StringValues values))
             {
-                logger.LogDebug("There is not 'Digest' header in the request.");
-                if (!options.Behavior.HasFlag(DigestVerificationOptions.VerificationBehavior.Optional))
+                logger.LogDebug("There is no 'Content-Digest' header in the request.");
+                if (!options.Behavior.HasFlag(ContentDigestVerificationOptions.VerificationBehavior.Optional))
                 {
                     // Terminate the request with the corresponding status code.
                     context.Response.StatusCode = options.MissingHeaderResponseStatus;
@@ -145,8 +145,8 @@ namespace NSign.AspNetCore
                     context.Request.Body.Position = 0;
                 }
 
-                if ((!options.Behavior.HasFlag(DigestVerificationOptions.VerificationBehavior.IgnoreUnknownAlgorithms) && numUnknown > 0) ||
-                    (!options.Behavior.HasFlag(DigestVerificationOptions.VerificationBehavior.RequireOnlySingleMatch) && numMismatches > 0) ||
+                if ((!options.Behavior.HasFlag(ContentDigestVerificationOptions.VerificationBehavior.IgnoreUnknownAlgorithms) && numUnknown > 0) ||
+                    (!options.Behavior.HasFlag(ContentDigestVerificationOptions.VerificationBehavior.RequireOnlySingleMatch) && numMismatches > 0) ||
                     numMatches <= 0)
                 {
                     context.Response.StatusCode = options.VerificationFailuresResponseStatus;
@@ -164,10 +164,10 @@ namespace NSign.AspNetCore
         }
 
         /// <summary>
-        /// Parse the given values from a 'digest' header.
+        /// Parse the given values from a 'content-digest' header.
         /// </summary>
         /// <param name="values">
-        /// A StringValue value representing the values from all 'digest' headers.
+        /// A StringValue value representing the values from all 'content-digest' headers.
         /// </param>
         /// <returns>
         /// An IEnumerable of KeyValuePair of string and string representing the hash algorithm names mapped to their
@@ -182,7 +182,7 @@ namespace NSign.AspNetCore
 
                 if (matches.Count <= 0)
                 {
-                    throw new InvalidDataException($"The digest header value '{value}' could not be parsed.");
+                    throw new InvalidDataException($"The content-digest header value '{value}' could not be parsed.");
                 }
 
                 foreach (Match? match in matches)
@@ -201,7 +201,7 @@ namespace NSign.AspNetCore
 
                 if (matches.Count <= 0)
                 {
-                    throw new InvalidDataException($"The digest header value '{value}' could not be parsed.");
+                    throw new InvalidDataException($"The content-digest header value '{value}' could not be parsed.");
                 }
 
                 foreach (Match? match in matches)

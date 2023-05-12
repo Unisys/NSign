@@ -8,12 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddControllers().Services
-    .Configure<DigestVerificationOptions>(o =>
-        o.Behavior |= DigestVerificationOptions.VerificationBehavior.RequireOnlySingleMatch)
+    .Configure<ContentDigestVerificationOptions>(o =>
+        o.Behavior |= ContentDigestVerificationOptions.VerificationBehavior.RequireOnlySingleMatch)
     .Configure<RequestSignatureVerificationOptions>((options) =>
     {
         options.TagsToVerify.Add("nsign-example-publisher");
-        options.RequiredSignatureComponents.Add(SignatureComponent.Digest);
+        options.RequiredSignatureComponents.Add(SignatureComponent.ContentDigest);
         options.RequiredSignatureComponents.Add(new HttpHeaderStructuredFieldComponent(Constants.Headers.ContentType));
         options.CreatedRequired =
             options.ExpiresRequired =
@@ -32,7 +32,7 @@ builder.Services
     })
     .AddSignatureVerification(
         new RsaPssSha512SignatureProvider(new X509Certificate2(@"examples.nsign.local.cer"), "examples.nsign.local"))
-    .AddDigestVerification()
+    .AddContentDigestVerification()
     ;
 
 var app = builder.Build();
@@ -46,5 +46,5 @@ app.Run();
 
 static void ValidateSignatureAndDigest(IApplicationBuilder builder)
 {
-    builder.UseSignatureVerification().UseDigestVerification();
+    builder.UseSignatureVerification().UseContentDigestVerification();
 }

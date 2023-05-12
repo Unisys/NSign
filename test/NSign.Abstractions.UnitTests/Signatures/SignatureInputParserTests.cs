@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Xunit;
 
 namespace NSign.Signatures
@@ -210,6 +211,27 @@ namespace NSign.Signatures
             SignatureInputException ex = Assert.Throws<SignatureInputException>(
                 () => SignatureInputParser.ParseAndUpdate(input, signatureParams));
             Assert.Equal(expectedMessage, ex.Message);
+        }
+
+        [Theory]
+        [InlineData("r%C3%A9sum%C3%A9", "résumé", true)]
+        [InlineData("r%C3%A9sum%C3%A9", "résumé", false)]
+        [InlineData("fa%C3%A7ade%22%3A%20", "façade\": ", true)]
+        [InlineData("fa%C3%A7ade%22%3A%20", "façade\": ", false)]
+        public void ParsingPassesQueryParamNameAsIs(string queryParamInputName, string expectedName, bool bindRequest)
+        {
+            SignatureParamsComponent signatureParams = new SignatureParamsComponent();
+
+            string originalIdentifier = @$"""@query-param"";name=""{queryParamInputName}""{(bindRequest ? ";req": "")}";
+            string input = $"({originalIdentifier})";
+            SignatureInputParser.ParseAndUpdate(input, signatureParams);
+
+            SignatureComponent component = signatureParams.Components.Single();
+            QueryParamComponent queryParam = Assert.IsType<QueryParamComponent>(component);
+
+            Assert.Equal(expectedName, queryParam.Name);
+            Assert.Equal(originalIdentifier, queryParam.OriginalIdentifier);
+            Assert.Equal(bindRequest, queryParam.BindRequest);
         }
     }
 }

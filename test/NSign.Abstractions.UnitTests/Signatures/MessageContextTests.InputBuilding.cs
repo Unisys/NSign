@@ -1,7 +1,6 @@
 ﻿using Moq;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Xunit;
 
@@ -290,23 +289,32 @@ namespace NSign.Signatures
         }
 
         [Theory]
-        [InlineData(false, "My", new string[] { "param", })]
-        [InlineData(false, "a", new string[] { "b", "cc", })]
-        [InlineData(false, "A", new string[] { "b", "cc", })]
-        [InlineData(false, "another", new string[] { "", })]
-        [InlineData(true, "My", new string[] { "param", })]
-        [InlineData(true, "a", new string[] { "b", "cc", })]
-        [InlineData(true, "A", new string[] { "b", "cc", })]
-        [InlineData(true, "another", new string[] { "", })]
-        public void GetSignatureInputGetsCorrectQueryParamsValue(bool bindRequest, string paramName, string[] expectedValues)
+        [InlineData(false, "My", "My", "param%0Amultiline%20value")]
+        [InlineData(false, "a", "a", "b")]
+        [InlineData(false, "A", "A", "b")]
+        [InlineData(false, "another", "another", "")]
+        [InlineData(false, "résumé", "r%C3%A9sum%C3%A9", "the%20summary")]
+        [InlineData(false, "r%C3%A9sum%C3%A9", "r%C3%A9sum%C3%A9", "the%20summary")]
+        [InlineData(true, "My", "My", "param%0Amultiline%20value")]
+        [InlineData(true, "a", "a", "b")]
+        [InlineData(true, "A", "A", "b")]
+        [InlineData(true, "another", "another", "")]
+        [InlineData(true, "résumé", "r%C3%A9sum%C3%A9", "the%20summary")]
+        [InlineData(true, "r%C3%A9sum%C3%A9", "r%C3%A9sum%C3%A9", "the%20summary")]
+        public void GetSignatureInputGetsCorrectQueryParamsValue(
+            bool bindRequest,
+            string paramName,
+            string expectedName,
+            string expectedValue)
         {
             context.OnGetQueryParamValues = (paramName) =>
             {
                 return paramName.ToLowerInvariant() switch
                 {
-                    "a" => new string[] { "b", "cc", },
-                    "my" => new string[] { "param", },
+                    "a" => new string[] { "b", },
+                    "my" => new string[] { "param\nmultiline value", },
                     "another" => new string[] { "", },
+                    "résumé" => new string[] { "the summary", },
                     _ => Array.Empty<string>(),
                 };
             };
@@ -317,9 +325,9 @@ namespace NSign.Signatures
             spec.SignatureParameters.AddComponent(new QueryParamComponent(paramName, bindRequest));
             ReadOnlyMemory<byte> input = context.GetSignatureInput(spec.SignatureParameters, out string inputStr);
 
-            Assert.Equal($"(\"@query-param\"{suffix};name=\"{paramName.ToLower()}\")", inputStr);
-            string expectedValue = String.Join("", expectedValues.Select(v => $"\"@query-param\"{suffix};name=\"{paramName.ToLower()}\": {v}\n"));
-            Assert.Equal($"{expectedValue}\"@signature-params\": {inputStr}", Encoding.ASCII.GetString(input.Span));
+            Assert.Equal($"(\"@query-param\"{suffix};name=\"{expectedName}\")", inputStr);
+            string expectedQueryParam = $"\"@query-param\"{suffix};name=\"{expectedName}\": {expectedValue}\n";
+            Assert.Equal($"{expectedQueryParam}\"@signature-params\": {inputStr}", Encoding.ASCII.GetString(input.Span));
         }
 
         [Theory]
@@ -448,7 +456,7 @@ namespace NSign.Signatures
             {
                 return name switch
                 {
-                    "abc" => new string[] { "def", "ghi", },
+                    "abc" => new string[] { "def", },
                     _ => throw new Exception("Unexpected"),
                 };
             };
@@ -480,7 +488,6 @@ namespace NSign.Signatures
                 $"\"@test-authority\"{suffix}: unit.tests:1234\n" +
                 $"\"test-xyz\"{suffix};key=\"test-a\": b\n" +
                 $"\"@query-param\"{suffix};name=\"test-abc\": def\n" +
-                $"\"@query-param\"{suffix};name=\"test-abc\": ghi\n" +
                 $"\"@signature-params\": {outputSigParams}", Encoding.ASCII.GetString(input.Span));
         }
 
@@ -581,6 +588,34 @@ namespace NSign.Signatures
             Assert.Equal(
                 $"\"test-xyz\";bs{suffix}: :Yz1kLCBlPWY=:, :YSA9IGI=:\n" +
                 $"\"@signature-params\": {outputSigParams}", Encoding.ASCII.GetString(input.Span));
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void GetSignatureInputThrowsForQueryParamComponentWithMultipleValues(bool bindRequest)
+        {
+            string suffix = bindRequest ? ";req" : String.Empty;
+            context.HasResponseValue = bindRequest;
+            context.OnGetQueryParamValues = (name) =>
+            {
+                return name switch
+                {
+                    "abc" => new string[] { "def", "", },
+                    _ => throw new Exception("Unexpected"),
+                };
+            };
+
+            SignatureInputSpec spec = new SignatureInputSpec("unitTest");
+            spec.SignatureParameters
+                .AddComponent(new QueryParamComponent("abc", bindRequest))
+                ;
+
+            SignatureComponentNotAllowedException ex = Assert.Throws<SignatureComponentNotAllowedException>(
+                () => context.GetSignatureInput(spec.SignatureParameters, out string outputSigParams));
+            Assert.Equal(
+                "Query parameter 'abc' has more than one value which is not allowed in signatures.",
+                ex.Message);
         }
 
         private static SignatureInputSpec MakeSignatureInput(SignatureComponent component)

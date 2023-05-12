@@ -9,7 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class DependencyInjectionExtensions
     {
         /// <summary>
-        /// Adds the <see cref="AddDigestHandler"/> message handler to the HTTP client.
+        /// Adds the <see cref="AddContentDigestHandler"/> message handler to the HTTP client.
         /// </summary>
         /// <param name="clientBuilder">
         /// The <see cref="IHttpClientBuilder"/>.
@@ -17,11 +17,11 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>
         /// An <see cref="IHttpClientBuilder"/> that can be used to configure the client.
         /// </returns>
-        public static IHttpClientBuilder AddDigestHandler(this IHttpClientBuilder clientBuilder)
+        public static IHttpClientBuilder AddContentDigestHandler(this IHttpClientBuilder clientBuilder)
         {
-            clientBuilder.Services.AddTransient<AddDigestHandler>();
+            clientBuilder.Services.AddTransient<AddContentDigestHandler>();
 
-            return clientBuilder.AddHttpMessageHandler<AddDigestHandler>();
+            return clientBuilder.AddHttpMessageHandler<AddContentDigestHandler>();
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Adds both the <see cref="AddDigestHandler"/> and the <see cref="SigningHandler"/> message handlers to the HTTP
+        /// Adds both the <see cref="AddContentDigestHandler"/> and the <see cref="SigningHandler"/> message handlers to the HTTP
         /// client, in that order.
         /// </summary>
         /// <param name="clientBuilder">
@@ -53,10 +53,10 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>
         /// An <see cref="IHttpClientBuilder"/> that can be used to configure the client.
         /// </returns>
-        public static IHttpClientBuilder AddDigestAndSigningHandlers(this IHttpClientBuilder clientBuilder)
+        public static IHttpClientBuilder AddContentDigestAndSigningHandlers(this IHttpClientBuilder clientBuilder)
         {
             // Digest must come before signing to make sure signing also has the 'Digest' header available.
-            return clientBuilder.AddDigestHandler().AddSigningHandler();
+            return clientBuilder.AddContentDigestHandler().AddSigningHandler();
         }
 
         /// <summary>

@@ -23,7 +23,7 @@
             /// <summary>
             /// The name of the header holding message body digest values.
             /// </summary>
-            public const string Digest = "digest";
+            public const string ContentDigest = "content-digest";
 
             /// <summary>
             /// The name of the header holding message body content type.

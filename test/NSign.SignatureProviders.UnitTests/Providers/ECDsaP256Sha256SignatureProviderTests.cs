@@ -105,6 +105,83 @@ namespace NSign.Providers
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
+        [Fact]
+        public async Task Draft17_2_4_Example1_Verify()
+        {
+            ECDsaP256Sha256SignatureProvider provider = Make(false, "test-key-ecc-p256", "test-key-ecc-p256");
+
+            string input =
+                "\"@status\": 503\n" +
+                "\"content-digest\": sha-512=:0Y6iCBzGg5rZtoXS95Ijz03mslf6KAMCloESHObfwnHJDbkkWWQz6PhhU9kxsTbARtY2PTBOzq24uJFpHsMuAg==:\n" +
+                "\"content-type\": application/json\n" +
+                "\"@authority\";req: origin.host.internal.example\n" +
+                "\"@method\";req: POST\n" +
+                "\"@path\";req: /foo\n" +
+                "\"content-digest\";req: sha-512=:WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+TaPm+AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew==:\n" +
+                "\"@signature-params\": (\"@status\" \"content-digest\" \"content-type\" \"@authority\";req \"@method\";req \"@path\";req \"content-digest\";req);created=1618884479;keyid=\"test-key-ecc-p256\"";
+            SignatureParamsComponent sigParams = new SignatureParamsComponent(
+                "(\"@status\" \"content-digest\" \"content-type\" \"@authority\";req \"@method\";req \"@path\";req \"content-digest\";req);created=1618884479;keyid=\"test-key-ecc-p256\"");
+
+            VerificationResult result = await provider.VerifyAsync(
+                sigParams,
+                Encoding.ASCII.GetBytes(input),
+                Convert.FromBase64String("9MG6AOgykOZTc/h2rnDc/g8L+/aXgdkV4hNDvpCxfbVrmLevWPfyvEC/8jBh+3XnVwBqqcJyhUXoFgWv1SMI7A=="),
+                default);
+            Assert.Equal(VerificationResult.SuccessfullyVerified, result);
+        }
+
+        [Fact]
+        public async Task Draft17_2_4_Example2_Verify()
+        {
+            ECDsaP256Sha256SignatureProvider provider = Make(false, "test-key-ecc-p256", "test-key-ecc-p256");
+
+            string input =
+                "\"@status\": 503\n" +
+                "\"content-digest\": sha-512=:0Y6iCBzGg5rZtoXS95Ijz03mslf6KAMCloESHObfwnHJDbkkWWQz6PhhU9kxsTbARtY2PTBOzq24uJFpHsMuAg==:\n" +
+                "\"content-type\": application/json\n" +
+                "\"@authority\";req: origin.host.internal.example\n" +
+                "\"@method\";req: POST\n" +
+                "\"@path\";req: /foo\n" +
+                "\"@query\";req: ?param=Value&Pet=dog\n" +
+                "\"content-digest\";req: sha-512=:WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+TaPm+AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew==:\n" +
+                "\"content-type\";req: application/json\n" +
+                "\"content-length\";req: 18\n" +
+                "\"@signature-params\": (\"@status\" \"content-digest\" \"content-type\" \"@authority\";req \"@method\";req \"@path\";req \"@query\";req \"content-digest\";req \"content-type\";req \"content-length\";req);created=1618884479;keyid=\"test-key-ecc-p256\"";
+            SignatureParamsComponent sigParams = new SignatureParamsComponent(
+                "(\"@status\" \"content-digest\" \"content-type\" \"@authority\";req \"@method\";req \"@path\";req \"@query\";req \"content-digest\";req \"content-type\";req \"content-length\";req);created=1618884479;keyid=\"test-key-ecc-p256\"");
+
+            VerificationResult result = await provider.VerifyAsync(
+                sigParams,
+                Encoding.ASCII.GetBytes(input),
+                Convert.FromBase64String("zU7zd1MN56WapeNxfVNleCx5rFxBhBcZngnX4d+MurOk3tNu3rFfTFnwhglZH8qNBoygvhVMfQq9wIvLqyVNog=="),
+                default);
+            Assert.Equal(VerificationResult.SuccessfullyVerified, result);
+        }
+
+        [Fact]
+        public async Task Draft17_4_3_Example2_Verify()
+        {
+            ECDsaP256Sha256SignatureProvider provider = Make(false, "test-key-ecc-p256", "test-key-ecc-p256");
+
+            string input =
+                "\"@method\": POST\n" +
+                "\"@authority\": example.com\n" +
+                "\"@path\": /foo\n" +
+                "\"content-digest\": sha-512=:WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+TaPm+AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew==:\n" +
+                "\"content-type\": application/json\n" +
+                "\"content-length\": 18\n" +
+                "\"@signature-params\": (\"@method\" \"@authority\" \"@path\" \"content-digest\" \"content-type\" \"content-length\");created=1618884475;keyid=\"test-key-ecc-p256\"";
+            SignatureParamsComponent sigParams = new SignatureParamsComponent(
+                "(\"@method\" \"@authority\" \"@path\" \"content-digest\" \"content-type\" \"content-length\");created=1618884475;keyid=\"test-key-ecc-p256\"");
+
+            VerificationResult result = await provider.VerifyAsync(
+                sigParams,
+                Encoding.ASCII.GetBytes(input),
+                Convert.FromBase64String("X5spyd6CFnAG5QnDyHfqoSNICd+BUP4LYMz2Q0JXlb//4Ijpzp+kve2w4NIyqeAuM7jTDX+sNalzA8ESSaHD3A=="),
+                default);
+            Assert.Equal(VerificationResult.SuccessfullyVerified, result);
+        }
+
         #endregion
 
         [Theory]

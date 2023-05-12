@@ -81,12 +81,12 @@ namespace NSign.Signatures
             Assert.False(context.HasSignatureComponent(new HttpHeaderStructuredFieldComponent("y-missing-dict", bindRequest: true)));
 
             Assert.True(context.HasSignatureComponent(new QueryParamComponent("a")));
-            Assert.True(context.HasSignatureComponent(new QueryParamComponent("c")));
+            Assert.False(context.HasSignatureComponent(new QueryParamComponent("c")));
             Assert.True(context.HasSignatureComponent(new QueryParamComponent("e")));
             Assert.False(context.HasSignatureComponent(new QueryParamComponent("x")));
 
             Assert.True(context.HasSignatureComponent(new QueryParamComponent("a", bindRequest: true)));
-            Assert.True(context.HasSignatureComponent(new QueryParamComponent("c", bindRequest: true)));
+            Assert.False(context.HasSignatureComponent(new QueryParamComponent("c", bindRequest: true)));
             Assert.True(context.HasSignatureComponent(new QueryParamComponent("e", bindRequest: true)));
             Assert.False(context.HasSignatureComponent(new QueryParamComponent("x", bindRequest: true)));
 

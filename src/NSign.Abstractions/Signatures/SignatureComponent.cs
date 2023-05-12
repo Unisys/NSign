@@ -52,9 +52,9 @@ namespace NSign.Signatures
         public static readonly DerivedComponent Status = new DerivedComponent(Constants.DerivedComponents.Status);
 
         /// <summary>
-        /// Represents the 'Digest' HTTP header component.
+        /// Represents the 'Content-Digest' HTTP header component.
         /// </summary>
-        public static readonly HttpHeaderComponent Digest = new HttpHeaderComponent(Constants.Headers.Digest);
+        public static readonly HttpHeaderComponent ContentDigest = new HttpHeaderComponent(Constants.Headers.ContentDigest);
 
         /// <summary>
         /// Represents the 'Content-Type' HTTP header component.

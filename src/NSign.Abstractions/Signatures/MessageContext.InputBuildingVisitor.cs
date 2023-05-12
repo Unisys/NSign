@@ -182,6 +182,12 @@ namespace NSign.Signatures
                 {
                     throw new SignatureComponentMissingException(queryParam);
                 }
+                else if (1 < numValues)
+                {
+                    throw new SignatureComponentNotAllowedException(
+                        $"Query parameter '{queryParam.Name}' has more than one value which is not allowed in signatures.",
+                        queryParam);
+                }
             }
 
             #region Private Methods
@@ -243,7 +249,8 @@ namespace NSign.Signatures
                         }
                         else if (component is ISignatureComponentWithName componentWithName)
                         {
-                            sb.Append($"{prefix};{Constants.ComponentParameters.Name}=\"{componentWithName.Name}\"");
+                            sb.Append($"{prefix};{Constants.ComponentParameters.Name}=" +
+                                $"\"{PercentCodec.Encode(componentWithName.Name)}\"");
                         }
                         else if (component is HttpHeaderStructuredFieldComponent)
                         {
@@ -372,7 +379,10 @@ namespace NSign.Signatures
                 if (null == component.OriginalIdentifier)
                 {
                     string suffix = component.BindRequest ? ParamBindRequest : String.Empty;
-                    AddInput($"\"{component.ComponentName}\"{suffix};{Constants.ComponentParameters.Name}=\"{component.Name}\"", value);
+                    AddInput($"\"{component.ComponentName}\"{suffix};" +
+                        $"{Constants.ComponentParameters.Name}=" +
+                        $"\"{PercentCodec.Encode(component.Name)}\"",
+                        PercentCodec.Encode(value));
                 }
                 else
                 {

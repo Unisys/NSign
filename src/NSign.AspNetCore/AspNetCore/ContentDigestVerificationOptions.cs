@@ -5,15 +5,15 @@ namespace NSign.AspNetCore
     /// <summary>
     /// Options class to control digest verification on HTTP request messages.
     /// </summary>
-    public sealed class DigestVerificationOptions
+    public sealed class ContentDigestVerificationOptions
     {
         /// <summary>
-        /// Gets or sets the HTTP status code to use when the 'digest' header is missing. Defauls to <c>400</c>;
+        /// Gets or sets the HTTP status code to use when the 'content-digest' header is missing. Defauls to <c>400</c>;
         /// </summary>
         public int MissingHeaderResponseStatus { get; set; } = 400;
 
         /// <summary>
-        /// Gets or sets the HTTP status code to use when 'digest' header value verification has failed. Defauls to <c>400</c>;
+        /// Gets or sets the HTTP status code to use when 'content-digest' header value verification has failed. Defauls to <c>400</c>;
         /// </summary>
         public int VerificationFailuresResponseStatus { get; set; } = 400;
 
@@ -45,7 +45,7 @@ namespace NSign.AspNetCore
             RequireOnlySingleMatch = 0x10,
 
             /// <summary>
-            /// The 'Digest' header is not required; it's verified only when present.
+            /// The 'Content-Digest' header is not required; it's verified only when present.
             /// </summary>
             Optional = 0x0100,
         }

@@ -35,7 +35,10 @@ namespace NSign.Signatures
                 throw new ArgumentNullException(nameof(name));
             }
 
-            Name = name.ToLower();
+            // When the component is created by the parser, the name would have
+            // to be percent encoded. So in order to work with the decoded name
+            // we need to decode it here first.
+            Name = Uri.UnescapeDataString(name);
         }
 
         #region ISignatureComponentWithName Implementation
