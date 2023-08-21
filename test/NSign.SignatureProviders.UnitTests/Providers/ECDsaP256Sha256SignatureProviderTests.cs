@@ -159,6 +159,59 @@ namespace NSign.Providers
         }
 
         [Fact]
+        public async Task Draft19_2_4_Example1_Verify()
+        {
+            ECDsaP256Sha256SignatureProvider provider = Make(false, "test-key-ecc-p256", "test-key-ecc-p256");
+
+            string input =
+                "\"@status\": 503\n" +
+                "\"content-digest\": sha-512=:0Y6iCBzGg5rZtoXS95Ijz03mslf6KAMCloESHObfwnHJDbkkWWQz6PhhU9kxsTbARtY2PTBOzq24uJFpHsMuAg==:\n" +
+                "\"content-type\": application/json\n" +
+                "\"@authority\";req: example.com\n" +
+                "\"@method\";req: POST\n" +
+                "\"@path\";req: /foo\n" +
+                "\"content-digest\";req: sha-512=:WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+TaPm+AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew==:\n" +
+                "\"@signature-params\": (\"@status\" \"content-digest\" \"content-type\" \"@authority\";req \"@method\";req \"@path\";req \"content-digest\";req);created=1618884479;keyid=\"test-key-ecc-p256\"";
+            SignatureParamsComponent sigParams = new SignatureParamsComponent(
+                "(\"@status\" \"content-digest\" \"content-type\" \"@authority\";req \"@method\";req \"@path\";req \"content-digest\";req);created=1618884479;keyid=\"test-key-ecc-p256\"");
+
+            VerificationResult result = await provider.VerifyAsync(
+                sigParams,
+                Encoding.ASCII.GetBytes(input),
+                Convert.FromBase64String("dMT/A/76ehrdBTD/2Xx8QuKV6FoyzEP/I9hdzKN8LQJLNgzU4W767HK05rx1i8meNQQgQPgQp8wq2ive3tV5Ag=="),
+                default);
+            Assert.Equal(VerificationResult.SuccessfullyVerified, result);
+        }
+
+        [Fact]
+        public async Task Draft19_2_4_Example2_Verify()
+        {
+            ECDsaP256Sha256SignatureProvider provider = Make(false, "test-key-ecc-p256", "test-key-ecc-p256");
+
+            string input =
+                "\"@status\": 503\n" +
+                "\"content-digest\": sha-512=:0Y6iCBzGg5rZtoXS95Ijz03mslf6KAMCloESHObfwnHJDbkkWWQz6PhhU9kxsTbARtY2PTBOzq24uJFpHsMuAg==:\n" +
+                "\"content-type\": application/json\n" +
+                "\"@authority\";req: example.com\n" +
+                "\"@method\";req: POST\n" +
+                "\"@path\";req: /foo\n" +
+                "\"@query\";req: ?param=Value&Pet=dog\n" +
+                "\"content-digest\";req: sha-512=:WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+TaPm+AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew==:\n" +
+                "\"content-type\";req: application/json\n" +
+                "\"content-length\";req: 18\n" +
+                "\"@signature-params\": (\"@status\" \"content-digest\" \"content-type\" \"@authority\";req \"@method\";req \"@path\";req \"@query\";req \"content-digest\";req \"content-type\";req \"content-length\";req);created=1618884479;keyid=\"test-key-ecc-p256\"";
+            SignatureParamsComponent sigParams = new SignatureParamsComponent(
+                "(\"@status\" \"content-digest\" \"content-type\" \"@authority\";req \"@method\";req \"@path\";req \"@query\";req \"content-digest\";req \"content-type\";req \"content-length\";req);created=1618884479;keyid=\"test-key-ecc-p256\"");
+
+            VerificationResult result = await provider.VerifyAsync(
+                sigParams,
+                Encoding.ASCII.GetBytes(input),
+                Convert.FromBase64String("C73J41GVKc+TYXbSobvZf0CmNcptRiWN+NY1Or0A36ISg6ymdRN6ZgR2QfrtopFNzqAyv+CeWrMsNbcV2Ojsgg=="),
+                default);
+            Assert.Equal(VerificationResult.SuccessfullyVerified, result);
+        }
+
+        [Fact]
         public async Task Draft17_4_3_Example2_Verify()
         {
             ECDsaP256Sha256SignatureProvider provider = Make(false, "test-key-ecc-p256", "test-key-ecc-p256");

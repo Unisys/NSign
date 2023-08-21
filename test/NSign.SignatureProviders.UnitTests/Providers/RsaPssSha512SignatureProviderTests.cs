@@ -139,6 +139,31 @@ aOT9v6d+nb4bnNkQVklLQ3fVAvJm+xdDOp9LCNCN48V2pnDOkFV6+U9nV5oyc6XI
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
+        [Fact]
+        public async Task Draft19_2_4_Verify()
+        {
+            RsaPssSha512SignatureProvider provider = new RsaPssSha512SignatureProvider(null, publicKeyFromStandard, "test-key-rsa-pss");
+
+            string input =
+                "\"@method\": POST\n" +
+                "\"@authority\": example.com\n" +
+                "\"@path\": /foo\n" +
+                "\"@query\": ?param=Value&Pet=dog\n" +
+                "\"content-digest\": sha-512=:WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+TaPm+AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew==:\n" +
+                "\"content-type\": application/json\n" +
+                "\"content-length\": 18\n" +
+                "\"@signature-params\": (\"@method\" \"@authority\" \"@path\" \"@query\" \"content-digest\" \"content-type\" \"content-length\");created=1618884475;keyid=\"test-key-rsa-pss\"";
+            SignatureParamsComponent sigParams = new SignatureParamsComponent(
+                "(\"@method\" \"@authority\" \"@path\" \"@query\" \"content-digest\" \"content-type\" \"content-length\");created=1618884475;keyid=\"test-key-rsa-pss\"");
+
+            VerificationResult result = await provider.VerifyAsync(
+                sigParams,
+                Encoding.ASCII.GetBytes(input),
+                Convert.FromBase64String("e8UJ5wMiRaonlth5ERtE8GIiEH7Akcr493nQ07VPNo6y3qvjdKt0fo8VHO8xXDjmtYoatGYBGJVlMfIp06eVMEyNW2I4vN7XDAz7m5v1108vGzaDljrd0H8+SJ28g7bzn6h2xeL/8q+qUwahWA/JmC8aOC9iVnwbOKCc0WSrLgWQwTY6VLp42Qt7jjhYT5W7/wCvfK9A1VmHH1lJXsV873Z6hpxesd50PSmO+xaNeYvDLvVdZlhtw5PCtUYzKjHqwmaQ6DEuM8udRjYsoNqp2xZKcuCO1nKc0V3RjpqMZLuuyVbHDAbCzr0pg2d2VM/OC33JAU7meEjjaNz+d7LWPg=="),
+                default);
+            Assert.Equal(VerificationResult.SuccessfullyVerified, result);
+        }
+
         #endregion
 
         [Theory]
