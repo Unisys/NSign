@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>$(DotNetTargetFrameworks)</TargetFrameworks>
+    <RootNamespace>NSign.BouncyCastle</RootNamespace>
+    <AssemblyName>NSign.BouncyCastle</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Description>NSign extension using BouncyCastle.</Description>
+    <PackageDescription>Includes signature provider for signing and verifying signatures using EdDSA with ed25519.
+
+See also: https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/</PackageDescription>
+    <PackageTags>nsign;sign;signing;verify;http message;request;response;eddsa;edwards25519;ed25519;signature;bouncycastle</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NSign.Abstractions\NSign.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.*" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+        <_Parameter1>$(AssemblyName).UnitTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>

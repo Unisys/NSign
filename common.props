@@ -3,6 +3,7 @@
         <LibraryTargetFramework>netstandard2.1</LibraryTargetFramework>
         <AspNetCoreTargetFrameworks>net6.0;net7.0</AspNetCoreTargetFrameworks>
         <TestTargetFrameworks>net6.0;net7.0</TestTargetFrameworks>
+        <DotNetTargetFrameworks>net6.0;net7.0</DotNetTargetFrameworks>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <Nullable>enable</Nullable>
         <LangVersion>9.0</LangVersion>
@@ -30,7 +31,7 @@
         <RestoreLockedMode>true</RestoreLockedMode>
     </PropertyGroup>
 
-    <ItemGroup Label="NuSpec">
+    <ItemGroup Label="NuSpec" Condition="$(IsPackable) == 'true'">
         <None Include="..\..\icon.png" Pack="true" PackagePath="\" Visible="false" />
         <None Include="README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
