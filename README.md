@@ -26,6 +26,7 @@ response messages for a client to verify on receipt.
 | NSign.SignatureProviders | Signature providers (signers and verifiers) for symmetric and asymmetric signatures. | [![Nuget](https://img.shields.io/nuget/v/NSign.SignatureProviders)](https://nuget.org/packages/NSign.SignatureProviders) |
 | NSign.AspNetCore | Middleware for verifying signatures on HTTP requests and signing HTTP responses. | [![Nuget](https://img.shields.io/nuget/v/NSign.AspNetCore)](https://nuget.org/packages/NSign.AspNetCore) |
 | NSign.Client | HTTP message pipeline handlers (for the `System.Net.Http.HttpClient` class) for signing HTTP request messages and verifying signatures on HTTP response messages. | [![Nuget](https://img.shields.io/nuget/v/NSign.Client)](https://nuget.org/packages/NSign.Client) |
+| NSign.BouncyCastle | NSign extensions using BouncyCastle; includes a signature provider for `ed25519` (EdDSA using curve edwards25519) | [![Nuget](https://img.shields.io/nuget/v/NSign.BouncyCastle)](https://nuget.org/packages/NSign.BouncyCastle) |
 
 ## Usage
 
@@ -232,6 +233,5 @@ namespace WebhooksCaller
 
 ## Missing Features
 
-- [ ] Support for EdDSA using curve edwards25519 (algorithm `ed25519`)
 - [ ] Support for JSON Web Signature algorithms
 - [ ] Support for `Accept-Signature`
