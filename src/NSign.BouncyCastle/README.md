@@ -19,10 +19,18 @@ Here, `privateKey` and `publicKey` are instances of `Ed25519PrivateKeyParameters
 package respectively.
 
 If you have the keys in PEM-formatted files, you can use the `PemReader` from the same BouncyCastle
-package to read those keys. If you have a PFX file with private and public key, you can extract
-the private key using `Pkcs12Store` (again, from the same BouncyCastle package). The public key
-can be extracted easily either from a PFX or a certificate file using something like
+package to read those keys. If you have a .pfx or a .cer file, you can use `openssl` to extract the
+keys. For instance:
 
-```csharp
-var publicKey = new Ed25519PublicKeyParameters(certificate.GetPublicKey());
+```bash
+# Extract the ed25519 private key from a .pfx file holding an ed25519 private key:
+openssl pkcs12 -in my.pfx -nocerts -nodes -out my-priv.pem
+
+# Extract the public key from the above extracted private key
+openssl pkey -in my-priv.pem -pubout -out my-pub.pem
+
+## OR, if you just have the public key in a certificate file:
+openssl x509 -in my.cer -pubkey -nocert -out my-pub.pem
 ```
+
+Make sure to consult the documentation of your `openssl` installation for more details.

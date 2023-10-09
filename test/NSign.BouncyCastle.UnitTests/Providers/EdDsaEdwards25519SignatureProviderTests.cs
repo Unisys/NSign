@@ -1,18 +1,12 @@
 ﻿using NSign.Signatures;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.OpenSsl;
-using Org.BouncyCastle.Pkcs;
-using Org.BouncyCastle.Security;
-using Org.BouncyCastle.X509;
 using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-
-using DotNetX509Cert = System.Security.Cryptography.X509Certificates.X509Certificate2;
 
 namespace NSign.BouncyCastle.Providers
 {
@@ -36,9 +30,9 @@ namespace NSign.BouncyCastle.Providers
         [Fact]
         public async Task SignAsyncThrowsWhenPrivateKeyMissing()
         {
-            (Ed25519PrivateKeyParameters? privateKey, Ed25519PublicKeyParameters publicKey) =
-                GetKeys("ed25519.nsign.test.local.cer");
-            EdDsaEdwards25519SignatureProvider provider = new EdDsaEdwards25519SignatureProvider(privateKey, publicKey, "test-key-id");
+            (_, Ed25519PublicKeyParameters publicKey) =
+                GetKeys("ed25519.nsign.test.local");
+            EdDsaEdwards25519SignatureProvider provider = new EdDsaEdwards25519SignatureProvider(publicKey, "test-key-id");
             InvalidOperationException ex = await Assert.ThrowsAsync<InvalidOperationException>(
                 () => provider.SignAsync(new byte[] { }, default));
 
@@ -51,7 +45,7 @@ namespace NSign.BouncyCastle.Providers
         public async Task OwnSignatureCanBeVerified(string keyId)
         {
             (Ed25519PrivateKeyParameters? privateKey, Ed25519PublicKeyParameters publicKey) =
-                GetKeys("ed25519.nsign.test.local.pfx");
+                GetKeys("ed25519.nsign.test.local");
             EdDsaEdwards25519SignatureProvider signingProvider = new EdDsaEdwards25519SignatureProvider(privateKey, publicKey, keyId);
             EdDsaEdwards25519SignatureProvider verifyingProvider = new EdDsaEdwards25519SignatureProvider(publicKey, keyId);
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
@@ -75,7 +69,7 @@ namespace NSign.BouncyCastle.Providers
         public async Task VerificationFailsForDifferentKeyId(string keyId)
         {
             (Ed25519PrivateKeyParameters? privateKey, Ed25519PublicKeyParameters publicKey) =
-                GetKeys("ed25519.nsign.test.local.pfx");
+                GetKeys("ed25519.nsign.test.local");
             EdDsaEdwards25519SignatureProvider signingProvider = new EdDsaEdwards25519SignatureProvider(privateKey, publicKey, keyId);
             EdDsaEdwards25519SignatureProvider verifyingProvider = new EdDsaEdwards25519SignatureProvider(publicKey, keyId);
             SignatureParamsComponent signatureParams = new SignatureParamsComponent().WithKeyId("unknown-key");
@@ -93,7 +87,7 @@ namespace NSign.BouncyCastle.Providers
         public async Task VerificationFailsForDifferentAlgorithm(string keyId)
         {
             (Ed25519PrivateKeyParameters? privateKey, Ed25519PublicKeyParameters publicKey) =
-                GetKeys("ed25519.nsign.test.local.pfx");
+                GetKeys("ed25519.nsign.test.local");
             EdDsaEdwards25519SignatureProvider signingProvider = new EdDsaEdwards25519SignatureProvider(privateKey, publicKey, keyId);
             EdDsaEdwards25519SignatureProvider verifyingProvider = new EdDsaEdwards25519SignatureProvider(publicKey, keyId);
             SignatureParamsComponent signatureParams = new SignatureParamsComponent().WithAlgorithm(SignatureAlgorithm.HmacSha256);
@@ -109,9 +103,9 @@ namespace NSign.BouncyCastle.Providers
         [Fact]
         public void UpdateSignatureParamsSetsTheAlgorithm()
         {
-            (Ed25519PrivateKeyParameters? privateKey, Ed25519PublicKeyParameters publicKey) =
-                GetKeys("ed25519.nsign.test.local.cer");
-            EdDsaEdwards25519SignatureProvider signingProvider = new EdDsaEdwards25519SignatureProvider(privateKey, publicKey, "some-test-key");
+            (_, Ed25519PublicKeyParameters publicKey) =
+                GetKeys("ed25519.nsign.test.local");
+            EdDsaEdwards25519SignatureProvider signingProvider = new EdDsaEdwards25519SignatureProvider(publicKey, "some-test-key");
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
 
             Assert.Null(signatureParams.Algorithm);
@@ -235,34 +229,23 @@ MCowBQYDK2VwAyEAJrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=
             return (Ed25519PublicKeyParameters)reader.ReadObject();
         }
 
-        private (Ed25519PrivateKeyParameters? privateKey, Ed25519PublicKeyParameters publicKey) GetKeys(string certificatePath)
+        private (Ed25519PrivateKeyParameters? privateKey, Ed25519PublicKeyParameters publicKey) GetKeys(string pemBasePath)
         {
-            using DotNetX509Cert certificate = new DotNetX509Cert(certificatePath, String.Empty);
-            X509Certificate cert = DotNetUtilities.FromX509Certificate(certificate);
+            Ed25519PrivateKeyParameters priv;
+            Ed25519PublicKeyParameters pub;
 
-            Ed25519PublicKeyParameters publicKey = new Ed25519PublicKeyParameters(certificate.GetPublicKey());
-            Ed25519PrivateKeyParameters? privateKey = null;
-
-            if (certificate.HasPrivateKey)
             {
-                using Stream stream = File.OpenRead(certificatePath);
-                Pkcs12Store store = new Pkcs12StoreBuilder().Build();
-                store.Load(stream, new char[0]);
-
-                string alias = store.Aliases.Single();
-                AsymmetricKeyEntry asymmetricKey = store.GetKey(alias);
-
-                if (asymmetricKey.Key is Ed25519PrivateKeyParameters ed25519PrivateKey)
-                {
-                    privateKey = ed25519PrivateKey;
-                }
-                else
-                {
-                    throw new InvalidOperationException("The certificate has a private key that is not for ed25519.");
-                }
+                using StreamReader streamReader = new StreamReader($"{pemBasePath}-priv.pem");
+                using PemReader reader = new PemReader(streamReader);
+                priv = (Ed25519PrivateKeyParameters)reader.ReadObject();
+            }
+            {
+                using StreamReader streamReader = new StreamReader($"{pemBasePath}-pub.pem");
+                using PemReader reader = new PemReader(streamReader);
+                pub = (Ed25519PublicKeyParameters)reader.ReadObject();
             }
 
-            return (privateKey, publicKey);
+            return (priv, pub);
         }
     }
 }

@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="*.cer;*.pfx">
+    <None Update="*-priv.pem;*-pub.pem">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
