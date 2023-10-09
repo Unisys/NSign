@@ -137,7 +137,7 @@ namespace NSign.Providers
             cancellationToken.ThrowIfCancellationRequested();
 
             // If the signature parameters has the 'alg' parameter set, it must match the algorithm provided with this
-            // instance. The same goes for the 'keyid' paramter, provided that it is set with this instance.
+            // instance. The same goes for the 'keyid' parameter, provided that it is set with this instance.
             if (!signatureParams.HasMatchingAlgorithm(algorithmName) ||
                 (!String.IsNullOrEmpty(KeyId) && !signatureParams.HasMatchingKeyId(KeyId)))
             {
