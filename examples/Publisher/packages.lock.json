@@ -181,8 +181,8 @@
       },
       "Microsoft.Extensions.Logging.Abstractions": {
         "type": "Transitive",
-        "resolved": "6.0.3",
-        "contentHash": "SUpStcdjeBbdKjPKe53hVVLkFjylX0yIXY8K+xWa47+o1d+REDyOMZjHZa+chsQI1K9qZeiHWk9jos0TFU7vGg=="
+        "resolved": "6.0.4",
+        "contentHash": "K14wYgwOfKVELrUh5eBqlC8Wvo9vvhS3ZhIvcswV2uS/ubkTRPSQsN557EZiYUSSoZNxizG+alN4wjtdyLdcyw=="
       },
       "Microsoft.Extensions.Logging.Configuration": {
         "type": "Transitive",
@@ -369,7 +369,7 @@
           "Microsoft.Extensions.Http": "[6.0.*, )",
           "Microsoft.Extensions.Logging.Abstractions": "[6.0.*, )",
           "Microsoft.Extensions.Options": "[6.0.*, )",
-          "NSign.Abstractions": "[0.17.0, )",
+          "NSign.Abstractions": "[0.19.1, )",
           "StructuredFieldValues": "[0.*, )",
           "System.Collections.Immutable": "[6.0.*, )",
           "System.IO.Pipelines": "[6.*, )"
@@ -378,7 +378,7 @@
       "nsign.signatureproviders": {
         "type": "Project",
         "dependencies": {
-          "NSign.Abstractions": "[0.17.0, )"
+          "NSign.Abstractions": "[0.19.1, )"
         }
       }
     }
