@@ -1,0 +1,8 @@
+<Project>
+    <PropertyGroup>
+        <ExamplesTargetFramework>net6.0</ExamplesTargetFramework>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+</Project>
