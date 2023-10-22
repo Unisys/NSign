@@ -9,7 +9,7 @@ namespace NSign.Signatures
         /// <summary>
         /// Implements the InputVisitorBase class to assist with checking for existence of signature components.
         /// </summary>
-        private sealed class InputCheckingVisitor : VisitorBase
+        private sealed class InputCheckingVisitor : VisitorBase, ISignatureComponentCheckVisitor
         {
             /// <summary>
             /// Initializes a new instance of InputCheckingVisitor.

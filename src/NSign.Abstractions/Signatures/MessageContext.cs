@@ -83,14 +83,16 @@ namespace NSign.Signatures
         /// <param name="component">
         /// A <see cref="SignatureComponent"/> object that describes the component to check.
         /// </param>
+        /// <param name="visitor">Optional. A customized input checking visitor, to support historical drafts of the
+        /// spec.</param>
         /// <returns>
         /// True if the component is available (and can be used in signatures), false otherwise.
         /// </returns>
-        public bool HasSignatureComponent(SignatureComponent component)
+        public bool HasSignatureComponent(SignatureComponent component, ISignatureComponentCheckVisitor? visitor = null)
         {
             EnsureComponentIsAllowed(component);
-
-            InputCheckingVisitor visitor = new InputCheckingVisitor(this);
+            
+            visitor ??= new InputCheckingVisitor(this);
 
             component.Accept(visitor);
 
@@ -108,14 +110,17 @@ namespace NSign.Signatures
         /// A string that receives the representation of the '@signature-params' component for the given
         /// <paramref name="signatureParams"/> when the method returns.
         /// </param>
+        /// <param name="visitor">Optional. A customized input building visitor, to support historical drafts of the
+        /// spec.</param>
         /// <returns>
         /// A <see cref="ReadOnlyMemory{T}"/> of <see cref="byte"/> representing the signature input.
         /// </returns>
         public ReadOnlyMemory<byte> GetSignatureInput(
             SignatureParamsComponent signatureParams,
-            out string signatureParamsValue)
+            out string signatureParamsValue,
+            ISignatureComponentInputVisitor? visitor = null)
         {
-            InputBuildingVisitor visitor = new InputBuildingVisitor(this);
+            visitor ??= new InputBuildingVisitor(this);
 
             signatureParams.Accept(visitor);
             signatureParamsValue = visitor.SignatureParamsValue!;
