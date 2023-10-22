@@ -12,7 +12,7 @@ namespace NSign.Signatures
         /// <summary>
         /// Implements the VisitorBase class to assist with building strings for signature input.
         /// </summary>
-        private sealed class InputBuildingVisitor : VisitorBase, ISignatureComponentInputVisitor
+        private sealed class InputBuildingVisitor : VisitorBase, ISignatureComponentBuildVisitor
         {
             /// <summary>
             /// The parameter to use to indicate that a component is bound to the request.

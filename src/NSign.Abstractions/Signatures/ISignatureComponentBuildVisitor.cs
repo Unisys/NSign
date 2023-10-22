@@ -3,7 +3,7 @@
     /// <summary>
     /// Contract for a SignatureComponent visitor that should build the signature input document.
     /// </summary>
-    public interface ISignatureComponentInputVisitor : ISignatureComponentVisitor
+    public interface ISignatureComponentBuildVisitor : ISignatureComponentVisitor
     {
         /// <summary>
         /// The signature input as built by the visitor.

@@ -118,7 +118,7 @@ namespace NSign.Signatures
         public ReadOnlyMemory<byte> GetSignatureInput(
             SignatureParamsComponent signatureParams,
             out string signatureParamsValue,
-            ISignatureComponentInputVisitor? visitor = null)
+            ISignatureComponentBuildVisitor? visitor = null)
         {
             visitor ??= new InputBuildingVisitor(this);
 
