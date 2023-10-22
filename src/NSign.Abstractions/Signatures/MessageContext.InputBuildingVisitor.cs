@@ -47,14 +47,10 @@ namespace NSign.Signatures
             /// </param>
             public InputBuildingVisitor(MessageContext context) : base(context) { }
 
-            /// <summary>
-            /// The signature input as built by the visitor.
-            /// </summary>
+            /// <inheritdoc/>
             public string SignatureInput => signatureInput.ToString();
 
-            /// <summary>
-            /// The value for the '@signature-params' component, as built by the visitor.
-            /// </summary>
+            /// <inheritdoc/>
             public string? SignatureParamsValue { get; private set; }
 
             /// <inheritdoc/>

@@ -19,9 +19,7 @@ namespace NSign.Signatures
             /// </param>
             public InputCheckingVisitor(MessageContext context) : base(context) { }
 
-            /// <summary>
-            /// Gets or sets a flag which indicates whether or not all the tested components were found.
-            /// </summary>
+            /// <inheritdoc/>
             public bool Found { get; private set; } = true;
 
             /// <inheritdoc/>
