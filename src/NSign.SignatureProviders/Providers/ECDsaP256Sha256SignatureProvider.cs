@@ -21,7 +21,7 @@ namespace NSign.Providers
         /// </param>
         public ECDsaP256Sha256SignatureProvider(X509Certificate2 certificate, string keyId) :
             base(certificate,
-                 ECCurve.NamedCurves.nistP256.Oid.Value,
+                 ECCurve.NamedCurves.nistP256.Oid.Value!,
                  "P-256",
                  Constants.SignatureAlgorithms.EcdsaP256Sha256,
                  keyId)

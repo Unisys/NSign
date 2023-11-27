@@ -91,15 +91,15 @@ namespace NSign.Http
             {
                 case StructuredFieldType.List:
                     Debug.Assert(null != List, "The list must not be null.");
-                    return List.SerializeAsString(innerList: false);
+                    return List!.SerializeAsString(innerList: false);
 
                 case StructuredFieldType.Dictionary:
                     Debug.Assert(null != Dictionary, "The dictionary must not be null.");
-                    return Dictionary.SerializeAsString();
+                    return Dictionary!.SerializeAsString();
 
                 case StructuredFieldType.Item:
                     Debug.Assert(null != Item, "The item must not be null.");
-                    return Item.SerializeAsString();
+                    return Item!.SerializeAsString();
 
                 default:
                     throw new NotSupportedException("Cannot serialize a field of type Unknown type.");

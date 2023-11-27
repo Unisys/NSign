@@ -94,8 +94,8 @@ namespace NSign.Signatures
                     Debug.Assert(lastValue.HasValue, "lastValue must have a value.");
 
                     AddInputWithKey(httpHeaderDictionary,
-                                    lastValue.Value.Value.SerializeAsString() +
-                                    lastValue.Value.Parameters.SerializeAsParameters());
+                                    lastValue!.Value.Value.SerializeAsString() +
+                                    lastValue!.Value.Parameters.SerializeAsParameters());
                     return;
                 }
 
@@ -471,8 +471,13 @@ namespace NSign.Signatures
 
                 if (byteLen <= 1024)
                 {
+#if NETSTANDARD2_0
+                    byte[] buffer = Encoding.ASCII.GetBytes(value);
+                    byteLen = buffer.Length;
+#elif NETSTANDARD2_1_OR_GREATER || NET
                     Span<byte> buffer = stackalloc byte[byteLen];
                     byteLen = Encoding.ASCII.GetBytes(value, buffer);
+#endif
 
                     return ((ReadOnlySpan<byte>)buffer).SerializeAsString();
                 }
@@ -484,7 +489,7 @@ namespace NSign.Signatures
                 }
             }
 
-            #endregion
+#endregion
         }
     }
 }

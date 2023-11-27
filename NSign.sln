@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Global", "Global", "{6F1B62
 		.gitignore = .gitignore
 		.github\workflows\build-test.yml = .github\workflows\build-test.yml
 		common.props = common.props
+		.github\dependabot.yml = .github\dependabot.yml
+		Directory.Build.props = Directory.Build.props
 		.github\workflows\publish.yml = .github\workflows\publish.yml
 		.github\workflows\pull-request-build-test.yml = .github\workflows\pull-request-build-test.yml
 		README.md = README.md
@@ -31,9 +33,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NSign.AspNetCore.UnitTests"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NSign.SignatureProviders.UnitTests", "test\NSign.SignatureProviders.UnitTests\NSign.SignatureProviders.UnitTests.csproj", "{C259AB0B-3F5B-4844-B407-2576D2114669}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NSign.BouncyCastle", "src\NSign.BouncyCastle\NSign.BouncyCastle.csproj", "{6953523B-1377-4B6E-AE96-AC4DC05755B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NSign.BouncyCastle", "src\NSign.BouncyCastle\NSign.BouncyCastle.csproj", "{6953523B-1377-4B6E-AE96-AC4DC05755B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NSign.BouncyCastle.UnitTests", "test\NSign.BouncyCastle.UnitTests\NSign.BouncyCastle.UnitTests.csproj", "{DC7CA54A-BE81-4FD0-B2CC-4E57C6CDCFF0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NSign.BouncyCastle.UnitTests", "test\NSign.BouncyCastle.UnitTests\NSign.BouncyCastle.UnitTests.csproj", "{DC7CA54A-BE81-4FD0-B2CC-4E57C6CDCFF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

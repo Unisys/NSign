@@ -23,6 +23,8 @@ namespace NSign.Signatures
             Position = position;
         }
 
+#if NET8_0_OR_GREATER
+#else
         /// <summary>
         /// Initializes a new instance of UnexpectedInputException.
         /// </summary>
@@ -39,6 +41,7 @@ namespace NSign.Signatures
             UnexpectedCharacter = info.GetChar(nameof(UnexpectedCharacter));
             Position = info.GetInt32(nameof(Position));
         }
+#endif
 
         /// <summary>
         /// Gets the character that was expected.
@@ -50,6 +53,8 @@ namespace NSign.Signatures
         /// </summary>
         public int Position { get; }
 
+#if NET8_0_OR_GREATER
+#else
         /// <inheritdoc/>
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
@@ -58,6 +63,7 @@ namespace NSign.Signatures
             info.AddValue(nameof(UnexpectedCharacter), UnexpectedCharacter);
             info.AddValue(nameof(Position), Position);
         }
+#endif
 
         /// <summary>
         /// Gets a friendly message for this exception.

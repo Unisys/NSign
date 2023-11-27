@@ -1,8 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <Project>
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
     <PropertyGroup>
-        <ExamplesTargetFramework>net6.0</ExamplesTargetFramework>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <TargetFramework>$(DotnetLatestLtsVersion)</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
+
+        <!-- Override the LangVersion inherited from the root Directory.Build.props -->
+        <LangVersion></LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Label="SystemDependencyVersions">
+        <SystemDependencyVersionWildcard>8.0.*</SystemDependencyVersionWildcard>
     </PropertyGroup>
 </Project>

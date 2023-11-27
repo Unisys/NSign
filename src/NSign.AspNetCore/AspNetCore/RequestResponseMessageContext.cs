@@ -82,7 +82,7 @@ namespace NSign.AspNetCore
         /// <inheritdoc/>
         public override void AddHeader(string headerName, string value)
         {
-            HttpContext.Response.Headers.Add(headerName, value);
+            HttpContext.Response.Headers.Append(headerName, value);
         }
 
         /// <inheritdoc/>

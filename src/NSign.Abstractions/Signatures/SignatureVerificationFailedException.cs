@@ -19,6 +19,8 @@ namespace NSign.Signatures
             base($"Some signatures have failed verification: {String.Join(", ", signatureNames)}.")
         { }
 
+#if NET8_0_OR_GREATER
+#else
         /// <summary>
         /// Initializes a new instance of SignatureVerificationFailedException.
         /// </summary>
@@ -32,5 +34,6 @@ namespace NSign.Signatures
         /// </param>
         public SignatureVerificationFailedException(SerializationInfo info, StreamingContext context) : base(info, context)
         { }
+#endif
     }
 }

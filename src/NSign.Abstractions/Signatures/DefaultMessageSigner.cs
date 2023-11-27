@@ -52,7 +52,7 @@ namespace NSign.Signatures
                 throw new InvalidOperationException("The SignatureName must be set to a non-blank string. Signing failed.");
             }
 
-            SignatureInputSpec inputSpec = new SignatureInputSpec(options.SignatureName);
+            SignatureInputSpec inputSpec = new SignatureInputSpec(options.SignatureName!);
             options.SetParameters?.Invoke(inputSpec.SignatureParameters);
 
             foreach (ComponentSpec componentSpec in options.ComponentsToInclude)
@@ -85,7 +85,11 @@ namespace NSign.Signatures
 
             // It's time to add the 'signature-input' and 'signature' headers.
             context.AddHeader(Constants.Headers.SignatureInput, $"{inputSpec.Name}={sigInput}");
+#if NETSTANDARD2_0
+            context.AddHeader(Constants.Headers.Signature, $"{inputSpec.Name}=:{Convert.ToBase64String(signature.Span.ToArray())}:");
+#elif NETSTANDARD2_1_OR_GREATER || NET
             context.AddHeader(Constants.Headers.Signature, $"{inputSpec.Name}=:{Convert.ToBase64String(signature.Span)}:");
+#endif
         }
 
         #endregion

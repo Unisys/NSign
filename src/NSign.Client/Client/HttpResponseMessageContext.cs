@@ -84,17 +84,25 @@ namespace NSign.Client
         /// <inheritdoc/>
         public override IEnumerable<string> GetTrailerValues(string fieldName)
         {
-            if (Response.TrailingHeaders.TryGetValues(fieldName, out IEnumerable<string> values))
+#if NETSTANDARD2_0
+            throw new NotSupportedException("Trailers are not supported with .netstandard 2.0. Please update to a more modern version.");
+#elif NETSTANDARD2_1_OR_GREATER || NET
+            if (Response.TrailingHeaders.TryGetValues(fieldName, out IEnumerable<string>? values) &&
+                null != values)
             {
                 return values;
             }
 
             return Array.Empty<string>();
+#endif
         }
 
         /// <inheritdoc/>
         public override bool HasTrailer(bool bindRequest, string fieldName)
         {
+#if NETSTANDARD2_0
+            throw new NotSupportedException("Trailers are not supported with .netstandard 2.0. Please update to a more modern version.");
+#elif NETSTANDARD2_1_OR_GREATER || NET
             if (bindRequest)
             {
                 // The HttpRequestMessage for HttpClient does not support trailers.
@@ -102,6 +110,7 @@ namespace NSign.Client
             }
 
             return Response.TrailingHeaders.TryGetValues(fieldName, out _);
+#endif
         }
 
         #endregion

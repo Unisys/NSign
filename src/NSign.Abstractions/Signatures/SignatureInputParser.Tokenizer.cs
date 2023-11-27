@@ -173,7 +173,11 @@ namespace NSign.Signatures
                 }
 
                 // We have already read the closing double quote, so the actual quoted string ends one character before.
+#if NETSTANDARD2_0
+                Token = new Token(TokenType.QuotedString, Input.Slice(startPos, position - 1 - startPos));
+#elif NETSTANDARD2_1_OR_GREATER || NET
                 Token = new Token(TokenType.QuotedString, Input[startPos..(position - 1)]);
+#endif
             }
 
             /// <summary>
@@ -193,7 +197,11 @@ namespace NSign.Signatures
                     Read();
                 }
 
+#if NETSTANDARD2_0
+                Token = new Token(TokenType.Identifier, Input.Slice(startPos, position - startPos));
+#elif NETSTANDARD2_1_OR_GREATER || NET
                 Token = new Token(TokenType.Identifier, Input[startPos..position]);
+#endif
             }
 
             /// <summary>
@@ -212,7 +220,11 @@ namespace NSign.Signatures
                     Read();
                 }
 
+#if NETSTANDARD2_0
+                Token = new Token(TokenType.Integer, Input.Slice(startPos, position - startPos));
+#elif NETSTANDARD2_1_OR_GREATER || NET
                 Token = new Token(TokenType.Integer, Input[startPos..position]);
+#endif
             }
 
             /// <summary>

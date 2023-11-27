@@ -21,7 +21,7 @@ namespace NSign.Providers
         /// </param>
         public ECDsaP382Sha384SignatureProvider(X509Certificate2 certificate, string keyId) :
             base(certificate,
-                 ECCurve.NamedCurves.nistP384.Oid.Value,
+                 ECCurve.NamedCurves.nistP384.Oid.Value!,
                  "P-384",
                  Constants.SignatureAlgorithms.EcdsaP384Sha384,
                  keyId)

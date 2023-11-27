@@ -71,8 +71,13 @@ namespace NSign.Http
         /// </returns>
         private static string Encode(Match match)
         {
+#if NETSTANDARD2_0
+            byte[] bytes = Encoding.UTF8.GetBytes(match.Value);
+            int numBytes = bytes.Length;
+#elif NETSTANDARD2_1_OR_GREATER || NET
             Span<byte> bytes = stackalloc byte[8]; // It should be safe to assume at most 8 bytes per code-point.
             int numBytes = Encoding.UTF8.GetBytes(match.Value, bytes);
+#endif
             StringBuilder result = new StringBuilder(numBytes * 3);
 
             for (int i = 0; i < numBytes; i++)

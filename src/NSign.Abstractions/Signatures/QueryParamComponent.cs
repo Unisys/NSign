@@ -57,7 +57,7 @@ namespace NSign.Signatures
         #region IEquatable<QueryParamComponent> Implementation
 
         /// <inheritdoc/>
-        public bool Equals(QueryParamComponent other)
+        public bool Equals(QueryParamComponent? other)
         {
             if (null == other)
             {
