@@ -22,8 +22,7 @@ internal static class BasicAuthentication
         public Handler(
             IOptionsMonitor<Options> options,
             ILoggerFactory logger,
-            UrlEncoder encoder,
-            ISystemClock clock) : base(options, logger, encoder, clock)
+            UrlEncoder encoder) : base(options, logger, encoder)
         {
         }
 
@@ -60,13 +59,18 @@ internal static class BasicAuthentication
             return Task.CompletedTask;
         }
 
-        private static bool TryExtractUsername(string authorizationValue, out string? username)
+        private static bool TryExtractUsername(string? authorizationValue, out string? username)
         {
+            username = null;
+            if (null == authorizationValue)
+            {
+                return false;
+            }
+
             string[] parts = authorizationValue.Split(' ');
             if (parts.Length < 2 ||
                 !String.Equals(BasicAuthentication.Scheme, parts[0], StringComparison.OrdinalIgnoreCase))
             {
-                username = null;
                 return false;
             }
 
