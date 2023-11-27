@@ -20,6 +20,8 @@ namespace NSign.Signatures
             HttpHeaderStructuredField = httpHeaderStructuredField;
         }
 
+#if NET8_0_OR_GREATER
+#else
         /// <summary>
         /// Initializes a new instance of <see cref="UnknownStructuredFieldComponentException"/>.
         /// </summary>
@@ -31,6 +33,7 @@ namespace NSign.Signatures
         /// </param>
         public UnknownStructuredFieldComponentException(SerializationInfo info, StreamingContext context) : base(info, context)
         { }
+#endif
 
         /// <summary>
         /// Gets the <see cref="HttpHeaderStructuredFieldComponent"/> that caused the exception.

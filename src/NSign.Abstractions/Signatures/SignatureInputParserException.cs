@@ -23,10 +23,16 @@ namespace NSign.Signatures
         {
             Expected = expected;
             FoundType = tokenizer.Token.Type;
+#if NETSTANDARD2_0
+            FoundValue = new String(tokenizer.Token.Value.ToArray());
+#elif NETSTANDARD2_1_OR_GREATER || NET
             FoundValue = new String(tokenizer.Token.Value);
+#endif
             Position = tokenizer.LastPosition;
         }
 
+#if NET8_0_OR_GREATER
+#else
         /// <summary>
         /// Initializes a new instance of SignatureInputParserException.
         /// </summary>
@@ -40,11 +46,12 @@ namespace NSign.Signatures
         /// </param>
         public SignatureInputParserException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            Expected = (TokenType)info.GetValue(nameof(Expected), typeof(TokenType));
-            FoundType = (TokenType)info.GetValue(nameof(FoundType), typeof(TokenType));
-            FoundValue = info.GetString(nameof(FoundValue));
+            Expected = (TokenType)info.GetValue(nameof(Expected), typeof(TokenType))!;
+            FoundType = (TokenType)info.GetValue(nameof(FoundType), typeof(TokenType))!;
+            FoundValue = info.GetString(nameof(FoundValue))!;
             Position = info.GetInt32(nameof(Position));
         }
+#endif
 
         /// <summary>
         /// Gets a TokenType value representing all the types of tokens that were expected / allowed at the given position.
@@ -66,6 +73,8 @@ namespace NSign.Signatures
         /// </summary>
         public int Position { get; }
 
+#if NET8_0_OR_GREATER
+#else
         /// <inheritdoc/>
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
@@ -73,9 +82,14 @@ namespace NSign.Signatures
 
             info.AddValue(nameof(Expected), Expected);
             info.AddValue(nameof(FoundType), FoundType);
+#if NETSTANDARD2_0
+            info.AddValue(nameof(FoundValue), new String(FoundValue.ToCharArray()));
+#elif NETSTANDARD2_1_OR_GREATER || NET
             info.AddValue(nameof(FoundValue), new String(FoundValue));
+#endif
             info.AddValue(nameof(Position), Position);
         }
+#endif
 
         /// <summary>
         /// Gets a friendly message for this exception.
@@ -96,16 +110,28 @@ namespace NSign.Signatures
             if ((rawExpected & (rawExpected - 1)) == 0)
             {
                 // A single token type is expected / allowed.
+#if NETSTANDARD2_0
+                return
+                    $"Expected token of type {expected}, but found token '{new String(tokenizer.Token.Value.ToArray())}' of type " +
+                    $"{tokenizer.Token.Type} at position {tokenizer.LastPosition}.";
+#elif NETSTANDARD2_1_OR_GREATER || NET
                 return
                     $"Expected token of type {expected}, but found token '{new String(tokenizer.Token.Value)}' of type " +
                     $"{tokenizer.Token.Type} at position {tokenizer.LastPosition}.";
+#endif
             }
             else
             {
                 // Multiple token types were expected / allowed.
+#if NETSTANDARD2_0
+                return
+                    $"Expected token type to be one of {{{expected}}}, but found token '{new String(tokenizer.Token.Value.ToArray())}' " +
+                    $"of type {tokenizer.Token.Type} at position {tokenizer.LastPosition}.";
+#elif NETSTANDARD2_1_OR_GREATER || NET
                 return
                     $"Expected token type to be one of {{{expected}}}, but found token '{new String(tokenizer.Token.Value)}' " +
                     $"of type {tokenizer.Token.Type} at position {tokenizer.LastPosition}.";
+#endif
             }
         }
     }

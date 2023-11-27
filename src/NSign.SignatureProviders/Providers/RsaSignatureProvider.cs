@@ -139,13 +139,17 @@ namespace NSign.Providers
             // If the signature parameters has the 'alg' parameter set, it must match the algorithm provided with this
             // instance. The same goes for the 'keyid' parameter, provided that it is set with this instance.
             if (!signatureParams.HasMatchingAlgorithm(algorithmName) ||
-                (!String.IsNullOrEmpty(KeyId) && !signatureParams.HasMatchingKeyId(KeyId)))
+                (!String.IsNullOrEmpty(KeyId) && !signatureParams.HasMatchingKeyId(KeyId!)))
             {
                 return Task.FromResult(VerificationResult.NoMatchingVerifierFound);
             }
 
             VerificationResult result = VerificationResult.SignatureMismatch;
+#if NETSTANDARD2_0
+            if (publicKey.VerifyData(input.Span.ToArray(), expectedSignature.Span.ToArray(), SignatureHash, SignaturePadding))
+#elif NETSTANDARD2_1_OR_GREATER || NET
             if (publicKey.VerifyData(input.Span, expectedSignature.Span, SignatureHash, SignaturePadding))
+#endif
             {
                 result = VerificationResult.SuccessfullyVerified;
             }

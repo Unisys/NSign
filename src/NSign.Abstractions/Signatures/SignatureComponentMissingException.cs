@@ -44,6 +44,8 @@ namespace NSign.Signatures
             Component = componentWithName;
         }
 
+#if NET8_0_OR_GREATER
+#else
         /// <summary>
         /// Initializes a new instance of SignatureComponentMissingException.
         /// </summary>
@@ -58,6 +60,7 @@ namespace NSign.Signatures
         public SignatureComponentMissingException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
+#endif
 
         /// <summary>
         /// Gets the ISignatureComponent which caused the exception.

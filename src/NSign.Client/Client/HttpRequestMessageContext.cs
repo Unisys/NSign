@@ -53,7 +53,7 @@ namespace NSign.Client
         {
             Debug.Assert(null != request, "The request must not be null.");
 
-            Request = request;
+            Request = request!;
             Aborted = cancellationToken;
             SigningOptions = signingOptions;
 
@@ -125,7 +125,7 @@ namespace NSign.Client
         /// <inheritdoc/>
         public override sealed IEnumerable<string> GetQueryParamValues(string paramName)
         {
-            string[] values = queryParams.Value.GetValues(paramName);
+            string[]? values = queryParams.Value.GetValues(paramName);
 
             if (null != values)
             {
@@ -156,7 +156,7 @@ namespace NSign.Client
         /// <inheritdoc/>
         public override sealed bool HasExactlyOneQueryParamValue(string paramName)
         {
-            string[] values = queryParams.Value.GetValues(paramName);
+            string[]? values = queryParams.Value.GetValues(paramName);
             return null != values && 1 == values.Length;
         }
 
@@ -198,12 +198,15 @@ namespace NSign.Client
         /// </remarks>
         protected bool TryGetHeaderValues(HttpHeaders headers, HttpContent? content, string name, out IEnumerable<string> values)
         {
-            if (headers.TryGetValues(name, out values))
+            if (headers.TryGetValues(name, out IEnumerable<string>? nullableVals) &&
+                null != nullableVals)
             {
+                values = nullableVals;
                 return true;
             }
             else if (null == content)
             {
+                values = Array.Empty<string>();
                 return false;
             }
 
@@ -245,12 +248,12 @@ namespace NSign.Client
         /// </returns>
         private NameValueCollection LoadQueryParams()
         {
-            if (String.IsNullOrWhiteSpace(Request.RequestUri.Query))
+            if (String.IsNullOrWhiteSpace(Request.RequestUri?.Query))
             {
                 return new NameValueCollection();
             }
 
-            return HttpUtility.ParseQueryString(Request.RequestUri.Query);
+            return HttpUtility.ParseQueryString(Request.RequestUri!.Query);
         }
 
         #endregion

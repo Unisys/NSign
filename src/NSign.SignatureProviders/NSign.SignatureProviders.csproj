@@ -2,7 +2,7 @@
   <Import Project="..\..\common.props" />
 
   <PropertyGroup>
-    <TargetFramework>$(LibraryTargetFramework)</TargetFramework>
+    <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <RootNamespace>NSign</RootNamespace>
     <AssemblyName>NSign.SignatureProviders</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

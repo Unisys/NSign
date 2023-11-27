@@ -22,6 +22,8 @@ namespace NSign.Signatures
             Component = component;
         }
 
+#if NET8_0_OR_GREATER
+#else
         /// <summary>
         /// Initializes a new instance of SignatureComponentNotAllowedException.
         /// </summary>
@@ -36,6 +38,7 @@ namespace NSign.Signatures
         public SignatureComponentNotAllowedException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
+#endif
 
         /// <summary>
         /// Gets the ISignatureComponent which caused the exception.
