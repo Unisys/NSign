@@ -17,8 +17,8 @@ public sealed class WebhooksController : ControllerBase
     public IActionResult ReceiveEvent(Event evt)
     {
         logger.LogInformation("Received signed data: [{data}].", evt.Data);
-        logger.LogInformation("Signature Header: {sigs}", Request.Headers[NSign.Constants.Headers.Signature]);
-        logger.LogInformation("Signature-Input Header: {sigInputs}", Request.Headers[NSign.Constants.Headers.SignatureInput]);
+        logger.LogInformation("Signature Header: {sigs}", Request.Headers[NSign.Constants.Headers.Signature]!);
+        logger.LogInformation("Signature-Input Header: {sigInputs}", Request.Headers[NSign.Constants.Headers.SignatureInput]!);
 
         return Ok();
     }

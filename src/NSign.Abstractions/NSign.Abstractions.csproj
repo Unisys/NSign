@@ -2,7 +2,7 @@
   <Import Project="..\..\common.props" />
 
   <PropertyGroup>
-    <TargetFramework>$(LibraryTargetFramework)</TargetFramework>
+    <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <RootNamespace>NSign</RootNamespace>
     <AssemblyName>NSign.Abstractions</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -14,11 +14,11 @@ See also: https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="6.0.*" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(SystemDependencyVersionWildcard)" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="$(SystemDependencyVersionWildcard)" />
+    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="$(SystemDependencyVersionWildcard)" />
     <PackageReference Include="StructuredFieldValues" Version="0.*" />
-    <PackageReference Include="System.Collections.Immutable" Version="6.0.*" />
+    <PackageReference Include="System.Collections.Immutable" Version="$(SystemDependencyVersionWildcard)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'Debug'">

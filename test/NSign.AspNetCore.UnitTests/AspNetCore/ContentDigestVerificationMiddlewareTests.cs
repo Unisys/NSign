@@ -108,7 +108,7 @@ namespace NSign.AspNetCore
 
             using Stream bodyStream = MakeStream(body);
             httpContext.Request.Body = bodyStream;
-            httpContext.Request.Headers.Add("Content-Digest", headers);
+            httpContext.Request.Headers["Content-Digest"] = headers;
 
             await middleware.InvokeAsync(httpContext, CountingMiddleware);
 
@@ -123,7 +123,7 @@ namespace NSign.AspNetCore
         {
             options.VerificationFailuresResponseStatus = 555;
 
-            httpContext.Request.Headers.Add("Content-Digest", headers);
+            httpContext.Request.Headers["Content-Digest"] = headers;
 
             await middleware.InvokeAsync(httpContext, CountingMiddleware);
 
@@ -139,7 +139,7 @@ namespace NSign.AspNetCore
             options.VerificationFailuresResponseStatus = 999;
             options.Behavior = behavior;
 
-            httpContext.Request.Headers.Add("Content-Digest", headers);
+            httpContext.Request.Headers["Content-Digest"] = headers;
 
             await middleware.InvokeAsync(httpContext, CountingMiddleware);
 
