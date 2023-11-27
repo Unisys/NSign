@@ -16,6 +16,8 @@ namespace NSign.Signatures
                  "Consider removing signature verification or make sure messages are signed.")
         { }
 
+#if NET8_0_OR_GREATER
+#else
         /// <summary>
         /// Initializes a new instance of SignatureMissingException.
         /// </summary>
@@ -29,5 +31,6 @@ namespace NSign.Signatures
         /// </param>
         public SignatureMissingException(SerializationInfo info, StreamingContext context) : base(info, context)
         { }
+#endif
     }
 }

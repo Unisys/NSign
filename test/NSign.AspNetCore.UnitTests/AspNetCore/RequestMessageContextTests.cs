@@ -110,9 +110,9 @@ namespace NSign.AspNetCore
         [InlineData("x-third-header", new string[] { "1", "2", "3" })]
         public void GetHeaderValuesWorks(string header, string[] expectedValues)
         {
-            httpContext.Request.Headers.Add("x-first-header", "firstValue");
-            httpContext.Request.Headers.Add("x-Second-Header", "");
-            httpContext.Request.Headers.Add("x-third-header", new StringValues(new string[] { "1", "2", "3", }));
+            httpContext.Request.Headers["x-first-header"] = "firstValue";
+            httpContext.Request.Headers["x-Second-Header"] = "";
+            httpContext.Request.Headers["x-third-header"] = new StringValues(new string[] { "1", "2", "3", });
 
             IEnumerable<string> actualValues = context.GetHeaderValues(header);
 
@@ -131,7 +131,7 @@ namespace NSign.AspNetCore
         {
             if (hasHeader)
             {
-                httpContext.Request.Headers.Add("Content-Length", "123");
+                httpContext.Request.Headers["Content-Length"] = "123";
             }
             if (hasSpecial)
             {
@@ -160,8 +160,8 @@ namespace NSign.AspNetCore
         [InlineData("inexistent", null)]
         public void GetRequestHeaderValuesWorks(string headerName, string? expectedValue)
         {
-            httpContext.Request.Headers.Add("x-first", "value1, value2");
-            httpContext.Request.Headers.Add("x-second", "");
+            httpContext.Request.Headers["x-first"] = "value1, value2";
+            httpContext.Request.Headers["x-second"] = "";
 
             IEnumerable<string>? actualValues = context.GetRequestHeaderValues(headerName);
 
@@ -248,9 +248,9 @@ namespace NSign.AspNetCore
         [InlineData("x-third-header", true)]
         public void HasHeaderWorks(string header, bool expectedResult)
         {
-            httpContext.Request.Headers.Add("x-first-header", "firstValue");
-            httpContext.Request.Headers.Add("x-Second-Header", "");
-            httpContext.Request.Headers.Add("x-third-header", new StringValues(new string[] { "1", "2", "3", }));
+            httpContext.Request.Headers["x-first-header"] = "firstValue";
+            httpContext.Request.Headers["x-Second-Header"] = "";
+            httpContext.Request.Headers["x-third-header"] = new StringValues(new string[] { "1", "2", "3" });
 
             Assert.Equal(expectedResult, context.HasHeader(bindRequest: false, header));
         }

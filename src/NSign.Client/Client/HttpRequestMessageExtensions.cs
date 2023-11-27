@@ -33,13 +33,13 @@ namespace NSign.Client
                 Constants.DerivedComponents.SignatureParams =>
                     throw new NotSupportedException("The '@signature-params' component cannot be included explicitly."),
                 Constants.DerivedComponents.Method => request.Method.Method,
-                Constants.DerivedComponents.TargetUri => request.RequestUri.OriginalString,
-                Constants.DerivedComponents.Authority => request.RequestUri.Authority.ToLower(),
-                Constants.DerivedComponents.Scheme => request.RequestUri.Scheme.ToLower(),
-                Constants.DerivedComponents.RequestTarget => request.RequestUri.PathAndQuery,
-                Constants.DerivedComponents.Path => request.RequestUri.AbsolutePath,
+                Constants.DerivedComponents.TargetUri => request.RequestUri!.OriginalString,
+                Constants.DerivedComponents.Authority => request.RequestUri!.Authority.ToLower(),
+                Constants.DerivedComponents.Scheme => request.RequestUri!.Scheme.ToLower(),
+                Constants.DerivedComponents.RequestTarget => request.RequestUri!.PathAndQuery,
+                Constants.DerivedComponents.Path => request.RequestUri!.AbsolutePath,
                 Constants.DerivedComponents.Query =>
-                    String.IsNullOrWhiteSpace(request.RequestUri.Query) ? "?" : request.RequestUri.Query,
+                    String.IsNullOrWhiteSpace(request.RequestUri!.Query) ? "?" : request.RequestUri.Query,
                 Constants.DerivedComponents.QueryParam =>
                     throw new NotSupportedException("The '@query-param' component must have the 'name' parameter set."),
                 Constants.DerivedComponents.Status =>

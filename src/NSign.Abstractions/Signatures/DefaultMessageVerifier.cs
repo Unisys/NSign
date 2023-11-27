@@ -148,7 +148,7 @@ namespace NSign.Signatures
             Dictionary<string, VerificationResult> results)
         {
             Debug.Assert(null != context.VerificationOptions, "The verification options of the context must not be null.");
-            SignatureVerificationOptions options = context.VerificationOptions;
+            SignatureVerificationOptions options = context.VerificationOptions!;
 
             if (results.Count <= 0)
             {
@@ -322,9 +322,15 @@ namespace NSign.Signatures
 
             if (logger.IsEnabled(LogLevel.Debug))
             {
+#if NETSTANDARD2_0
+                logger.LogDebug("Verifying signature '{sigName}' input spec '{inputSpec}' against signature '{sig}'.",
+                    signatureContext.Name, signatureContext.InputSpec, Convert.ToBase64String(signatureContext.Signature.Span.ToArray()));
+                logger.LogDebug("Signature input generated from request: '{input}'.", Encoding.UTF8.GetString(input.Span.ToArray()));
+#elif NETSTANDARD2_1_OR_GREATER || NET
                 logger.LogDebug("Verifying signature '{sigName}' input spec '{inputSpec}' against signature '{sig}'.",
                     signatureContext.Name, signatureContext.InputSpec, Convert.ToBase64String(signatureContext.Signature.Span));
                 logger.LogDebug("Signature input generated from request: '{input}'.", Encoding.UTF8.GetString(input.Span));
+#endif
             }
 
             try

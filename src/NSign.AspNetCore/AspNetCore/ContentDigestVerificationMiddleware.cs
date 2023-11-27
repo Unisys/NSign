@@ -190,7 +190,7 @@ namespace NSign.AspNetCore
                     yield return new KeyValuePair<string, string>(match!.Groups[1].Value, match!.Groups[2].Value);
                 }
             }
-#elif NET7_0
+#elif NET7_0_OR_GREATER
             foreach (string? value in values)
             {
                 if (value is null) {

@@ -50,7 +50,7 @@ namespace NSign.Http
             }
             else if (IsNumeric(value))
             {
-                return value.ToString();
+                return value.ToString()!;
             }
             else if (IsByteSequence(value, out ReadOnlyMemory<byte> bytesValue))
             {
@@ -58,7 +58,7 @@ namespace NSign.Http
             }
             else
             {
-                return value.ToString();
+                return value.ToString()!;
             }
         }
 
@@ -129,7 +129,11 @@ namespace NSign.Http
         /// </returns>
         public static string SerializeAsString(this ReadOnlySpan<byte> value)
         {
+#if NETSTANDARD2_0
+            return $":{Convert.ToBase64String(value.ToArray())}:";
+#elif NETSTANDARD2_1_OR_GREATER || NET
             return $":{Convert.ToBase64String(value)}:";
+#endif
         }
 
         /// <summary>
@@ -334,7 +338,11 @@ namespace NSign.Http
             IEnumerable<string> values,
             out StructuredFieldValue value)
         {
+#if NETSTANDARD2_0
+            string combinedValues = String.Join(",", values);
+#elif NETSTANDARD2_1_OR_GREATER || NET
             string combinedValues = String.Join(',', values);
+#endif
 
             switch (type)
             {

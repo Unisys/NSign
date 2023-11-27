@@ -132,9 +132,9 @@ namespace NSign.AspNetCore
         [InlineData("x-third-header", true)]
         public void HasHeaderWorksForRequestHeaders(string header, bool expectedResult)
         {
-            httpContext.Request.Headers.Add("x-first-header", "firstValue");
-            httpContext.Request.Headers.Add("x-Second-Header", "");
-            httpContext.Request.Headers.Add("x-third-header", new StringValues(new string[] { "1", "2", "3", }));
+            httpContext.Request.Headers["x-first-header"] = "firstValue";
+            httpContext.Request.Headers["x-Second-Header"] = "";
+            httpContext.Request.Headers["x-third-header"] = new StringValues(new string[] { "1", "2", "3" });
 
             Assert.Equal(expectedResult, context.HasHeader(bindRequest: true, header));
         }
@@ -146,9 +146,9 @@ namespace NSign.AspNetCore
         [InlineData("x-third-header", true)]
         public void HasHeaderWorksForResponseHeaders(string header, bool expectedResult)
         {
-            httpContext.Response.Headers.Add("x-first-header", "firstValue");
-            httpContext.Response.Headers.Add("x-Second-Header", "");
-            httpContext.Response.Headers.Add("x-third-header", new StringValues(new string[] { "1", "2", "3", }));
+            httpContext.Response.Headers["x-first-header"] = "firstValue";
+            httpContext.Response.Headers["x-Second-Header"] = "";
+            httpContext.Response.Headers["x-third-header"] = new StringValues(new string[] { "1", "2", "3", });
 
             Assert.Equal(expectedResult, context.HasHeader(bindRequest: false, header));
         }

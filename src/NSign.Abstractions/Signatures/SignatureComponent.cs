@@ -189,7 +189,7 @@ namespace NSign.Signatures
         #region IEquatable<SignatureComponent> Implementation
 
         /// <inheritdoc/>
-        public bool Equals(SignatureComponent other)
+        public bool Equals(SignatureComponent? other)
         {
             if (null == other)
             {
