@@ -19,6 +19,8 @@ namespace NSign.Signatures
             ExpectedCharacter = expectedCharacter;
         }
 
+#if NET8_0_OR_GREATER
+#else
         /// <summary>
         /// Initializes a new instance of UnexpectedEndOfInputException.
         /// </summary>
@@ -34,12 +36,15 @@ namespace NSign.Signatures
         {
             ExpectedCharacter = info.GetChar(nameof(ExpectedCharacter));
         }
+#endif
 
         /// <summary>
         /// Gets the character that was expected.
         /// </summary>
         public char ExpectedCharacter { get; }
 
+#if NET8_0_OR_GREATER
+#else
         /// <inheritdoc/>
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
@@ -47,6 +52,7 @@ namespace NSign.Signatures
 
             info.AddValue(nameof(ExpectedCharacter), ExpectedCharacter);
         }
+#endif
 
         /// <summary>
         /// Gets a friendly message for this exception.

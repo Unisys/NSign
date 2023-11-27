@@ -68,7 +68,7 @@ namespace NSign.Providers
             Certificate = certificate ?? throw new ArgumentNullException(nameof(certificate));
 
             privateKey = Certificate.GetECDsaPrivateKey();
-            publicKey = Certificate.GetECDsaPublicKey();
+            publicKey = Certificate.GetECDsaPublicKey()!;
 
             this.requiredCurveOid = requiredCurveOid;
             this.requiredCurveName = requiredCurveName;
@@ -135,13 +135,17 @@ namespace NSign.Providers
             // If the signature parameters has the 'alg' parameter set, it must match the algorithm provided with this
             // instance. The same goes for the 'keyid' parameter, provided that it is set with this instance.
             if (!signatureParams.HasMatchingAlgorithm(algorithmName) ||
-                (!String.IsNullOrEmpty(KeyId) && !signatureParams.HasMatchingKeyId(KeyId)))
+                (!String.IsNullOrEmpty(KeyId) && !signatureParams.HasMatchingKeyId(KeyId!)))
             {
                 return Task.FromResult(VerificationResult.NoMatchingVerifierFound);
             }
 
             VerificationResult result = VerificationResult.SignatureMismatch;
+#if NETSTANDARD2_0
+            if (publicKey.VerifyData(input.Span.ToArray(), expectedSignature.Span.ToArray(), SignatureHash))
+#elif NETSTANDARD2_1_OR_GREATER || NET
             if (publicKey.VerifyData(input.Span, expectedSignature.Span, SignatureHash))
+#endif
             {
                 result = VerificationResult.SuccessfullyVerified;
             }

@@ -73,7 +73,7 @@ namespace NSign.Signatures
         {
             Debug.Assert(null != signatureParams, "The signature params must not be null.");
 
-            this.signatureParams = signatureParams;
+            this.signatureParams = signatureParams!;
         }
 
         /// <summary>
@@ -96,7 +96,11 @@ namespace NSign.Signatures
                 throw new ArgumentNullException(nameof(signatureParams));
             }
 
+#if NETSTANDARD2_0
+            Tokenizer tokenizer = new Tokenizer(input.AsSpan());
+#elif NETSTANDARD2_1_OR_GREATER || NET
             Tokenizer tokenizer = new Tokenizer(input);
+#endif
             new SignatureInputParser(signatureParams).ParseAndUpdate(ref tokenizer);
         }
 
@@ -170,10 +174,17 @@ namespace NSign.Signatures
             // (to indicate a parameter to a component) or a whitespace (to indicate more components to follow).
             EnsureNextToken(ref tokenizer, TokenType.CloseParenthesis | TokenType.Semicolon | TokenType.Whitespace);
 
+#if NETSTANDARD2_0
+            string componentName = new String(componentNameSpan.ToArray());
+            IReadOnlyList<KeyValuePair<string, string?>> componentParams = ParseOptionalComponentParameters(ref tokenizer);
+            int origStringEnd = tokenizer.LastPosition;
+            ReadOnlySpan<char> originalIdentifier = tokenizer.Input.Slice(origStringStart, origStringEnd - origStringStart);
+#elif NETSTANDARD2_1_OR_GREATER || NET
             string componentName = new String(componentNameSpan);
             IReadOnlyList<KeyValuePair<string, string?>> componentParams = ParseOptionalComponentParameters(ref tokenizer);
             int origStringEnd = tokenizer.LastPosition;
             ReadOnlySpan<char> originalIdentifier = tokenizer.Input[origStringStart..origStringEnd];
+#endif
 
             if (componentNameSpan[0] == '@')
             {
@@ -225,7 +236,11 @@ namespace NSign.Signatures
 
             // The semicolon must be followed by an identifier representing the name of the parameter.
             EnsureNextToken(ref tokenizer, TokenType.Identifier);
+#if NETSTANDARD2_0
+            string name = new String(tokenizer.Token.Value.ToArray());
+#elif NETSTANDARD2_1_OR_GREATER || NET
             string name = new String(tokenizer.Token.Value);
+#endif
             string? value = null;
 
             // The parameter name must be followed either by the equal sign (in case there is a value), a semicolon
@@ -239,7 +254,11 @@ namespace NSign.Signatures
                 // We got a parameter with a value, so parse the value. At this point, the only supported values are
                 // quoted strings though.
                 EnsureNextToken(ref tokenizer, TokenType.QuotedString);
+#if NETSTANDARD2_0
+                value = new String(tokenizer.Token.Value.ToArray());
+#elif NETSTANDARD2_1_OR_GREATER || NET
                 value = new String(tokenizer.Token.Value);
+#endif
 
                 // We need to move to the next token because that's expected by the caller and it's necessary to then
                 // allow parsing the next parameter (if any), the next component in the list (if any) or the end of the
@@ -282,7 +301,11 @@ namespace NSign.Signatures
                     signatureParams.AddComponent(
                         new QueryParamComponent(name, bindRequest)
                         {
+#if NETSTANDARD2_0
+                            OriginalIdentifier = new String(originalIdentifier.ToArray()),
+#elif NETSTANDARD2_1_OR_GREATER || NET
                             OriginalIdentifier = new String(originalIdentifier),
+#endif
                         });
                     break;
 
@@ -362,7 +385,11 @@ namespace NSign.Signatures
             TryGetParameterValue(componentParams, Constants.ComponentParameters.FromTrailers, out bool fromTrailers);
             TryGetParameterValue(componentParams, Constants.ComponentParameters.ByteSequence, out bool useByteSequence);
 
+#if NETSTANDARD2_0
+            string original = new String(originalIdentifier.ToArray());
+#elif NETSTANDARD2_1_OR_GREATER || NET
             string original = new String(originalIdentifier);
+#endif
 
             if (TryGetParameterValue(componentParams, Constants.ComponentParameters.Key, out string key))
             {
@@ -426,7 +453,11 @@ namespace NSign.Signatures
         {
             // The parameter name must be an identifier ...
             EnsureNextToken(ref tokenizer, TokenType.Identifier);
+#if NETSTANDARD2_0
+            string paramName = new String(tokenizer.Token.Value.ToArray());
+#elif NETSTANDARD2_1_OR_GREATER || NET
             string paramName = new String(tokenizer.Token.Value);
+#endif
 
             // ... and must be followed by the equal sign and a quoted string or integer token.
             EnsureNextToken(ref tokenizer, TokenType.Equal);
@@ -436,37 +467,66 @@ namespace NSign.Signatures
             {
                 case Constants.SignatureParams.Created:
                     tokenizer.EnsureTokenOneOfOrThrow(TokenType.Integer);
+#if NETSTANDARD2_0
+                    signatureParams.Created = DateTimeOffset.FromUnixTimeSeconds(Int64.Parse(new String(tokenizer.Token.Value.ToArray())));
+#elif NETSTANDARD2_1_OR_GREATER || NET
                     signatureParams.Created = DateTimeOffset.FromUnixTimeSeconds(Int64.Parse(tokenizer.Token.Value));
+#endif
                     break;
 
                 case Constants.SignatureParams.Expires:
                     tokenizer.EnsureTokenOneOfOrThrow(TokenType.Integer);
+#if NETSTANDARD2_0
+                    signatureParams.Expires = DateTimeOffset.FromUnixTimeSeconds(Int64.Parse(new String(tokenizer.Token.Value.ToArray())));
+#elif NETSTANDARD2_1_OR_GREATER || NET
                     signatureParams.Expires = DateTimeOffset.FromUnixTimeSeconds(Int64.Parse(tokenizer.Token.Value));
+#endif
                     break;
 
                 case Constants.SignatureParams.Nonce:
                     tokenizer.EnsureTokenOneOfOrThrow(TokenType.QuotedString);
+#if NETSTANDARD2_0
+                    signatureParams.Nonce = new String(tokenizer.Token.Value.ToArray());
+#elif NETSTANDARD2_1_OR_GREATER || NET
                     signatureParams.Nonce = new String(tokenizer.Token.Value);
+#endif
                     break;
 
                 case Constants.SignatureParams.Alg:
                     tokenizer.EnsureTokenOneOfOrThrow(TokenType.QuotedString);
+#if NETSTANDARD2_0
+                    signatureParams.Algorithm = new String(tokenizer.Token.Value.ToArray());
+#elif NETSTANDARD2_1_OR_GREATER || NET
                     signatureParams.Algorithm = new String(tokenizer.Token.Value);
+#endif
                     break;
 
                 case Constants.SignatureParams.KeyId:
                     tokenizer.EnsureTokenOneOfOrThrow(TokenType.QuotedString);
+#if NETSTANDARD2_0
+                    signatureParams.KeyId = new String(tokenizer.Token.Value.ToArray());
+#elif NETSTANDARD2_1_OR_GREATER || NET
                     signatureParams.KeyId = new String(tokenizer.Token.Value);
+#endif
                     break;
 
                 case Constants.SignatureParams.Tag:
                     tokenizer.EnsureTokenOneOfOrThrow(TokenType.QuotedString);
+#if NETSTANDARD2_0
+                    signatureParams.Tag = new String(tokenizer.Token.Value.ToArray());
+#elif NETSTANDARD2_1_OR_GREATER || NET
                     signatureParams.Tag = new String(tokenizer.Token.Value);
+#endif
                     break;
 
                 default:
+#if NETSTANDARD2_0
+                    throw new SignatureInputException(
+                        $"Unsupported signature input parameter: {paramName} with value '{new String(tokenizer.Token.Value.ToArray())}'.");
+#elif NETSTANDARD2_1_OR_GREATER || NET
                     throw new SignatureInputException(
                         $"Unsupported signature input parameter: {paramName} with value '{new String(tokenizer.Token.Value)}'.");
+#endif
             }
         }
 
@@ -585,8 +645,13 @@ namespace NSign.Signatures
             {
                 if (!supportedParameterNames.Contains(parameter.Key))
                 {
+#if NETSTANDARD2_0
+                    throw new SignatureInputException(
+                        $"The component '{new String(componentIdentifier.ToArray())}' has unsupported parameter '{parameter.Key}'.");
+#elif NETSTANDARD2_1_OR_GREATER || NET
                     throw new SignatureInputException(
                         $"The component '{new String(componentIdentifier)}' has unsupported parameter '{parameter.Key}'.");
+#endif
                 }
             }
         }

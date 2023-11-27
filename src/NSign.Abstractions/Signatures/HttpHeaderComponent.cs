@@ -68,7 +68,7 @@ namespace NSign.Signatures
         #region IEquatable<HttpHeaderComponent> Implementation
 
         /// <inheritdoc/>
-        public bool Equals(HttpHeaderComponent other)
+        public bool Equals(HttpHeaderComponent? other)
         {
             if (null == other)
             {

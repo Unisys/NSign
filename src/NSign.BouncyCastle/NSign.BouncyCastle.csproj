@@ -2,7 +2,7 @@
   <Import Project="..\..\common.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>$(DotNetTargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <RootNamespace>NSign.BouncyCastle</RootNamespace>
     <AssemblyName>NSign.BouncyCastle</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

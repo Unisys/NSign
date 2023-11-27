@@ -25,6 +25,8 @@ namespace NSign.Signatures
             Type = type;
         }
 
+#if NET8_0_OR_GREATER
+#else
         /// <summary>
         /// Initializes a new instance of <see cref="StructuredFieldParsingException"/>.
         /// </summary>
@@ -36,6 +38,7 @@ namespace NSign.Signatures
         /// </param>
         public StructuredFieldParsingException(SerializationInfo info, StreamingContext context) : base(info, context)
         { }
+#endif
 
         /// <summary>
         /// Gets the name of the HTTP field for which the exception is raised.

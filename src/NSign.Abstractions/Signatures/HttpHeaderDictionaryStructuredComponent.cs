@@ -85,7 +85,7 @@ namespace NSign.Signatures
         #region IEquatable<HttpHeaderDictionaryStructuredComponent> Implementation
 
         /// <inheritdoc/>
-        public bool Equals(HttpHeaderDictionaryStructuredComponent other)
+        public bool Equals(HttpHeaderDictionaryStructuredComponent? other)
         {
             if (null == other)
             {

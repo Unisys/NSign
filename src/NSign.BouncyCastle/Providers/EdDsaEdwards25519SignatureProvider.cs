@@ -85,7 +85,12 @@ namespace NSign.BouncyCastle.Providers
 
             Ed25519Signer signer = new Ed25519Signer();
             signer.Init(forSigning: true, privateKey);
+#if NETSTANDARD2_0
+            byte[] buf = input.ToArray();
+            signer.BlockUpdate(buf, 0, buf.Length);
+#else
             signer.BlockUpdate(input.Span);
+#endif
             byte[] signature = signer.GenerateSignature();
 
             return Task.FromResult(new ReadOnlyMemory<byte>(signature));
@@ -109,14 +114,19 @@ namespace NSign.BouncyCastle.Providers
             // algorithm provided with this instance. The same goes for the 'keyid' parameter,
             // provided that it is set with this instance.
             if (!signatureParams.HasMatchingAlgorithm(AlgorithmName) ||
-                (!String.IsNullOrEmpty(KeyId) && !signatureParams.HasMatchingKeyId(KeyId)))
+                (!String.IsNullOrEmpty(KeyId) && !signatureParams.HasMatchingKeyId(KeyId!)))
             {
                 return Task.FromResult(VerificationResult.NoMatchingVerifierFound);
             }
 
             Ed25519Signer verifier = new Ed25519Signer();
             verifier.Init(forSigning: false, publicKey);
+#if NETSTANDARD2_0
+            byte[] buf = input.ToArray();
+            verifier.BlockUpdate(buf, 0, buf.Length);
+#else
             verifier.BlockUpdate(input.Span);
+#endif
 
             VerificationResult result = VerificationResult.SignatureMismatch;
             if (verifier.VerifySignature(expectedSignature.ToArray()))
