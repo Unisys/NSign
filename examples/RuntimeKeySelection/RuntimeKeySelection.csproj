@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\NSign.Abstractions\NSign.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\NSign.Client\NSign.Client.csproj" />
+    <ProjectReference Include="..\..\src\NSign.SignatureProviders\NSign.SignatureProviders.csproj" />
+  </ItemGroup>
+
+</Project>
