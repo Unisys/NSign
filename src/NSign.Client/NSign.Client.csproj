@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <Import Project="..\..\common.props" />
 
     <PropertyGroup>
@@ -20,7 +20,7 @@ See also: https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.*" />
         <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.*" />
         <PackageReference Include="System.Collections.Immutable" Version="6.0.*" />
-        <PackageReference Include="System.IO.Pipelines" Version="6.*" />
+        <PackageReference Include="System.IO.Pipelines" Version="8.*" />
         <PackageReference Include="StructuredFieldValues" Version="0.*" />
     </ItemGroup>
 
