@@ -34,7 +34,7 @@ jobs:
         fi
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       # Only execute this when we want to/can publish anything.
       if: env.PUBLISH == '1'
       with:
