@@ -13,10 +13,10 @@ namespace NSign.Signatures
         [InlineData(null)]
         [InlineData("")]
         [InlineData("   ")]
-        public void CtorValidatesInput(string key)
+        public void CtorValidatesInput(string? key)
         {
             ArgumentNullException ex = Assert.Throws<ArgumentNullException>(
-                () => new HttpHeaderDictionaryStructuredComponent("some-header", key));
+                () => new HttpHeaderDictionaryStructuredComponent("some-header", key!));
             Assert.Equal("key", ex.ParamName);
         }
 

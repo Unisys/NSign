@@ -42,7 +42,7 @@ namespace NSign.BouncyCastle.Providers
         [Theory]
         [InlineData(null)]
         [InlineData("my-key-id")]
-        public async Task OwnSignatureCanBeVerified(string keyId)
+        public async Task OwnSignatureCanBeVerified(string? keyId)
         {
             (Ed25519PrivateKeyParameters? privateKey, Ed25519PublicKeyParameters publicKey) =
                 GetKeys("ed25519.nsign.test.local");
@@ -58,7 +58,7 @@ namespace NSign.BouncyCastle.Providers
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
 
             // With the keyId set:
-            signatureParams.WithKeyId(keyId);
+            signatureParams.WithKeyId(keyId!);
 
             result = await verifyingProvider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);

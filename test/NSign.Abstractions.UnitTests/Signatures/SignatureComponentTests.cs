@@ -18,10 +18,10 @@ namespace NSign.Signatures
         [InlineData(null)]
         [InlineData("")]
         [InlineData("   ")]
-        public void CtorValidatesComponentName(string name)
+        public void CtorValidatesComponentName(string? name)
         {
             ArgumentNullException anex = Assert.Throws<ArgumentNullException>(
-                () => new CompA(SignatureComponentType.HttpHeader, name));
+                () => new CompA(SignatureComponentType.HttpHeader, name!));
             Assert.Equal("componentName", anex.ParamName);
         }
 
