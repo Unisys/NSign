@@ -12,9 +12,9 @@ namespace NSign.Signatures
         [InlineData(null)]
         [InlineData("")]
         [InlineData("   ")]
-        public void CtorValidatesInput(string name)
+        public void CtorValidatesInput(string? name)
         {
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => new QueryParamComponent(name));
+            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => new QueryParamComponent(name!));
             Assert.Equal("name", ex.ParamName);
         }
 

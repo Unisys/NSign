@@ -13,7 +13,7 @@ namespace NSign.Providers
         [InlineData("")]
         [InlineData("MyKey")]
         [InlineData("AnotherKey")]
-        public void CtorPassesKeyIdAsIs(string keyId)
+        public void CtorPassesKeyIdAsIs(string? keyId)
         {
             Assert.Equal(keyId, new TestProvider(keyId).KeyId);
         }
@@ -23,7 +23,7 @@ namespace NSign.Providers
         [InlineData("")]
         [InlineData("MyKey")]
         [InlineData("AnotherKey")]
-        public void UpdateSignatureParamsSetsKeyIdParameter(string keyId)
+        public void UpdateSignatureParamsSetsKeyIdParameter(string? keyId)
         {
             SignatureProvider provider = new TestProvider(keyId);
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
@@ -35,7 +35,7 @@ namespace NSign.Providers
 
         private sealed class TestProvider : SignatureProvider
         {
-            public TestProvider(string keyId) : base(keyId)
+            public TestProvider(string? keyId) : base(keyId)
             {
             }
 

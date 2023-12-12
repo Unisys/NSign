@@ -20,9 +20,9 @@ namespace NSign.Signatures
         [Theory]
         [InlineData(null)]
         [InlineData("")]
-        public void CtorThrowsForUnsupportedComponentNameFromBase(string name)
+        public void CtorThrowsForUnsupportedComponentNameFromBase(string? name)
         {
-            ArgumentNullException aoorex = Assert.Throws<ArgumentNullException>(() => new DerivedComponent(name));
+            ArgumentNullException aoorex = Assert.Throws<ArgumentNullException>(() => new DerivedComponent(name!));
 
             Assert.Equal("componentName", aoorex.ParamName);
         }

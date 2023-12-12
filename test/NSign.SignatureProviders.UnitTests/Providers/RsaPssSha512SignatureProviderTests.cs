@@ -169,7 +169,7 @@ aOT9v6d+nb4bnNkQVklLQ3fVAvJm+xdDOp9LCNCN48V2pnDOkFV6+U9nV5oyc6XI
         [Theory]
         [InlineData(null)]
         [InlineData("my-key-id")]
-        public async Task OwnSignatureCanBeVerified(string keyId)
+        public async Task OwnSignatureCanBeVerified(string? keyId)
         {
             RsaPssSha512SignatureProvider signingProvider = Make(true, keyId);
             RsaPssSha512SignatureProvider verifyingProvider = Make(false, keyId);
@@ -183,7 +183,7 @@ aOT9v6d+nb4bnNkQVklLQ3fVAvJm+xdDOp9LCNCN48V2pnDOkFV6+U9nV5oyc6XI
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
 
             // With the keyId set:
-            signatureParams.WithKeyId(keyId);
+            signatureParams.WithKeyId(keyId!);
 
             result = await verifyingProvider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);

@@ -10,9 +10,9 @@ namespace NSign.Providers
         [InlineData(null)]
         [InlineData("")]
         [InlineData("  ")]
-        public void CtorThrowsOnMissingAlg(string alg)
+        public void CtorThrowsOnMissingAlg(string? alg)
         {
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => new TestHmac(alg, null));
+            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => new TestHmac(alg!, null));
             Assert.Equal("algorithmName", ex.ParamName);
         }
 

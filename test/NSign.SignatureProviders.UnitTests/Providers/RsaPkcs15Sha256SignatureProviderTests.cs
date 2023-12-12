@@ -165,7 +165,7 @@ namespace NSign.Providers
         [Theory]
         [InlineData(null)]
         [InlineData("my-key-id")]
-        public async Task OwnSignatureCanBeVerified(string keyId)
+        public async Task OwnSignatureCanBeVerified(string? keyId)
         {
             RsaPkcs15Sha256SignatureProvider signingProvider = Make(true, keyId);
             RsaPkcs15Sha256SignatureProvider verifyingProvider = Make(false, keyId);
@@ -179,7 +179,7 @@ namespace NSign.Providers
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
 
             // With the keyId set:
-            signatureParams.WithKeyId(keyId);
+            signatureParams.WithKeyId(keyId!);
 
             result = await verifyingProvider.VerifyAsync(signatureParams, random, signature, CancellationToken.None);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
