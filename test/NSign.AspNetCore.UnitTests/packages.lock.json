@@ -36,9 +36,9 @@
       },
       "Moq": {
         "type": "Direct",
-        "requested": "[4.20.69, )",
-        "resolved": "4.20.69",
-        "contentHash": "8P/oAUOL8ZVyXnzBBcgdhTsOD1kQbAWfOcMI7KDQO3HqQtzB/0WYLdnMa4Jefv8nu/MQYiiG0IuoJdvG0v0Nig==",
+        "requested": "[4.20.70, )",
+        "resolved": "4.20.70",
+        "contentHash": "4rNnAwdpXJBuxqrOCzCyICXHSImOTRktCgCWXWykuF1qwoIsVvEnR7PjbMk/eLOxWvhmj5Kwt+kDV3RGUYcNwg==",
         "dependencies": {
           "Castle.Core": "5.1.1"
         }
@@ -1121,7 +1121,7 @@
       "nsign.aspnetcore": {
         "type": "Project",
         "dependencies": {
-          "NSign.Abstractions": "[0.19.1, )",
+          "NSign.Abstractions": "[0.19.2, )",
           "StructuredFieldValues": "[0.*, )"
         }
       }
@@ -1161,9 +1161,9 @@
       },
       "Moq": {
         "type": "Direct",
-        "requested": "[4.20.69, )",
-        "resolved": "4.20.69",
-        "contentHash": "8P/oAUOL8ZVyXnzBBcgdhTsOD1kQbAWfOcMI7KDQO3HqQtzB/0WYLdnMa4Jefv8nu/MQYiiG0IuoJdvG0v0Nig==",
+        "requested": "[4.20.70, )",
+        "resolved": "4.20.70",
+        "contentHash": "4rNnAwdpXJBuxqrOCzCyICXHSImOTRktCgCWXWykuF1qwoIsVvEnR7PjbMk/eLOxWvhmj5Kwt+kDV3RGUYcNwg==",
         "dependencies": {
           "Castle.Core": "5.1.1"
         }
@@ -2229,7 +2229,7 @@
       "nsign.aspnetcore": {
         "type": "Project",
         "dependencies": {
-          "NSign.Abstractions": "[0.19.1, )",
+          "NSign.Abstractions": "[0.19.2, )",
           "StructuredFieldValues": "[0.*, )"
         }
       }
@@ -2272,9 +2272,9 @@
       },
       "Moq": {
         "type": "Direct",
-        "requested": "[4.20.69, )",
-        "resolved": "4.20.69",
-        "contentHash": "8P/oAUOL8ZVyXnzBBcgdhTsOD1kQbAWfOcMI7KDQO3HqQtzB/0WYLdnMa4Jefv8nu/MQYiiG0IuoJdvG0v0Nig==",
+        "requested": "[4.20.70, )",
+        "resolved": "4.20.70",
+        "contentHash": "4rNnAwdpXJBuxqrOCzCyICXHSImOTRktCgCWXWykuF1qwoIsVvEnR7PjbMk/eLOxWvhmj5Kwt+kDV3RGUYcNwg==",
         "dependencies": {
           "Castle.Core": "5.1.1"
         }
@@ -3340,7 +3340,7 @@
       "nsign.aspnetcore": {
         "type": "Project",
         "dependencies": {
-          "NSign.Abstractions": "[0.19.1, )",
+          "NSign.Abstractions": "[0.19.2, )",
           "StructuredFieldValues": "[0.*, )"
         }
       }
