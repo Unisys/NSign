@@ -20,9 +20,9 @@
       },
       "Moq": {
         "type": "Direct",
-        "requested": "[4.20.69, )",
-        "resolved": "4.20.69",
-        "contentHash": "8P/oAUOL8ZVyXnzBBcgdhTsOD1kQbAWfOcMI7KDQO3HqQtzB/0WYLdnMa4Jefv8nu/MQYiiG0IuoJdvG0v0Nig==",
+        "requested": "[4.20.70, )",
+        "resolved": "4.20.70",
+        "contentHash": "4rNnAwdpXJBuxqrOCzCyICXHSImOTRktCgCWXWykuF1qwoIsVvEnR7PjbMk/eLOxWvhmj5Kwt+kDV3RGUYcNwg==",
         "dependencies": {
           "Castle.Core": "5.1.1"
         }
@@ -1181,7 +1181,7 @@
           "Microsoft.Extensions.Http": "[6.0.*, )",
           "Microsoft.Extensions.Logging.Abstractions": "[6.0.*, )",
           "Microsoft.Extensions.Options": "[6.0.*, )",
-          "NSign.Abstractions": "[0.19.1, )",
+          "NSign.Abstractions": "[0.19.2, )",
           "StructuredFieldValues": "[0.*, )",
           "System.Collections.Immutable": "[6.0.*, )",
           "System.IO.Pipelines": "[6.0.*, )"
@@ -1207,9 +1207,9 @@
       },
       "Moq": {
         "type": "Direct",
-        "requested": "[4.20.69, )",
-        "resolved": "4.20.69",
-        "contentHash": "8P/oAUOL8ZVyXnzBBcgdhTsOD1kQbAWfOcMI7KDQO3HqQtzB/0WYLdnMa4Jefv8nu/MQYiiG0IuoJdvG0v0Nig==",
+        "requested": "[4.20.70, )",
+        "resolved": "4.20.70",
+        "contentHash": "4rNnAwdpXJBuxqrOCzCyICXHSImOTRktCgCWXWykuF1qwoIsVvEnR7PjbMk/eLOxWvhmj5Kwt+kDV3RGUYcNwg==",
         "dependencies": {
           "Castle.Core": "5.1.1"
         }
@@ -2349,7 +2349,7 @@
           "Microsoft.Extensions.Http": "[7.0.*, )",
           "Microsoft.Extensions.Logging.Abstractions": "[7.0.*, )",
           "Microsoft.Extensions.Options": "[7.0.*, )",
-          "NSign.Abstractions": "[0.19.1, )",
+          "NSign.Abstractions": "[0.19.2, )",
           "StructuredFieldValues": "[0.*, )",
           "System.Collections.Immutable": "[7.0.*, )",
           "System.IO.Pipelines": "[7.0.*, )"
@@ -2375,9 +2375,9 @@
       },
       "Moq": {
         "type": "Direct",
-        "requested": "[4.20.69, )",
-        "resolved": "4.20.69",
-        "contentHash": "8P/oAUOL8ZVyXnzBBcgdhTsOD1kQbAWfOcMI7KDQO3HqQtzB/0WYLdnMa4Jefv8nu/MQYiiG0IuoJdvG0v0Nig==",
+        "requested": "[4.20.70, )",
+        "resolved": "4.20.70",
+        "contentHash": "4rNnAwdpXJBuxqrOCzCyICXHSImOTRktCgCWXWykuF1qwoIsVvEnR7PjbMk/eLOxWvhmj5Kwt+kDV3RGUYcNwg==",
         "dependencies": {
           "Castle.Core": "5.1.1"
         }
@@ -3571,7 +3571,7 @@
           "Microsoft.Extensions.Http": "[8.0.*, )",
           "Microsoft.Extensions.Logging.Abstractions": "[8.0.*, )",
           "Microsoft.Extensions.Options": "[8.0.*, )",
-          "NSign.Abstractions": "[0.19.1, )",
+          "NSign.Abstractions": "[0.19.2, )",
           "StructuredFieldValues": "[0.*, )",
           "System.Collections.Immutable": "[8.0.*, )",
           "System.IO.Pipelines": "[8.0.*, )"
