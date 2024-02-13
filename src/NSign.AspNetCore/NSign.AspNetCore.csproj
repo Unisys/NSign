@@ -1,6 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\common.props" />
-
   <PropertyGroup>
     <TargetFrameworks>$(AspNetCoreTargetFrameworks)</TargetFrameworks>
     <RootNamespace>NSign</RootNamespace>
@@ -33,5 +31,4 @@ See also: https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures
   <ItemGroup>
     <ProjectReference Include="..\NSign.Abstractions\NSign.Abstractions.csproj" />
   </ItemGroup>
-
 </Project>
