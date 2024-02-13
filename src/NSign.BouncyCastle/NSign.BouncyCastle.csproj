@@ -1,6 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\common.props" />
-
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <RootNamespace>NSign.BouncyCastle</RootNamespace>
@@ -26,5 +24,4 @@ See also: https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures
         <_Parameter1>$(AssemblyName).UnitTests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
-
 </Project>
