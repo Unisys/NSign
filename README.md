@@ -4,19 +4,17 @@
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/Unisys/NSign)](https://github.com/Unisys/NSign/pulls)
 [![Coverage Status](https://coveralls.io/repos/github/Unisys/NSign/badge.svg?branch=main)](https://coveralls.io/github/Unisys/NSign?branch=main)
 
-# NSign - HTTP message signatures and verification for .NET
+# NSign
 
-NSign (/ˈensaɪn/) provides libraries to sign HTTP messages based on recent drafts (currently: July 27th 2023) of the
-[HTTP Message Signatures](https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/) to-be standard from
-the IETF. The key motivation for the standard is to have a standard way to sign and verify HTTP messages e.g. used in
-webhook-like scenarios where a provider needs to sign HTTP request messages before sending them to subscribers, and
-subscribers need to verify incoming messages' signatures for authentication. Signatures can also be applied to HTTP
+## HTTP Message Signatures (RFC 9421) for .NET
+
+NSign (/ˈensaɪn/) provides libraries to sign HTTP messages and verify signatures
+based on [HTTP Message Signatures (RFC 9421)](https://datatracker.ietf.org/doc/rfc9421/).
+That standard defines mechanisms to sign and verify HTTP messages e.g. used in
+webhook-like scenarios where a provider needs to sign HTTP request messages
+before sending them to subscribers, and subscribers need to verify incoming
+messages' signatures for authentication. Signatures can also be applied to HTTP
 response messages for a client to verify on receipt.
-
->__*Disclaimer*__
->
->Since the standard is currently in draft state, much like the standard itself, the libraries and its interfaces and
->implementations are subject to change. Versions 0.x.* of the libraries are usually aligned with draft x of the standard.
 
 ## Libraries and Nuget packages
 
