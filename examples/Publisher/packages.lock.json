@@ -274,8 +274,8 @@
       },
       "Microsoft.Extensions.Options": {
         "type": "Transitive",
-        "resolved": "8.0.1",
-        "contentHash": "wmpp+BSU3oGifaev6Z9rrlwHoITLFfpVOSbgBrOXjkbJSCXnZVCsoRGE5c3fJFI4VlNgnNkNlI9y+5jC4fmOEA==",
+        "resolved": "8.0.2",
+        "contentHash": "dWGKvhFybsaZpGmzkGCbNNwBD1rVlWzrZKANLW/CcbFJpCEceMCGzT7zZwHOGBCbwM0SzBuceMj5HN1LKV1QqA==",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0",
           "Microsoft.Extensions.Primitives": "8.0.0"
@@ -369,7 +369,7 @@
           "Microsoft.Extensions.Http": "[8.0.*, )",
           "Microsoft.Extensions.Logging.Abstractions": "[8.0.*, )",
           "Microsoft.Extensions.Options": "[8.0.*, )",
-          "NSign.Abstractions": "[0.19.2, )",
+          "NSign.Abstractions": "[1.0.0, )",
           "StructuredFieldValues": "[0.*, )",
           "System.Collections.Immutable": "[8.0.*, )",
           "System.IO.Pipelines": "[8.0.*, )"
@@ -378,7 +378,7 @@
       "nsign.signatureproviders": {
         "type": "Project",
         "dependencies": {
-          "NSign.Abstractions": "[0.19.2, )"
+          "NSign.Abstractions": "[1.0.0, )"
         }
       }
     }
