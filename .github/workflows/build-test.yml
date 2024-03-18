@@ -26,7 +26,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal --collect:'XPlat Code Coverage' --results-directory ./coverage/temp
 
     - name: Generate lcov
-      uses: danielpalme/ReportGenerator-GitHub-Action@5.2.2
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.2.3
       with:
         reports: coverage/temp/**/coverage.cobertura.xml
         targetdir: coverage/report/
