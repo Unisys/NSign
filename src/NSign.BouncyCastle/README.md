@@ -1,7 +1,8 @@
 # NSign extensions using BouncyCastle
 
-This library must be used together with other NSign libraries. It provides support for signatures
-and signature verifications for EdDSA using curve edwards25519.
+This library must be used together with other NSign libraries. It provides
+support for signatures and signature verifications for EdDSA using curve
+edwards25519 [^1].
 
 ## Usage
 
@@ -34,3 +35,12 @@ openssl x509 -in my.cer -pubkey -nocert -out my-pub.pem
 ```
 
 Make sure to consult the documentation of your `openssl` installation for more details.
+
+## Further Information
+
+See also:
+- [NSign on github.com](https://github.com/Unisys/NSign)
+- [HTTP Message Signatures (RFC 9421)](https://www.rfc-editor.org/rfc/rfc9421.html)
+
+[^1]: See section _EdDSA Using Curve edwards25519_ of _HTTP Message Signatures (RFC 9421)_,
+	https://www.rfc-editor.org/rfc/rfc9421.html#name-eddsa-using-curve-edwards25
