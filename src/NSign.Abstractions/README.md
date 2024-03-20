@@ -8,13 +8,13 @@ provides middleware, or the `HttpClient` class from the `System.Net.Http` namesp
 [NSign.Client](https://nuget.org/packages/NSign.Client) package already provides the middleware.
 
 And, just as important, the package [NSign.SignatureProviders](https://nuget.org/packages/NSign.SignatureProviders)
-holds implementations for standard signature algorithms outlined in the draft [^1].
+holds implementations for standard signature algorithms outlined in RFC 9421 [^1].
 
 ## Further Information
 
 See also:
 - [NSign on github.com](https://github.com/Unisys/NSign)
-- [HTTP Message Signatures (current draft)](https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/)
+- [HTTP Message Signatures (RFC 9421)](https://www.rfc-editor.org/rfc/rfc9421.html)
 
-[^1]: See section _Signature Algorithms_ of _HTTP Message Signatures_,
-	https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/
+[^1]: See section _Signature Algorithms_ of _HTTP Message Signatures (RFC 9421)_,
+	https://www.rfc-editor.org/rfc/rfc9421.html#name-signature-algorithms

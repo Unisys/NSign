@@ -52,7 +52,7 @@ This signature provider requires the (shared) key to be provided during construc
 
 See also:
 - [NSign on github.com](https://github.com/Unisys/NSign)
-- [HTTP Message Signatures (current draft)](https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/)
+- [HTTP Message Signatures (RFC 9421)](https://www.rfc-editor.org/rfc/rfc9421.html)
 
-[^1]: See section _Signature Algorithms_ of _HTTP Message Signatures_,
-	https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/
+[^1]: See section _Signature Algorithms_ of _HTTP Message Signatures (RFC 9421)_,
+	https://www.rfc-editor.org/rfc/rfc9421.html#name-signature-algorithms

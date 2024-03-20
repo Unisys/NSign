@@ -110,4 +110,4 @@ access to the shared key when symmetric signatures are used.
 
 See also:
 - [NSign on github.com](https://github.com/Unisys/NSign)
-- [HTTP Message Signatures (current draft)](https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/)
+- [HTTP Message Signatures (RFC 9421)](https://www.rfc-editor.org/rfc/rfc9421.html)
