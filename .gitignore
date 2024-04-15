@@ -3,3 +3,5 @@ bin/
 obj/
 TestResults/
 Coverage/
+
+*.csproj.user
