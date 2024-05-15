@@ -3,7 +3,7 @@
     <PropertyGroup>
         <DotnetLatestLtsVersion>net8.0</DotnetLatestLtsVersion>
         <DotnetSupportedLtsVersions>net6.0;net8.0</DotnetSupportedLtsVersions>
-        <SupportedDotnetVersions>net6.0;net7.0;net8.0</SupportedDotnetVersions>
+        <SupportedDotnetVersions>net6.0;net8.0</SupportedDotnetVersions>
         <LibraryTargetFrameworks>netstandard2.0;$(SupportedDotnetVersions)</LibraryTargetFrameworks>
         <AspNetCoreTargetFrameworks>$(SupportedDotnetVersions)</AspNetCoreTargetFrameworks>
         <TestTargetFrameworks>$(SupportedDotnetVersions)</TestTargetFrameworks>
@@ -15,7 +15,6 @@
     <PropertyGroup Label="SystemDependencyVersions">
         <!-- Use 6.0.x assemblies as the minimum for dependencies also for netstandard2.0 -->
         <SystemDependencyVersionWildcard>6.0.*</SystemDependencyVersionWildcard>
-        <SystemDependencyVersionWildcard Condition="'$(TargetFramework)' == 'net7.0'">7.0.*</SystemDependencyVersionWildcard>
         <SystemDependencyVersionWildcard Condition="'$(TargetFramework)' == 'net8.0'">8.0.*</SystemDependencyVersionWildcard>
     </PropertyGroup>
 
