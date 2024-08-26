@@ -79,8 +79,8 @@
       },
       "StructuredFieldValues": {
         "type": "Transitive",
-        "resolved": "0.5.3",
-        "contentHash": "G0uqNU82bf3dloMYkzHyThT35D64SpDK8pe2/xO1TDU39R2t1PTNuzIv1HT7OgdVOWDyZ6kKxS5H0hVVcMhvPw==",
+        "resolved": "0.6.3",
+        "contentHash": "EgCsxEnSeXuamDL6AV8ygCI+WHNodfgARlpqBT1MQjy4Qxg8VQA7IHlH5jFbzhXKpWIL2mU8+/Ed3yW/At9vWg==",
         "dependencies": {
           "System.Memory": "4.5.5"
         }
@@ -189,8 +189,8 @@
       },
       "StructuredFieldValues": {
         "type": "Transitive",
-        "resolved": "0.5.3",
-        "contentHash": "G0uqNU82bf3dloMYkzHyThT35D64SpDK8pe2/xO1TDU39R2t1PTNuzIv1HT7OgdVOWDyZ6kKxS5H0hVVcMhvPw==",
+        "resolved": "0.6.3",
+        "contentHash": "EgCsxEnSeXuamDL6AV8ygCI+WHNodfgARlpqBT1MQjy4Qxg8VQA7IHlH5jFbzhXKpWIL2mU8+/Ed3yW/At9vWg==",
         "dependencies": {
           "System.Memory": "4.5.5"
         }
@@ -274,21 +274,13 @@
       },
       "StructuredFieldValues": {
         "type": "Transitive",
-        "resolved": "0.5.3",
-        "contentHash": "G0uqNU82bf3dloMYkzHyThT35D64SpDK8pe2/xO1TDU39R2t1PTNuzIv1HT7OgdVOWDyZ6kKxS5H0hVVcMhvPw==",
-        "dependencies": {
-          "System.Memory": "4.5.5"
-        }
+        "resolved": "0.6.3",
+        "contentHash": "EgCsxEnSeXuamDL6AV8ygCI+WHNodfgARlpqBT1MQjy4Qxg8VQA7IHlH5jFbzhXKpWIL2mU8+/Ed3yW/At9vWg=="
       },
       "System.Collections.Immutable": {
         "type": "Transitive",
         "resolved": "8.0.0",
         "contentHash": "AurL6Y5BA1WotzlEvVaIDpqzpIPvYnnldxru8oXJU2yFxFUy3+pNXjXd1ymO+RA0rq0+590Q8gaz2l3Sr7fmqg=="
-      },
-      "System.Memory": {
-        "type": "Transitive",
-        "resolved": "4.5.5",
-        "contentHash": "XIWiDvKPXaTveaB7HVganDlOCRoj03l+jrwNvcge/t8vhGYKvqV+dMv6G4SAX2NoNmN0wZfVPTAlFwZcZvVOUw=="
       },
       "nsign.abstractions": {
         "type": "Project",
