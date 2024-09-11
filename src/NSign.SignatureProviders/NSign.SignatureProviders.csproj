@@ -4,11 +4,11 @@
     <RootNamespace>NSign</RootNamespace>
     <AssemblyName>NSign.SignatureProviders</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Description>NSign signature providers for signing and verifying signatures.</Description>
-    <PackageDescription>NSign signature providers for signing and verifying signatures.
+    <Description>NSign signature providers for signing and verifying signatures (RFC 9421).</Description>
+    <PackageDescription>NSign signature providers for signing and verifying signatures (RFC 9421).
 
-See also: https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/</PackageDescription>
-    <PackageTags>nsign;sign;signing;verify;http message;request;response;rsa;hmac;signature</PackageTags>
+See also: https://datatracker.ietf.org/doc/rfc9421/</PackageDescription>
+    <PackageTags>nsign;sign;signing;verify;http message;request;response;rfc9421;rsa;hmac;signature;rfc9421</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

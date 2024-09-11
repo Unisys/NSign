@@ -4,11 +4,11 @@
     <RootNamespace>NSign</RootNamespace>
     <AssemblyName>NSign.Abstractions</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Description>Abstractions for signing and verification of signatures on HTTP messages.</Description>
-    <PackageDescription>Abstractions for signing and verification of signatures on HTTP messages.
+    <Description>Abstractions for signing and verification of signatures on HTTP messages (RFC 9421).</Description>
+    <PackageDescription>Abstractions for signing and verification of signatures on HTTP messages (RFC 9421).
 
-See also: https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/</PackageDescription>
-    <PackageTags>nsign;sign;signing;verify;http message;request;response</PackageTags>
+See also: https://datatracker.ietf.org/doc/rfc9421/</PackageDescription>
+    <PackageTags>nsign;sign;signing;verify;http message;request;response;rfc9421</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
