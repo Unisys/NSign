@@ -5,10 +5,10 @@
     <AssemblyName>NSign.BouncyCastle</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Description>NSign extension using BouncyCastle.</Description>
-    <PackageDescription>Includes signature provider for signing and verifying signatures using EdDSA with ed25519.
+    <PackageDescription>Includes signature provider for signing and verifying signatures (RFC 9421) using EdDSA with ed25519.
 
-See also: https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/</PackageDescription>
-    <PackageTags>nsign;sign;signing;verify;http message;request;response;eddsa;edwards25519;ed25519;signature;bouncycastle</PackageTags>
+See also: https://datatracker.ietf.org/doc/rfc9421/</PackageDescription>
+    <PackageTags>nsign;sign;signing;verify;http message;request;response;rfc9421;eddsa;edwards25519;ed25519;signature;bouncycastle</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

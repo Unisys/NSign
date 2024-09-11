@@ -4,13 +4,13 @@
     <RootNamespace>NSign</RootNamespace>
     <AssemblyName>NSign.Client</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Description>NSign for HTTP clients (System.Net.Http.HttpClient) for signing of HTTP requests and verification of HTTP responses.</Description>
+    <Description>NSign for HTTP clients (System.Net.Http.HttpClient) for signing of HTTP requests and verification of HTTP responses (RFC 9421).</Description>
     <PackageDescription>
-NSign for HTTP clients (`System.Net.Http.HttpClient`) for signing of HTTP requests and verification of HTTP responses.
+NSign for HTTP clients (`System.Net.Http.HttpClient`) for signing of HTTP requests and verification of HTTP responses (RFC 9421).
 
-See also: https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/
+See also: https://datatracker.ietf.org/doc/rfc9421/
     </PackageDescription>
-    <PackageTags>nsign;sign;signing;verify;http message;request;response;client</PackageTags>
+    <PackageTags>nsign;sign;signing;verify;http message;request;response;rfc9421;client</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

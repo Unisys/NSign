@@ -4,11 +4,11 @@
     <RootNamespace>NSign</RootNamespace>
     <AssemblyName>NSign.AspNetCore</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Description>NSign for ASP.NET Core services to verify HTTP requests and sign HTTP responses.</Description>
-    <PackageDescription>NSign for ASP.NET Core services to verify HTTP requests and sign HTTP responses.
+    <Description>NSign for ASP.NET Core services to verify HTTP requests and sign HTTP responses (RFC 9421).</Description>
+    <PackageDescription>NSign for ASP.NET Core services to verify HTTP requests and sign HTTP responses (RFC 9421).
 
-See also: https://datatracker.ietf.org/doc/draft-ietf-httpbis-message-signatures/</PackageDescription>
-    <PackageTags>nsign;sign;signing;verify;http message;request;response;aspnetcore</PackageTags>
+See also: https://datatracker.ietf.org/doc/rfc9421/</PackageDescription>
+    <PackageTags>nsign;sign;signing;verify;http message;request;response;rfc9421;aspnetcore</PackageTags>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'Debug'">
