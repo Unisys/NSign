@@ -147,30 +147,53 @@ namespace NSign.AspNetCore
             Assert.Equal(0, Interlocked.Read(ref numCallsToNext));
         }
 
-        //[InlineData(
-        //    new string[]
-        //    {
-        //        "Sha-256=uU0nuZNNPgilLlLX2n2r+sSE7+N6U4DukIj3rOLvzek=",
-        //        "sha-512=uU0nuZNNPgilLlLX2n2r+sSE7+N6U4DukIj3rOLvzek=",
-        //    },
-        //    "hello world",
-        //    VerificationBehavior.RequireOnlySingleMatch)]
-        //public async Task SuccessfulVerificationCauseNextMiddlewareToBeCalled(
-        //    string[] headers,
-        //    string body,
-        //    VerificationBehavior behavior)
-        //{
-        //    options.Behavior = behavior;
+        [Theory]
+        [InlineData(
+            @"{""hello"": ""world""}",
+            // Formatted per RFC 3230
+            "sha-512=WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+TaPm+AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew=="
+        )]
+        [InlineData(
+            @"{""hello"": ""world""}",
+            // Formatted per RFC 9530
+            "sha-512=:WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+TaPm+AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew==:"
+        )]
+        [InlineData(
+            @"{""busy"": true, ""message"": ""Your call is very important to us""}",
+            // Formatted per RFC 3230
+            "sha-512=0Y6iCBzGg5rZtoXS95Ijz03mslf6KAMCloESHObfwnHJDbkkWWQz6PhhU9kxsTbARtY2PTBOzq24uJFpHsMuAg=="
+        )]
+        [InlineData(
+            @"{""busy"": true, ""message"": ""Your call is very important to us""}",
+            // Formatted per RFC 9530
+            "sha-512=:0Y6iCBzGg5rZtoXS95Ijz03mslf6KAMCloESHObfwnHJDbkkWWQz6PhhU9kxsTbARtY2PTBOzq24uJFpHsMuAg==:"
+        )]
+        [InlineData(
+            @"hello world!",
+            // Formatted per RFC 3230
+            "sha-256=dQnlvaDHYtK6x/kNdYtbImP6Acy8VCq1498WO+CObKk=," +
+            "sha-512=25sc0yYt7jd1agm5BklzWJhHyqjlPTGp0ULqJwGxsoq9l4OLuaJwaLowXcjQSkWh/PB53lTWB2ZplrPMVPa2fA=="
+        )]
+        [InlineData(
+            @"hello world!",
+            // Formatted per RFC 9530
+            "sha-256=:dQnlvaDHYtK6x/kNdYtbImP6Acy8VCq1498WO+CObKk=:," +
+            "sha-512=:25sc0yYt7jd1agm5BklzWJhHyqjlPTGp0ULqJwGxsoq9l4OLuaJwaLowXcjQSkWh/PB53lTWB2ZplrPMVPa2fA==:"
+        )]
+        public async Task TestRfc3230AndRfc9530(string body, string headers)
+        {
+            options.VerificationFailuresResponseStatus = 999;
+            options.Behavior = VerificationBehavior.None;
 
-        //    using Stream bodyStream = MakeStream(body);
-        //    httpContext.Request.Body = bodyStream;
-        //    httpContext.Request.Headers.Add("Content-Digest", headers);
+            using Stream bodyStream = MakeStream(body);
+            httpContext.Request.Body = bodyStream;
+            httpContext.Request.Headers["Content-Digest"] = headers;
 
-        //    await middleware.InvokeAsync(httpContext, CountingMiddleware);
+            await middleware.InvokeAsync(httpContext, CountingMiddleware);
 
-        //    Assert.Equal(200, httpContext.Response.StatusCode);
-        //    Assert.Equal(1, Interlocked.Read(ref numCallsToNext));
-        //}
+            Assert.Equal(200, httpContext.Response.StatusCode);
+            Assert.Equal(1, Interlocked.Read(ref numCallsToNext));
+        }
 
         private Task CountingMiddleware(HttpContext context)
         {

@@ -33,8 +33,9 @@ namespace NSign.AspNetCore
         /// <summary>
         /// The regular expression to parse the 'content-digest' header.
         /// See also <seealso href="https://www.rfc-editor.org/rfc/rfc3230"/>
+        /// and <seealso href="https://www.rfc-editor.org/rfc/rfc9530"/>.
         /// </summary>
-        private static readonly Regex HeaderValueParser = new Regex(@"(?<= ^|,\s*) ([\w_\-]+) = ([0-9a-zA-Z+/=]+) (?= $|,\s*)",
+        private static readonly Regex HeaderValueParser = new Regex(@"(?<= ^|,\s*) ([\w_\-]+) = (?<colon>:?) ([0-9a-zA-Z+/=]+) \k<colon> (?= $|,\s*)",
             RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
 
         /// <summary>
