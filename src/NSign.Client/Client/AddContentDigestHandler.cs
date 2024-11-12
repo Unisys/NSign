@@ -76,7 +76,7 @@ namespace NSign.Client
             byte[] hashOutput = hash.ComputeHash(streamToHash);
 
             return writeBody
-                .ContinueWith(_ => $"{algName}={Convert.ToBase64String(hashOutput, Base64FormattingOptions.None)}");
+                .ContinueWith(_ => $"{algName}=:{Convert.ToBase64String(hashOutput, Base64FormattingOptions.None)}:");
         }
 
         /// <summary>
@@ -96,11 +96,11 @@ namespace NSign.Client
             switch (alg)
             {
                 case Hash.Sha256:
-                    algName = Constants.HashAlgorithms.Sha256;
+                    algName = "sha-256";
                     return SHA256.Create();
 
                 case Hash.Sha512:
-                    algName = Constants.HashAlgorithms.Sha512;
+                    algName = "sha-512";
                     return SHA512.Create();
 
                 default:

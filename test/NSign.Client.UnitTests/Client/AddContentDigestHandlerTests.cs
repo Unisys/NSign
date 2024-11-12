@@ -53,12 +53,42 @@ namespace NSign.Client
         }
 
         [Theory]
-        [InlineData("stream", "hello world", Hash.Sha256, "SHA-256=uU0nuZNNPgilLlLX2n2r+sSE7+N6U4DukIj3rOLvzek=")]
-        [InlineData("string", "hello", Hash.Sha256, "SHA-256=LPJNul+wow4m6DsqxbninhsWHlwfp0JecwQzYpOLmCQ=")]
-        [InlineData("json", "hello", Hash.Sha256, "SHA-256=Wqdirjg/u3J688ejbUlApbjECpiUUtIwT8lY/z81Tno=")]
-        [InlineData("stream", "hello world", Hash.Sha512, "SHA-512=MJ7MSJwS1utMxA9QyQLytNDtd+5RGnx6m808qG1M2G+YndNbxf9JlnDaNCVbRbDP2DDoH2Bdz33FVC6TrpzXbw==")]
-        [InlineData("string", "hello", Hash.Sha512, "SHA-512=m3HSJL1i83hdltRq0+o9czGb+8KJDKra4t/3JRlnPKcjI8PZm6XBHXx6zG4UuMXaDEZjR1wuXDre9G9zvN7AQw==")]
-        [InlineData("json", "hello", Hash.Sha512, "SHA-512=A8pplr4vsk4xdLkJruCXWp6+i+dy/3pSW5HW5ke1jDWS70Dv6Fstf1jS+XEcLqEVhW3i925IPlf/4tnpnvAQDw==")]
+        [InlineData(
+            "stream",
+            "hello world",
+            Hash.Sha256,
+            "sha-256=:uU0nuZNNPgilLlLX2n2r+sSE7+N6U4DukIj3rOLvzek=:"
+        )]
+        [InlineData(
+            "string",
+            "hello",
+            Hash.Sha256,
+            "sha-256=:LPJNul+wow4m6DsqxbninhsWHlwfp0JecwQzYpOLmCQ=:"
+        )]
+        [InlineData(
+            "json",
+            "hello",
+            Hash.Sha256,
+            "sha-256=:Wqdirjg/u3J688ejbUlApbjECpiUUtIwT8lY/z81Tno=:"
+        )]
+        [InlineData(
+            "stream",
+            "hello world",
+            Hash.Sha512,
+            "sha-512=:MJ7MSJwS1utMxA9QyQLytNDtd+5RGnx6m808qG1M2G+YndNbxf9JlnDaNCVbRbDP2DDoH2Bdz33FVC6TrpzXbw==:"
+        )]
+        [InlineData(
+            "string",
+            "hello",
+            Hash.Sha512,
+            "sha-512=:m3HSJL1i83hdltRq0+o9czGb+8KJDKra4t/3JRlnPKcjI8PZm6XBHXx6zG4UuMXaDEZjR1wuXDre9G9zvN7AQw==:"
+        )]
+        [InlineData(
+            "json",
+            "hello",
+            Hash.Sha512,
+            "sha-512=:A8pplr4vsk4xdLkJruCXWp6+i+dy/3pSW5HW5ke1jDWS70Dv6Fstf1jS+XEcLqEVhW3i925IPlf/4tnpnvAQDw==:"
+        )]
         public async Task SendAsyncAddsOnlyConfiguredHashes(string httpContentType, string content, Hash hash, string expectedValue)
         {
             using HttpMessageInvoker invoker = new HttpMessageInvoker(handler);
@@ -80,9 +110,24 @@ namespace NSign.Client
         }
 
         [Theory]
-        [InlineData("stream", "test", "SHA-256=n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=", "SHA-512=7iaw3Ur350mqGo7jwQrpkj9hiYB3Lkc/iBml1JQODbJ6wYX4oOHV+E+IvIh/1nsUNzLDBMxfqa2Ob1f1ACio/w==")]
-        [InlineData("string", "test", "SHA-256=n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=", "SHA-512=7iaw3Ur350mqGo7jwQrpkj9hiYB3Lkc/iBml1JQODbJ6wYX4oOHV+E+IvIh/1nsUNzLDBMxfqa2Ob1f1ACio/w==")]
-        [InlineData("json", "test", "SHA-256=TZZ6MBEb8p8OugHESLN1wWKbL+0BzfzDrtkfG1fV3V4=", "SHA-512=ceemix/T1umsPeT9f/DEUNpccmguTGuGcqp+SAhBhz9oTwjX49sBWRNNam2cvhm51qgMV+NsXMm/Fg6JsKjgJQ==")]
+        [InlineData(
+            "stream",
+            "test",
+            "sha-256=:n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=:",
+            "sha-512=:7iaw3Ur350mqGo7jwQrpkj9hiYB3Lkc/iBml1JQODbJ6wYX4oOHV+E+IvIh/1nsUNzLDBMxfqa2Ob1f1ACio/w==:"
+        )]
+        [InlineData(
+            "string",
+            "test",
+            "sha-256=:n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=:",
+            "sha-512=:7iaw3Ur350mqGo7jwQrpkj9hiYB3Lkc/iBml1JQODbJ6wYX4oOHV+E+IvIh/1nsUNzLDBMxfqa2Ob1f1ACio/w==:"
+        )]
+        [InlineData(
+            "json",
+            "test",
+            "sha-256=:TZZ6MBEb8p8OugHESLN1wWKbL+0BzfzDrtkfG1fV3V4=:",
+            "sha-512=:ceemix/T1umsPeT9f/DEUNpccmguTGuGcqp+SAhBhz9oTwjX49sBWRNNam2cvhm51qgMV+NsXMm/Fg6JsKjgJQ==:"
+        )]
         public async Task SendAsyncAddsMultipleHashes(string httpContentType, string content, string expectedValue1, string expectedValue2)
         {
             using HttpMessageInvoker invoker = new HttpMessageInvoker(handler);
