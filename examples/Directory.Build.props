@@ -2,7 +2,7 @@
 <Project>
     <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
     <PropertyGroup>
-        <TargetFramework>$(DotnetLatestLtsVersion)</TargetFramework>
+        <TargetFramework>net$(DotnetLatestLtsVersion)</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
 
         <!-- Override the LangVersion inherited from the root Directory.Build.props -->
@@ -10,6 +10,6 @@
     </PropertyGroup>
 
     <PropertyGroup Label="SystemDependencyVersions">
-        <SystemDependencyVersionWildcard>8.0.*</SystemDependencyVersionWildcard>
+        <SystemDependencyVersionWildcard>$(DotnetLatestLtsVersion).*</SystemDependencyVersionWildcard>
     </PropertyGroup>
 </Project>

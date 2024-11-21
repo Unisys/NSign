@@ -41,7 +41,8 @@ namespace NSign.Http
         /// Encode the given <paramref name="value"/>.
         /// </summary>
         /// <param name="value">
-        /// The value to encode. The value is first decoded (through <see cref="Uri.UnescapeDataString"/>) to ensure
+        /// The value to encode. The value is first decoded (through
+        /// <see cref="Uri.UnescapeDataString(string)"/>) to ensure
         /// already escaped code points are not double-escaped.
         /// </param>
         /// <param name="decodeFirst">
