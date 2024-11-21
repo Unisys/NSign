@@ -54,30 +54,32 @@ namespace NSign.AspNetCore
         }
 
         /// <summary>
-        /// Normalizes the value for the <c>@authority</c> derived component: default ports are omitted and host values
-        /// are lower-cased.
+        /// Normalizes the value for the <c>@authority</c> derived component:
+        /// default ports are omitted and host values are lower-cased.
         /// </summary>
         /// <param name="request">
-        /// The <see cref="HttpRequest"/> defining the values to use for the <c>@authority</c> derived component value.
+        /// The <see cref="HttpRequest"/> defining the values to use for the
+        /// <c>@authority</c> derived component value.
         /// </param>
         /// <returns>
-        /// A string value representing the <c>@authority</c> derived component value for the message.
+        /// A string value representing the <c>@authority</c> derived component
+        /// value for the message.
         /// </returns>
         private static string NormalizeAuthority(HttpRequest request)
         {
             string scheme = request.Scheme;
             HostString host = request.Host;
 
-            if (host.Port.HasValue)
+            if (host.Port.HasValue &&
+                ((StringComparer.OrdinalIgnoreCase.Equals("http", scheme) &&
+                  host.Port.Value == 80) ||
+                 (StringComparer.OrdinalIgnoreCase.Equals("https", scheme) &&
+                  host.Port.Value == 443)))
             {
-                if ((StringComparer.OrdinalIgnoreCase.Equals("http", scheme) && host.Port.Value == 80) ||
-                    (StringComparer.OrdinalIgnoreCase.Equals("https", scheme) && host.Port.Value == 443))
-                {
-                    return host.Host.ToLower();
-                }
+                return host.Host.ToLower();
             }
 
-            return host.Value.ToLower();
+            return host.ToUriComponent();
         }
     }
 }

@@ -66,6 +66,18 @@ namespace NSign.AspNetCore
             Assert.Equal(expectedValue, actualValue);
         }
 
+        [Fact]
+        public void GetDerivedComponentValueReturnsNormalizedAuthorityForMissingHost()
+        {
+            HttpRequest? request = httpContext.Request;
+            request.Host = new HostString(null!);
+
+            DerivedComponent comp = new DerivedComponent("@authority");
+            string actualValue = httpContext.Request.GetDerivedComponentValue(comp);
+
+            Assert.Equal("", actualValue);
+        }
+
         [Theory]
         [InlineData(null, "?")]
         [InlineData("", "?")]
