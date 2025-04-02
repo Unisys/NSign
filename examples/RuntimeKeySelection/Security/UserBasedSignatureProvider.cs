@@ -15,12 +15,12 @@ internal sealed class UserBasedSignatureProvider : ISigner
         this.httpContextAccessor = httpContextAccessor;
     }
 
-    public Task<ReadOnlyMemory<byte>> SignAsync(ReadOnlyMemory<byte> input, CancellationToken cancellationToken)
+    public Task<ReadOnlyMemory<byte>> SignAsync(string? keyId, ReadOnlyMemory<byte> input, CancellationToken cancellationToken)
     {
-        ISigner signer = GetSignerForUser();
+        ISigner signer = GetSignerKeyId(keyId);
         try
         {
-            return signer.SignAsync(input, cancellationToken);
+            return signer.SignAsync(keyId, input, cancellationToken);
         }
         finally
         {
@@ -31,22 +31,13 @@ internal sealed class UserBasedSignatureProvider : ISigner
         }
     }
 
-    public void UpdateSignatureParams(SignatureParamsComponent signatureParams)
+    public async Task UpdateSignatureParamsAsync(SignatureParamsComponent signatureParams, MessageContext messageContext, CancellationToken cancellationToken)
     {
         string username = GetUserName();
-        ISigner signer = GetSignerForUser(username);
-        try
-        {
-            signer.UpdateSignatureParams(signatureParams);
-            signatureParams.Tag = $"user[{username}]";
-        }
-        finally
-        {
-            if (signer is IDisposable disposable)
-            {
-                disposable.Dispose();
-            }
-        }
+        string keyId = await GetUserKeyIdAsync();
+
+        signatureParams.KeyId = keyId;
+        signatureParams.Tag = $"user[{username}]";
     }
 
     private string GetUserName()
@@ -54,13 +45,15 @@ internal sealed class UserBasedSignatureProvider : ISigner
         return httpContextAccessor.HttpContext?.User?.Identity?.Name ?? "no-user";
     }
 
-    private ISigner GetSignerForUser(string? username = null)
+    private Task<string> GetUserKeyIdAsync()
     {
-        if (null == username)
-        {
-            username = GetUserName();
-        }
+        return Task.FromResult(httpContextAccessor.HttpContext?.User?.Identity?.Name ?? "no-user");
+    }
 
-        return new HmacSha256SignatureProvider(UTF8.GetBytes(username), username);
+    private ISigner GetSignerKeyId(string? keyId)
+    {
+        ArgumentNullException.ThrowIfNull(keyId);
+
+        return new HmacSha256SignatureProvider(UTF8.GetBytes(keyId), keyId);
     }
 }

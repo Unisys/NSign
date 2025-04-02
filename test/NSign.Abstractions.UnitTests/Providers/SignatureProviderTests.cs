@@ -1,4 +1,6 @@
-﻿using NSign.Signatures;
+﻿using Microsoft.Extensions.Logging;
+using Moq;
+using NSign.Signatures;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +10,14 @@ namespace NSign.Providers
 {
     public sealed class SignatureProviderTests
     {
+        private readonly Mock<ILogger> mockLogger = new Mock<ILogger>(MockBehavior.Loose);
+        private readonly TestMessageContext messageContext;
+
+        public SignatureProviderTests()
+        {
+            messageContext = new TestMessageContext(mockLogger.Object);
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData("")]
@@ -23,13 +33,13 @@ namespace NSign.Providers
         [InlineData("")]
         [InlineData("MyKey")]
         [InlineData("AnotherKey")]
-        public void UpdateSignatureParamsSetsKeyIdParameter(string? keyId)
+        public async Task UpdateSignatureParamsSetsKeyIdParameter(string? keyId)
         {
             SignatureProvider provider = new TestProvider(keyId);
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
 
             Assert.Null(signatureParams.KeyId);
-            provider.UpdateSignatureParams(signatureParams);
+            await provider.UpdateSignatureParamsAsync(signatureParams, messageContext, CancellationToken.None);
             Assert.Equal(keyId, signatureParams.KeyId);
         }
 
