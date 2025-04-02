@@ -158,9 +158,9 @@ namespace NSign.Providers
         }
 
         /// <inheritdoc/>
-        public override void UpdateSignatureParams(SignatureParamsComponent signatureParams)
+        public override async Task UpdateSignatureParamsAsync(SignatureParamsComponent signatureParams, MessageContext messageContext, CancellationToken cancellationToken)
         {
-            base.UpdateSignatureParams(signatureParams);
+            await base.UpdateSignatureParamsAsync(signatureParams, messageContext, cancellationToken);
 
             if (!String.IsNullOrWhiteSpace(algorithmName))
             {

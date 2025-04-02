@@ -1,4 +1,6 @@
-﻿using NSign.Signatures;
+﻿using Microsoft.Extensions.Logging;
+using Moq;
+using NSign.Signatures;
 using System;
 using System.Text;
 using System.Threading;
@@ -13,6 +15,13 @@ namespace NSign.Providers
         private static readonly byte[] defaultKey = Encoding.ASCII.GetBytes("mykey");
         private static readonly byte[] sharedKeyFromStandard =
             Convert.FromBase64String("uzvJfB4u3N0Jy4T7NZ75MDVcr8zSTInedJtkgcu46YW4XByzNJjxBdtjUkdJPBtbmHhIDi6pcl8jsasjlTMtDQ==");
+        private readonly Mock<ILogger> mockLogger = new Mock<ILogger>(MockBehavior.Loose);
+        private readonly TestMessageContext messageContext;
+
+        public HmacSha256SignatureProviderTests()
+        {
+            messageContext = new TestMessageContext(mockLogger.Object);
+        }
 
         #region From standard
 
@@ -109,13 +118,13 @@ namespace NSign.Providers
         }
 
         [Fact]
-        public void UpdateSignatureParamsSetsTheAlgorithm()
+        public async Task UpdateSignatureParamsSetsTheAlgorithm()
         {
             HmacSha256SignatureProvider provider = Make();
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
 
             Assert.Null(signatureParams.Algorithm);
-            provider.UpdateSignatureParams(signatureParams);
+            await provider.UpdateSignatureParamsAsync(signatureParams, this.messageContext, CancellationToken.None);
             Assert.Equal("hmac-sha256", signatureParams.Algorithm);
         }
 

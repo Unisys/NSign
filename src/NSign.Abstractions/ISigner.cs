@@ -17,7 +17,7 @@ namespace NSign
         /// <param name="signatureParams">
         /// The SignatureParamsComponent object holding the signature parameters to update, if necessary.
         /// </param>
-        void UpdateSignatureParams(SignatureParamsComponent signatureParams);
+        Task UpdateSignatureParamsAsync(SignatureParamsComponent signatureParams, MessageContext messageContext, CancellationToken cancellationToken);
 
         /// <summary>
         /// Signs the given input asynchronously.
@@ -32,6 +32,6 @@ namespace NSign
         /// A Task which results in a <see cref="ReadOnlyMemory{T}"/> of <see cref="byte"/> representing the signature
         /// when it completes.
         /// </returns>
-        Task<ReadOnlyMemory<byte>> SignAsync(ReadOnlyMemory<byte> input, CancellationToken cancellationToken);
+        Task<ReadOnlyMemory<byte>> SignAsync(string? keyId, ReadOnlyMemory<byte> input, CancellationToken cancellationToken);
     }
 }

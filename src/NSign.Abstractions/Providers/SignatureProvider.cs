@@ -29,9 +29,26 @@ namespace NSign.Providers
         public string? KeyId { get; }
 
         /// <inheritdoc/>
-        public virtual void UpdateSignatureParams(SignatureParamsComponent signatureParams)
+        public virtual Task UpdateSignatureParamsAsync(SignatureParamsComponent signatureParams, MessageContext messageContext, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             signatureParams.KeyId = KeyId;
+
+            return Task.CompletedTask;
+        }
+
+        public Task<ReadOnlyMemory<byte>> SignAsync(
+            string? keyId,
+            ReadOnlyMemory<byte> input,
+            CancellationToken cancellationToken)
+        {
+            if (this.KeyId != keyId)
+            {
+                throw new InvalidOperationException("The specified keyId does not match the keyId of this provider.");
+            }
+
+            return SignAsync(input, cancellationToken);
         }
 
         /// <inheritdoc/>

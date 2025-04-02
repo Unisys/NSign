@@ -66,10 +66,11 @@ namespace NSign.Signatures
 
             if (options.UseUpdateSignatureParams)
             {
-                signer.UpdateSignatureParams(inputSpec.SignatureParameters);
+                await signer.UpdateSignatureParamsAsync(inputSpec.SignatureParameters, context, context.Aborted);
             }
 
             ReadOnlyMemory<byte> signature = await signer.SignAsync(
+                inputSpec.SignatureParameters.KeyId,
                 context.GetSignatureInput(inputSpec.SignatureParameters, out string sigInput),
                 context.Aborted);
 

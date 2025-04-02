@@ -83,17 +83,18 @@ namespace NSign.Signatures
             mockContext.Setup(c => c.AddHeader("signature", "SignMessageAsyncAddsSignature=:blah:"));
             mockContext.Setup(c => c.AddHeader("signature-input", "SignMessageAsyncAddsSignature=(\"@method\" \"@request-target\")"));
 
-            mockSigner.Setup(s => s.UpdateSignatureParams(It.IsAny<SignatureParamsComponent>()));
+            mockSigner.Setup(s => s.UpdateSignatureParamsAsync(It.IsAny<SignatureParamsComponent>(), It.IsAny<MessageContext>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
             mockSigner.Setup(s => s.SignAsync(It.IsAny<ReadOnlyMemory<byte>>(), cancellationToken))
                 .ReturnsAsync(new ReadOnlyMemory<byte>(new byte[] { 0x6e, 0x56, 0xa1, })); // base64 encoded to 'blah'
 
             await signer.SignMessageAsync(mockContext.Object);
 
-            mockSigner.Verify(s => s.UpdateSignatureParams(It.IsAny<SignatureParamsComponent>()),
+            mockSigner.Verify(s => s.UpdateSignatureParamsAsync(It.IsAny<SignatureParamsComponent>(), It.IsAny<MessageContext>(), It.IsAny<CancellationToken>()),
                 Times.Exactly(useUpdateSignatureParams ? 1 : 0));
             mockSigner.Verify(s => s.SignAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()), Times.Once());
 
-            mockContext.VerifyGet(c => c.Aborted, Times.Once());
+            mockContext.VerifyGet(c => c.Aborted, Times.Exactly(useUpdateSignatureParams ? 2 : 1));
             mockContext.Verify(c => c.GetDerivedComponentValue(It.IsAny<DerivedComponent>()), Times.Exactly(4));
             mockContext.Verify(c => c.AddHeader(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
 

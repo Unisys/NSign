@@ -1,4 +1,6 @@
-﻿using NSign.Signatures;
+﻿using Microsoft.Extensions.Logging;
+using Moq;
+using NSign.Signatures;
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -13,6 +15,13 @@ namespace NSign.Providers
     {
         private readonly Random rng = new Random();
         private readonly RSA publicKeyFromStandard = GetPublicKeyFromStandard();
+        private readonly Mock<ILogger> mockLogger = new Mock<ILogger>(MockBehavior.Loose);
+        private readonly TestMessageContext messageContext;
+
+        public RsaPssSha512SignatureProviderTests()
+        {
+            messageContext = new TestMessageContext(mockLogger.Object);
+        }
 
         #region From standard
 
@@ -223,13 +232,13 @@ aOT9v6d+nb4bnNkQVklLQ3fVAvJm+xdDOp9LCNCN48V2pnDOkFV6+U9nV5oyc6XI
         }
 
         [Fact]
-        public void UpdateSignatureParamsSetsTheAlgorithm()
+        public async Task UpdateSignatureParamsSetsTheAlgorithm()
         {
             RsaPssSha512SignatureProvider signingProvider = Make(true);
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
 
             Assert.Null(signatureParams.Algorithm);
-            signingProvider.UpdateSignatureParams(signatureParams);
+            await signingProvider.UpdateSignatureParamsAsync(signatureParams, messageContext, CancellationToken.None);
             Assert.Equal("rsa-pss-sha512", signatureParams.Algorithm);
         }
 

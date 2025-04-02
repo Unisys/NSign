@@ -1,4 +1,6 @@
-﻿using NSign.Signatures;
+﻿using Microsoft.Extensions.Logging;
+using Moq;
+using NSign.Signatures;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.OpenSsl;
 using System;
@@ -16,6 +18,13 @@ namespace NSign.BouncyCastle.Providers
 
         private readonly Ed25519PrivateKeyParameters privateKeyFromStandard = GetPrivateKeyFromStandard();
         private readonly Ed25519PublicKeyParameters publicKeyFromStandard = GetPublicKeyFromStandard();
+        private readonly Mock<ILogger> mockLogger = new Mock<ILogger>(MockBehavior.Loose);
+        private readonly TestMessageContext messageContext;
+
+        public EdDsaEdwards25519SignatureProviderTests()
+        {
+            messageContext = new TestMessageContext(mockLogger.Object);
+        }
 
         [Fact]
         public void CtorValidatesInput()
@@ -101,7 +110,7 @@ namespace NSign.BouncyCastle.Providers
         }
 
         [Fact]
-        public void UpdateSignatureParamsSetsTheAlgorithm()
+        public async Task UpdateSignatureParamsSetsTheAlgorithm()
         {
             (_, Ed25519PublicKeyParameters publicKey) =
                 GetKeys("ed25519.nsign.test.local");
@@ -109,7 +118,7 @@ namespace NSign.BouncyCastle.Providers
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
 
             Assert.Null(signatureParams.Algorithm);
-            signingProvider.UpdateSignatureParams(signatureParams);
+            await signingProvider.UpdateSignatureParamsAsync(signatureParams, this.messageContext, CancellationToken.None);
             Assert.Equal("ed25519", signatureParams.Algorithm);
         }
 

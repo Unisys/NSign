@@ -1,5 +1,7 @@
 ﻿using NSign.Signatures;
 using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NSign.Providers
 {
@@ -38,9 +40,10 @@ namespace NSign.Providers
         }
 
         /// <inheritdoc/>
-        public override void UpdateSignatureParams(SignatureParamsComponent signatureParams)
+        public override async Task UpdateSignatureParamsAsync(SignatureParamsComponent signatureParams, MessageContext messageContext, CancellationToken cancellationToken)
         {
-            base.UpdateSignatureParams(signatureParams);
+            await base.UpdateSignatureParamsAsync(signatureParams, messageContext, cancellationToken);
+
             signatureParams.Algorithm = Constants.SignatureAlgorithms.HmacSha256;
         }
 
