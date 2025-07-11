@@ -14,10 +14,12 @@ namespace NSign.Providers
 
         #region From standard
 
-        [Fact]
-        public async Task Standard_2_2_11_Verify()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Standard_2_2_11_Verify(bool useKeysCtor)
         {
-            ECDsaP256Sha256SignatureProvider provider = Make(false, "test-key-ecc-p256", "test-key-ecc-p256");
+            ECDsaP256Sha256SignatureProvider provider = Make(useKeysCtor, false, "test-key-ecc-p256", "test-key-ecc-p256");
 
             string input =
                 "\"@status\": 503\n" +
@@ -36,10 +38,12 @@ namespace NSign.Providers
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
-        [Fact]
-        public async Task Standard_4_3_Verify_OnReverseProxy_Draft16()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Standard_4_3_Verify_OnReverseProxy_Draft16(bool useKeysCtor)
         {
-            ECDsaP256Sha256SignatureProvider provider = Make(false, "test-key-ecc-p256", "test-key-ecc-p256");
+            ECDsaP256Sha256SignatureProvider provider = Make(useKeysCtor, false, "test-key-ecc-p256", "test-key-ecc-p256");
 
             string input =
                 "\"@method\": POST\n" +
@@ -60,10 +64,12 @@ namespace NSign.Providers
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
-        [Fact]
-        public async Task Standard_B_2_4_Verify()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Standard_B_2_4_Verify(bool useKeysCtor)
         {
-            ECDsaP256Sha256SignatureProvider provider = Make(false, "test-key-ecc-p256", "test-key-ecc-p256");
+            ECDsaP256Sha256SignatureProvider provider = Make(useKeysCtor, false, "test-key-ecc-p256", "test-key-ecc-p256");
 
             string input =
                 "\"@status\": 200\n" +
@@ -82,10 +88,12 @@ namespace NSign.Providers
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
-        [Fact]
-        public async Task Standard_B_3_Verify()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Standard_B_3_Verify(bool useKeysCtor)
         {
-            ECDsaP256Sha256SignatureProvider provider = Make(false, "test-key-ecc-p256", "test-key-ecc-p256");
+            ECDsaP256Sha256SignatureProvider provider = Make(useKeysCtor, false, "test-key-ecc-p256", "test-key-ecc-p256");
 
             string input =
                 "\"@path\": /foo\n" +
@@ -105,10 +113,12 @@ namespace NSign.Providers
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
-        [Fact]
-        public async Task Draft17_2_4_Example1_Verify()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Draft17_2_4_Example1_Verify(bool useKeysCtor)
         {
-            ECDsaP256Sha256SignatureProvider provider = Make(false, "test-key-ecc-p256", "test-key-ecc-p256");
+            ECDsaP256Sha256SignatureProvider provider = Make(useKeysCtor, false, "test-key-ecc-p256", "test-key-ecc-p256");
 
             string input =
                 "\"@status\": 503\n" +
@@ -130,10 +140,12 @@ namespace NSign.Providers
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
-        [Fact]
-        public async Task Draft17_2_4_Example2_Verify()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Draft17_2_4_Example2_Verify(bool useKeysCtor)
         {
-            ECDsaP256Sha256SignatureProvider provider = Make(false, "test-key-ecc-p256", "test-key-ecc-p256");
+            ECDsaP256Sha256SignatureProvider provider = Make(useKeysCtor, false, "test-key-ecc-p256", "test-key-ecc-p256");
 
             string input =
                 "\"@status\": 503\n" +
@@ -158,10 +170,12 @@ namespace NSign.Providers
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
-        [Fact]
-        public async Task Draft19_2_4_Example1_Verify()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Draft19_2_4_Example1_Verify(bool useKeysCtor)
         {
-            ECDsaP256Sha256SignatureProvider provider = Make(false, "test-key-ecc-p256", "test-key-ecc-p256");
+            ECDsaP256Sha256SignatureProvider provider = Make(useKeysCtor, false, "test-key-ecc-p256", "test-key-ecc-p256");
 
             string input =
                 "\"@status\": 503\n" +
@@ -183,10 +197,12 @@ namespace NSign.Providers
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
-        [Fact]
-        public async Task Draft19_2_4_Example2_Verify()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Draft19_2_4_Example2_Verify(bool useKeysCtor)
         {
-            ECDsaP256Sha256SignatureProvider provider = Make(false, "test-key-ecc-p256", "test-key-ecc-p256");
+            ECDsaP256Sha256SignatureProvider provider = Make(useKeysCtor, false, "test-key-ecc-p256", "test-key-ecc-p256");
 
             string input =
                 "\"@status\": 503\n" +
@@ -211,10 +227,12 @@ namespace NSign.Providers
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
-        [Fact]
-        public async Task Draft17_4_3_Example2_Verify()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Draft17_4_3_Example2_Verify(bool useKeysCtor)
         {
-            ECDsaP256Sha256SignatureProvider provider = Make(false, "test-key-ecc-p256", "test-key-ecc-p256");
+            ECDsaP256Sha256SignatureProvider provider = Make(useKeysCtor, false, "test-key-ecc-p256", "test-key-ecc-p256");
 
             string input =
                 "\"@method\": POST\n" +
@@ -238,28 +256,33 @@ namespace NSign.Providers
         #endregion
 
         [Theory]
-        [InlineData("ecdsa-p192-nsign.test.local", "P192")]
-        [InlineData("ecdsa-p384-nsign.test.local", "P384")]
-        [InlineData("rsa-nsign.test.local", "The certificate does not use elliptic curve keys.")]
-        public void CtorFailsForNonP256Curve(string cert, string expectedCurve)
+        [InlineData(false, "ecdsa-p192-nsign.test.local", "P192")]
+        [InlineData(true, "ecdsa-p192-nsign.test.local", "P192")]
+        [InlineData(false, "ecdsa-p384-nsign.test.local", "P384")]
+        [InlineData(true, "ecdsa-p384-nsign.test.local", "P384")]
+        [InlineData(false, "rsa-nsign.test.local", "The certificate does not use elliptic curve keys.")]
+        [InlineData(true, "rsa-nsign.test.local", "The publicKey does not use elliptic curve keys.")]
+        public void CtorFailsForNonP256Curve(bool useKeysCtor, string cert, string expectedCurve)
         {
             ArgumentException ex;
-            ex = Assert.Throws<ArgumentException>(() => Make(true, certName: cert));
-            Assert.Equal("certificate", ex.ParamName);
+            ex = Assert.Throws<ArgumentException>(() => Make(useKeysCtor, true, certName: cert));
+            Assert.Equal(useKeysCtor ? "publicKey" : "certificate", ex.ParamName);
             Assert.Contains(expectedCurve, ex.Message);
 
-            ex = Assert.Throws<ArgumentException>(() => Make(false, certName: cert));
-            Assert.Equal("certificate", ex.ParamName);
+            ex = Assert.Throws<ArgumentException>(() => Make(useKeysCtor, false, certName: cert));
+            Assert.Equal(useKeysCtor ? "publicKey" : "certificate", ex.ParamName);
             Assert.Contains(expectedCurve, ex.Message);
         }
 
         [Theory]
-        [InlineData(null)]
-        [InlineData("my-key-id")]
-        public async Task OwnSignatureCanBeVerified(string? keyId)
+        [InlineData(false, null)]
+        [InlineData(true, null)]
+        [InlineData(false, "my-key-id")]
+        [InlineData(true, "my-key-id")]
+        public async Task OwnSignatureCanBeVerified(bool useKeysCtor, string? keyId)
         {
-            ECDsaP256Sha256SignatureProvider signingProvider = Make(true, keyId);
-            ECDsaP256Sha256SignatureProvider verifyingProvider = Make(false, keyId);
+            ECDsaP256Sha256SignatureProvider signingProvider = Make(useKeysCtor, true, keyId);
+            ECDsaP256Sha256SignatureProvider verifyingProvider = Make(useKeysCtor, false, keyId);
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
             byte[] random = new byte[2048];
 
@@ -277,11 +300,12 @@ namespace NSign.Providers
         }
 
         [Theory]
-        [InlineData("my-key-id")]
-        public async Task VerificationFailsForDifferentKeyId(string keyId)
+        [InlineData(false, "my-key-id")]
+        [InlineData(true, "my-key-id")]
+        public async Task VerificationFailsForDifferentKeyId(bool useKeysCtor, string keyId)
         {
-            ECDsaP256Sha256SignatureProvider signingProvider = Make(true, keyId);
-            ECDsaP256Sha256SignatureProvider verifyingProvider = Make(false, keyId);
+            ECDsaP256Sha256SignatureProvider signingProvider = Make(useKeysCtor, true, keyId);
+            ECDsaP256Sha256SignatureProvider verifyingProvider = Make(useKeysCtor, false, keyId);
             SignatureParamsComponent signatureParams = new SignatureParamsComponent()
                 .WithKeyId("VerificationFailsForDifferentKeyId");
             byte[] random = new byte[2048];
@@ -294,11 +318,12 @@ namespace NSign.Providers
         }
 
         [Theory]
-        [InlineData("my-key-id")]
-        public async Task VerificationFailsForDifferentAlgorithm(string keyId)
+        [InlineData(false, "my-key-id")]
+        [InlineData(true, "my-key-id")]
+        public async Task VerificationFailsForDifferentAlgorithm(bool useKeysCtor, string keyId)
         {
-            ECDsaP256Sha256SignatureProvider signingProvider = Make(true, keyId);
-            ECDsaP256Sha256SignatureProvider verifyingProvider = Make(false, keyId);
+            ECDsaP256Sha256SignatureProvider signingProvider = Make(useKeysCtor, true, keyId);
+            ECDsaP256Sha256SignatureProvider verifyingProvider = Make(useKeysCtor, false, keyId);
             SignatureParamsComponent signatureParams = new SignatureParamsComponent().WithAlgorithm(SignatureAlgorithm.HmacSha256);
             byte[] random = new byte[2048];
 
@@ -309,10 +334,12 @@ namespace NSign.Providers
             Assert.Equal(VerificationResult.NoMatchingVerifierFound, result);
         }
 
-        [Fact]
-        public void UpdateSignatureParamsSetsTheAlgorithm()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void UpdateSignatureParamsSetsTheAlgorithm(bool useKeysCtor)
         {
-            ECDsaP256Sha256SignatureProvider signingProvider = Make(true);
+            ECDsaP256Sha256SignatureProvider signingProvider = Make(useKeysCtor, true);
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
 
             Assert.Null(signatureParams.Algorithm);
@@ -321,6 +348,7 @@ namespace NSign.Providers
         }
 
         private static ECDsaP256Sha256SignatureProvider Make(
+            bool useKeysCtor,
             bool forSigning = false,
             string? keyId = null,
             string certName = "ecdsa-p256-nsign.test.local")
@@ -336,7 +364,13 @@ namespace NSign.Providers
                 cert = Certificates.GetCertificate($"{certName}.cer");
             }
 
-            return new ECDsaP256Sha256SignatureProvider(cert, keyId ?? cert.Thumbprint);
+            if (!useKeysCtor)
+            {
+                return new ECDsaP256Sha256SignatureProvider(cert, keyId ?? cert.Thumbprint);
+            }
+
+            return new ECDsaP256Sha256SignatureProvider(forSigning ? cert.GetECDsaPrivateKey() : null,
+                cert.GetECDsaPublicKey()!, keyId ?? cert.Thumbprint);
         }
     }
 }
