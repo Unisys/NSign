@@ -84,12 +84,63 @@ namespace NSign.Providers
         }
 
         /// <summary>
+        /// Initializes a new instance of ECDsaSignatureProvider.
+        /// </summary>
+        /// <param name="privateKey">
+        /// The <see cref="ECDsa"/> object that represents the private key or null if signing with this provider is not
+        /// needed.
+        /// </param>
+        /// <param name="publicKey">
+        /// The <see cref="ECDsa"/> object that represents the public key to use for signature verification.
+        /// </param>
+        /// <param name="requiredCurveOid">
+        /// The OID value of the curve required to use this instance.
+        /// </param>
+        /// <param name="requiredCurveName">
+        /// The name of the curve rqeuired to use this instance.
+        /// </param>
+        /// <param name="algorithmName">
+        /// The name of the asymmetric signature algorithm provided by this instance.
+        /// </param>
+        /// <param name="keyId">
+        /// The value for the KeyId parameter of signatures produced with this provider or null if the value should not
+        /// be set / is not important.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if the <paramref name="publicKey"/> is null.
+        /// </exception>
+        public ECDsaSignatureProvider(
+            ECDsa? privateKey,
+            ECDsa publicKey,
+            string requiredCurveOid,
+            string requiredCurveName,
+            string algorithmName,
+            string? keyId
+        ) : base(keyId)
+        {
+            this.privateKey = privateKey;
+            this.publicKey = publicKey;
+
+            this.requiredCurveOid = requiredCurveOid;
+            this.requiredCurveName = requiredCurveName;
+
+            // Give derived classes a chance to reject the certificate because the curve doesn't match.
+            CheckKeyAlgorithm(publicKey, nameof(publicKey));
+
+            if (String.IsNullOrWhiteSpace(algorithmName))
+            {
+                throw new ArgumentNullException(nameof(algorithmName));
+            }
+            this.algorithmName = algorithmName;
+        }
+
+        /// <summary>
         /// Gets the <see cref="X509Certificate2"/> to use to get the public key and the private key.
         /// </summary>
         /// <remarks>
         /// A certificate with access to the private key is needed only when signatures must be created.
         /// </remarks>
-        public X509Certificate2 Certificate { get; }
+        public X509Certificate2? Certificate { get; }
 
         /// <inheritdoc/>
         public void Dispose()
@@ -186,7 +237,7 @@ namespace NSign.Providers
         {
             if (null == publicKey)
             {
-                throw new ArgumentException("The certificate does not use elliptic curve keys.", parameterName);
+                throw new ArgumentException($"The {parameterName} does not use elliptic curve keys.", parameterName);
             }
 
             ECParameters parameters = publicKey.ExportParameters(false);

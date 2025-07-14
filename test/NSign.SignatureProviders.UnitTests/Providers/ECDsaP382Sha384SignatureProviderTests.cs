@@ -12,28 +12,33 @@ namespace NSign.Providers
         private readonly Random rng = new Random();
 
         [Theory]
-        [InlineData("ecdsa-p192-nsign.test.local", "P192")]
-        [InlineData("ecdsa-p256-nsign.test.local", "P256")]
-        [InlineData("rsa-nsign.test.local", "The certificate does not use elliptic curve keys.")]
-        public void CtorFailsForNonP384Curve(string cert, string expectedCurve)
+        [InlineData(false, "ecdsa-p192-nsign.test.local", "P192")]
+        [InlineData(true, "ecdsa-p192-nsign.test.local", "P192")]
+        [InlineData(false, "ecdsa-p256-nsign.test.local", "P256")]
+        [InlineData(true, "ecdsa-p256-nsign.test.local", "P256")]
+        [InlineData(false, "rsa-nsign.test.local", "The certificate does not use elliptic curve keys.")]
+        [InlineData(true, "rsa-nsign.test.local", "The publicKey does not use elliptic curve keys.")]
+        public void CtorFailsForNonP384Curve(bool useKeysCtor, string cert, string expectedCurve)
         {
             ArgumentException ex;
-            ex = Assert.Throws<ArgumentException>(() => Make(true, certName: cert));
-            Assert.Equal("certificate", ex.ParamName);
+            ex = Assert.Throws<ArgumentException>(() => Make(useKeysCtor, true, certName: cert));
+            Assert.Equal(useKeysCtor ? "publicKey" : "certificate", ex.ParamName);
             Assert.Contains(expectedCurve, ex.Message);
 
-            ex = Assert.Throws<ArgumentException>(() => Make(false, certName: cert));
-            Assert.Equal("certificate", ex.ParamName);
+            ex = Assert.Throws<ArgumentException>(() => Make(useKeysCtor, false, certName: cert));
+            Assert.Equal(useKeysCtor ? "publicKey" : "certificate", ex.ParamName);
             Assert.Contains(expectedCurve, ex.Message);
         }
 
         [Theory]
-        [InlineData(null)]
-        [InlineData("my-key-id")]
-        public async Task OwnSignatureCanBeVerified(string? keyId)
+        [InlineData(false, null)]
+        [InlineData(true, null)]
+        [InlineData(false, "my-key-id")]
+        [InlineData(true, "my-key-id")]
+        public async Task OwnSignatureCanBeVerified(bool useKeysCtor, string? keyId)
         {
-            ECDsaP382Sha384SignatureProvider signingProvider = Make(true, keyId);
-            ECDsaP382Sha384SignatureProvider verifyingProvider = Make(false, keyId);
+            ECDsaP382Sha384SignatureProvider signingProvider = Make(useKeysCtor, true, keyId);
+            ECDsaP382Sha384SignatureProvider verifyingProvider = Make(useKeysCtor, false, keyId);
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
             byte[] random = new byte[2048];
 
@@ -51,11 +56,12 @@ namespace NSign.Providers
         }
 
         [Theory]
-        [InlineData("my-key-id")]
-        public async Task VerificationFailsForDifferentKeyId(string keyId)
+        [InlineData(false, "my-key-id")]
+        [InlineData(true, "my-key-id")]
+        public async Task VerificationFailsForDifferentKeyId(bool useKeysCtor, string keyId)
         {
-            ECDsaP382Sha384SignatureProvider signingProvider = Make(true, keyId);
-            ECDsaP382Sha384SignatureProvider verifyingProvider = Make(false, keyId);
+            ECDsaP382Sha384SignatureProvider signingProvider = Make(useKeysCtor, true, keyId);
+            ECDsaP382Sha384SignatureProvider verifyingProvider = Make(useKeysCtor, false, keyId);
             SignatureParamsComponent signatureParams = new SignatureParamsComponent()
                 .WithKeyId("VerificationFailsForDifferentKeyId");
             byte[] random = new byte[2048];
@@ -68,11 +74,12 @@ namespace NSign.Providers
         }
 
         [Theory]
-        [InlineData("my-key-id")]
-        public async Task VerificationFailsForDifferentAlgorithm(string keyId)
+        [InlineData(false, "my-key-id")]
+        [InlineData(true, "my-key-id")]
+        public async Task VerificationFailsForDifferentAlgorithm(bool useKeysCtor, string keyId)
         {
-            ECDsaP382Sha384SignatureProvider signingProvider = Make(true, keyId);
-            ECDsaP382Sha384SignatureProvider verifyingProvider = Make(false, keyId);
+            ECDsaP382Sha384SignatureProvider signingProvider = Make(useKeysCtor, true, keyId);
+            ECDsaP382Sha384SignatureProvider verifyingProvider = Make(useKeysCtor, false, keyId);
             SignatureParamsComponent signatureParams = new SignatureParamsComponent().WithAlgorithm(SignatureAlgorithm.HmacSha256);
             byte[] random = new byte[2048];
 
@@ -83,10 +90,12 @@ namespace NSign.Providers
             Assert.Equal(VerificationResult.NoMatchingVerifierFound, result);
         }
 
-        [Fact]
-        public void UpdateSignatureParamsSetsTheAlgorithm()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void UpdateSignatureParamsSetsTheAlgorithm(bool useKeysCtor)
         {
-            ECDsaP382Sha384SignatureProvider signingProvider = Make(true);
+            ECDsaP382Sha384SignatureProvider signingProvider = Make(useKeysCtor, true);
             SignatureParamsComponent signatureParams = new SignatureParamsComponent();
 
             Assert.Null(signatureParams.Algorithm);
@@ -95,6 +104,7 @@ namespace NSign.Providers
         }
 
         private static ECDsaP382Sha384SignatureProvider Make(
+            bool useKeysCtor,
             bool forSigning = false,
             string? keyId = null,
             string certName = "ecdsa-p384-nsign.test.local")
@@ -110,7 +120,13 @@ namespace NSign.Providers
                 cert = Certificates.GetCertificate($"{certName}.cer");
             }
 
-            return new ECDsaP382Sha384SignatureProvider(cert, keyId ?? cert.Thumbprint);
+            if (!useKeysCtor)
+            {
+                return new ECDsaP382Sha384SignatureProvider(cert, keyId ?? cert.Thumbprint);
+            }
+
+            return new ECDsaP382Sha384SignatureProvider(forSigning ? cert.GetECDsaPrivateKey() : null,
+                cert.GetECDsaPublicKey()!, keyId ?? cert.Thumbprint);
         }
     }
 }

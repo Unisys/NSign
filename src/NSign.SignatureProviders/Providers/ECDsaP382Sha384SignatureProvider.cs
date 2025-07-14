@@ -27,6 +27,29 @@ namespace NSign.Providers
                  keyId)
         { }
 
+        /// <summary>
+        /// Initializes a new instance of ECDsaP382Sha384SignatureProvider.
+        /// </summary>
+        /// <param name="privateKey">
+        /// The <see cref="ECDsa"/> object that represents the private key or null if signing with this provider is not
+        /// needed.
+        /// </param>
+        /// <param name="publicKey">
+        /// The <see cref="ECDsa"/> object that represents the public key to use for signature verification.
+        /// </param>
+        /// <param name="keyId">
+        /// The value for the KeyId parameter of signatures produced with this provider or null if the value should not
+        /// be set / is not important.
+        /// </param>
+        public ECDsaP382Sha384SignatureProvider(ECDsa? privateKey, ECDsa publicKey, string? keyId) :
+            base(privateKey,
+                 publicKey,
+                 ECCurve.NamedCurves.nistP384.Oid.Value!,
+                 "P-384",
+                 Constants.SignatureAlgorithms.EcdsaP384Sha384,
+                 keyId)
+        { }
+
         /// <inheritdoc/>
         protected override HashAlgorithmName SignatureHash => HashAlgorithmName.SHA384;
     }
