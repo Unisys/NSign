@@ -5,3 +5,5 @@ TestResults/
 Coverage/
 
 *.csproj.user
+*.DotSettings.user
+.idea/

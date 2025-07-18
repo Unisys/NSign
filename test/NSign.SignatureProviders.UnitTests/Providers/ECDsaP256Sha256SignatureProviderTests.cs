@@ -260,6 +260,8 @@ namespace NSign.Providers
         [InlineData(true, "ecdsa-p192-nsign.test.local", "P192")]
         [InlineData(false, "ecdsa-p384-nsign.test.local", "P384")]
         [InlineData(true, "ecdsa-p384-nsign.test.local", "P384")]
+        [InlineData(false, "ecdsa-p521-nsign.test.local", "P521")]
+        [InlineData(true, "ecdsa-p521-nsign.test.local", "P521")]
         [InlineData(false, "rsa-nsign.test.local", "The certificate does not use elliptic curve keys.")]
         [InlineData(true, "rsa-nsign.test.local", "The publicKey does not use elliptic curve keys.")]
         public void CtorFailsForNonP256Curve(bool useKeysCtor, string cert, string expectedCurve)

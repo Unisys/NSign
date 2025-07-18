@@ -210,6 +210,11 @@
             /// The name for signatures using ECDSA with curve P-384 and SHA-384.
             /// </summary>
             public const string EcdsaP384Sha384 = "ecdsa-p384-sha384";
+
+            /// <summary>
+            /// The name for signatures using ECDSA with curve P-521 and SHA-512.
+            /// </summary>
+            public const string EcdsaP521Sha512 = "ecdsa-p521-sha512";
         }
     }
 }
