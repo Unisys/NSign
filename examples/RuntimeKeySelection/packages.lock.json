@@ -127,8 +127,8 @@
       },
       "StructuredFieldValues": {
         "type": "Transitive",
-        "resolved": "0.7.5",
-        "contentHash": "X3AtLbwzugXf6M8hWQBbR6QXEoccQeMuEEarX9GJocB7y4RetHGaKi6ih6SOctV2U+BlEHd2dHi2Puu62+Ituw=="
+        "resolved": "0.7.6",
+        "contentHash": "4cz+5Oxeb8pN19k0XqaACJYXwMAn25wxRw0h1KL+hcAXOAxGl9ArH7Jx0y3FyPao2VxSAbj0UJUkE8/i8XReoA=="
       },
       "System.Collections.Immutable": {
         "type": "Transitive",
