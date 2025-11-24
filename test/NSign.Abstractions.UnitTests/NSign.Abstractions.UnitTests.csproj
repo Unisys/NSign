@@ -20,7 +20,14 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Label="netstandard target" Condition="'$(TestTargetsNetStandard)' == 'true'">
+    <!-- Set the library project reference to target the designated netstandard target -->
+    <ProjectReference Include="..\..\src\NSign.Abstractions\NSign.Abstractions.csproj">
+      <SetTargetFramework>TargetFramework=$(NetStandardTarget)</SetTargetFramework>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup Label="netX targets" Condition="'$(TestTargetsNetStandard)' != 'true'">
     <ProjectReference Include="..\..\src\NSign.Abstractions\NSign.Abstractions.csproj" />
   </ItemGroup>
 </Project>

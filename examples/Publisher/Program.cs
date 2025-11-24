@@ -15,7 +15,6 @@ IHost host = Host
 
 host.Run();
 
-
 static void SetupServices(IServiceCollection services)
 {
     services
@@ -44,7 +43,10 @@ static void SetupServices(IServiceCollection services)
         }).Services
         .AddSingleton<ISigner>(
             new RsaPssSha512SignatureProvider(
-                new X509Certificate2(@"examples.nsign.local.pfx", (string?)null), "examples.nsign.local"))
+                X509CertificateLoader.LoadPkcs12FromFile(
+                    @"examples.nsign.local.pfx",
+                    (string?)null),
+                "examples.nsign.local"))
         .AddHostedService<PublisherWorker>()
         ;
 }

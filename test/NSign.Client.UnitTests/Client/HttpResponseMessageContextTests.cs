@@ -133,6 +133,20 @@ namespace NSign.Client
             Assert.Equal(expectOnRequest, context.HasHeader(bindRequest: true, header));
         }
 
+#if TestTargetsNetStandard
+        [Theory]
+        [InlineData("a")]
+        [InlineData("header-one")]
+        [InlineData("x-header-two")]
+        public void GetTrailerValuesThrows(string name)
+        {
+            NotSupportedException ex = Assert.Throws<NotSupportedException>(
+                () => context.GetTrailerValues(name));
+            Assert.Equal(
+                "Trailers are not supported with .netstandard 2.0. Please update to a more modern version.",
+                ex.Message);
+        }
+#else
         [Theory]
         [InlineData("x-first", new string[] { "value1", "value2", })]
         [InlineData("x-second", new string[] { "", })]
@@ -154,7 +168,23 @@ namespace NSign.Client
                 Assert.Empty(actualValues);
             }
         }
+#endif
 
+#if TestTargetsNetStandard
+        [Theory]
+        [InlineData("not-found")]
+        [InlineData("x-first-header")]
+        [InlineData("x-second-header")]
+        [InlineData("x-third-header")]
+        public void HasTrailerThrowsWhenNotBindingToRequest(string header)
+        {
+            NotSupportedException ex = Assert.Throws<NotSupportedException>(
+                () => context.HasTrailer(bindRequest: false, header));
+            Assert.Equal(
+                "Trailers are not supported with .netstandard 2.0. Please update to a more modern version.",
+                ex.Message);
+        }
+#else
         [Theory]
         [InlineData("not-found", false)]
         [InlineData("x-first-header", true)]
@@ -169,6 +199,7 @@ namespace NSign.Client
             Assert.Equal(expectOnResponse, context.HasTrailer(bindRequest: false, header));
             Assert.False(context.HasTrailer(bindRequest: true, header));
         }
+#endif
 
         [Theory]
         [InlineData("not-found")]
@@ -181,6 +212,21 @@ namespace NSign.Client
             Assert.Equal("Request-based trailers in signatures are not supported.", ex.Message);
         }
 
+#if TestTargetsNetStandard
+        [Theory]
+        [InlineData("not-found")]
+        [InlineData("x-first-header")]
+        [InlineData("x-second-header")]
+        [InlineData("x-third-header")]
+        public void HasTrailerThrowsWhenBindingToRequest(string header)
+        {
+            NotSupportedException ex = Assert.Throws<NotSupportedException>(
+                () => context.HasTrailer(bindRequest: true, header));
+            Assert.Equal(
+                "Trailers are not supported with .netstandard 2.0. Please update to a more modern version.",
+                ex.Message);
+        }
+#else
         [Theory]
         [InlineData("not-found")]
         [InlineData("x-first-header")]
@@ -190,5 +236,6 @@ namespace NSign.Client
         {
             Assert.False(context.HasTrailer(bindRequest: true, header));
         }
+#endif
     }
 }

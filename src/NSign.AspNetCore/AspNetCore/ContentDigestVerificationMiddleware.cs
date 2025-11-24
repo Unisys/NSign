@@ -176,22 +176,6 @@ namespace NSign.AspNetCore
         /// </returns>
         private static IEnumerable<KeyValuePair<string, string>> ParseHeaders(StringValues values)
         {
-#if NET6_0
-            foreach (string value in values)
-            {
-                MatchCollection matches = HeaderValueParser.Matches(value);
-
-                if (matches.Count <= 0)
-                {
-                    throw new InvalidDataException($"The content-digest header value '{value}' could not be parsed.");
-                }
-
-                foreach (Match? match in matches)
-                {
-                    yield return new KeyValuePair<string, string>(match!.Groups[1].Value, match!.Groups[2].Value);
-                }
-            }
-#elif NET7_0_OR_GREATER
             foreach (string? value in values)
             {
                 if (value is null) {
@@ -210,7 +194,6 @@ namespace NSign.AspNetCore
                     yield return new KeyValuePair<string, string>(match!.Groups[1].Value, match!.Groups[2].Value);
                 }
             }
-#endif
         }
 
         /// <summary>

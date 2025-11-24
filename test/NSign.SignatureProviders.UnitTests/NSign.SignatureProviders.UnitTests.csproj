@@ -19,7 +19,14 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Label="netstandard target" Condition="'$(TestTargetsNetStandard)' == 'true'">
+    <!-- Set the library project reference to target the designated netstandard target -->
+    <ProjectReference Include="..\..\src\NSign.SignatureProviders\NSign.SignatureProviders.csproj">
+      <SetTargetFramework>TargetFramework=$(NetStandardTarget)</SetTargetFramework>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup Label="netX targets" Condition="'$(TestTargetsNetStandard)' != 'true'">
     <ProjectReference Include="..\..\src\NSign.SignatureProviders\NSign.SignatureProviders.csproj" />
   </ItemGroup>
 
