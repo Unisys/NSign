@@ -31,14 +31,14 @@ builder.Services
         };
     })
     .AddSignatureVerification(
-        new RsaPssSha512SignatureProvider(new X509Certificate2(@"examples.nsign.local.cer"), "examples.nsign.local"))
+        new RsaPssSha512SignatureProvider(
+            X509CertificateLoader.LoadCertificateFromFile(@"examples.nsign.local.cer"),
+            "examples.nsign.local"))
     .AddContentDigestVerification()
     ;
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
-app.UseAuthorization();
 app.UseWhen(ctx => ctx.Request.Path.StartsWithSegments("/webhooks"), ValidateSignatureAndDigest);
 app.MapControllers();
 

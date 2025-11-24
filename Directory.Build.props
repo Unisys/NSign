@@ -1,21 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project>
   <PropertyGroup>
-    <DotnetLatestLtsVersion>8.0</DotnetLatestLtsVersion>
-    <SupportedDotnetVersions>net8.0;net9.0</SupportedDotnetVersions>
-    <LibraryTargetFrameworks>netstandard2.0;$(SupportedDotnetVersions)</LibraryTargetFrameworks>
+    <DotnetLatestLtsVersion>10.0</DotnetLatestLtsVersion>
+    <NetStandardTarget>netstandard2.0</NetStandardTarget>
+    <SupportedDotnetVersions>net8.0;net9.0;net10.0</SupportedDotnetVersions>
+    <LibraryTargetFrameworks>$(NetStandardTarget);$(SupportedDotnetVersions)</LibraryTargetFrameworks>
     <AspNetCoreTargetFrameworks>$(SupportedDotnetVersions)</AspNetCoreTargetFrameworks>
     <TestTargetFrameworks>$(SupportedDotnetVersions)</TestTargetFrameworks>
+    <!-- Use the following target framework to test the netstandard targeted versions of the libraries -->
+    <NetStandardTestTargetFramework>net9.0</NetStandardTestTargetFramework>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <Nullable>enable</Nullable>
-    <LangVersion>9.0</LangVersion>
+  </PropertyGroup>
+
+  <!-- The following property group must be in-sync with the target framework designated for
+    testing netstandard -->
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(NetStandardTestTargetFramework)'">
+    <TestTargetsNetStandard>true</TestTargetsNetStandard>
+    <DefineConstants>$(DefineConstants);TestTargetsNetStandard</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Label="SystemDependencyVersions">
-    <!-- Use 8.0.x assemblies as the minimum for dependencies also for netstandard2.0 -->
-    <SystemDependencyVersionWildcard>8.0.*</SystemDependencyVersionWildcard>
+    <SystemDependencyVersionWildcard Condition="'$(TargetFramework)' == '$(NetStandardTarget)'">8.0.*</SystemDependencyVersionWildcard>
     <SystemDependencyVersionWildcard Condition="'$(TargetFramework)' == 'net8.0'">8.0.*</SystemDependencyVersionWildcard>
     <SystemDependencyVersionWildcard Condition="'$(TargetFramework)' == 'net9.0'">9.0.*</SystemDependencyVersionWildcard>
+    <SystemDependencyVersionWildcard Condition="'$(TargetFramework)' == 'net10.0'">10.0.*</SystemDependencyVersionWildcard>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -40,6 +49,6 @@
 
   <ItemGroup Label="NuSpec" Condition="$(IsPackable) == 'true'">
     <None Include="..\..\icon.png" Pack="true" PackagePath="\" Visible="false" />
-    <None Include="README.md" Pack="true" PackagePath="\"/>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Net.Http.Json" Version="$(SystemDependencyVersionWildcard)" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
     <PackageReference Include="Moq" Version="4.*" />
     <PackageReference Include="xunit" Version="2.*" />
@@ -20,7 +19,14 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Label="netstandard target" Condition="'$(TestTargetsNetStandard)' == 'true'">
+    <!-- Set the library project reference to target the designated netstandard target -->
+    <ProjectReference Include="..\..\src\NSign.Client\NSign.Client.csproj">
+      <SetTargetFramework>TargetFramework=$(NetStandardTarget)</SetTargetFramework>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup Label="netX targets" Condition="'$(TestTargetsNetStandard)' != 'true'">
     <ProjectReference Include="..\..\src\NSign.Client\NSign.Client.csproj" />
   </ItemGroup>
 </Project>
