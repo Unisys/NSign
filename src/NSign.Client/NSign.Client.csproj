@@ -19,7 +19,7 @@ See also: https://datatracker.ietf.org/doc/rfc9421/
     <PackageReference Include="Microsoft.Extensions.Options" Version="$(SystemDependencyVersionWildcard)" />
     <PackageReference Include="System.Collections.Immutable" Version="$(SystemDependencyVersionWildcard)" />
     <PackageReference Include="System.IO.Pipelines" Version="$(SystemDependencyVersionWildcard)" />
-    <PackageReference Include="StructuredFieldValues" Version="0.*" />
+    <PackageReference Include="StructuredFieldValues" Version="$(StructuredFieldValuesVersionWildcard)" />
   </ItemGroup>
 
   <ItemGroup>

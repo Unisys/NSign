@@ -15,7 +15,7 @@ See also: https://datatracker.ietf.org/doc/rfc9421/</PackageDescription>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(SystemDependencyVersionWildcard)" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="$(SystemDependencyVersionWildcard)" />
     <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="$(SystemDependencyVersionWildcard)" />
-    <PackageReference Include="StructuredFieldValues" Version="0.*" />
+    <PackageReference Include="StructuredFieldValues" Version="$(StructuredFieldValuesVersionWildcard)" />
     <PackageReference Include="System.Collections.Immutable" Version="$(SystemDependencyVersionWildcard)" />
   </ItemGroup>
 
