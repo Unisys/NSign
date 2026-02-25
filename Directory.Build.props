@@ -27,6 +27,18 @@
     <SystemDependencyVersionWildcard Condition="'$(TargetFramework)' == 'net10.0'">10.0.*</SystemDependencyVersionWildcard>
   </PropertyGroup>
 
+  <PropertyGroup Label="TestDependencyVersions">
+    <StructuredFieldValuesVersionWildcard>0.*</StructuredFieldValuesVersionWildcard>
+  </PropertyGroup>
+
+  <PropertyGroup Label="TestDependencyVersions">
+    <MicrosoftNetTestSdkVersionWildcard>18.*</MicrosoftNetTestSdkVersionWildcard>
+    <MoqVersionWildcard>4.*</MoqVersionWildcard>
+    <XunitVersionWildcard>2.*</XunitVersionWildcard>
+    <XunitRunnerVisualStudioVersionWildcard>3.*</XunitRunnerVisualStudioVersionWildcard>
+    <CoverletCollectorVersionWildcard>8.*</CoverletCollectorVersionWildcard>
+  </PropertyGroup>
+
   <PropertyGroup>
     <Authors>Unify Square (a Unisys company)</Authors>
     <Product>NSign</Product>

@@ -25,7 +25,7 @@ See also: https://datatracker.ietf.org/doc/rfc9421/</PackageDescription>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="StructuredFieldValues" Version="0.*" />
+    <PackageReference Include="StructuredFieldValues" Version="$(StructuredFieldValuesVersionWildcard)" />
   </ItemGroup>
 
   <ItemGroup>

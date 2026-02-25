@@ -2,5 +2,5 @@
 
 public sealed class OutboundCallOptions
 {
-    public string TargetEndpoint { get; set; } = null!;
+    public required string TargetEndpoint { get; set; }
 }
