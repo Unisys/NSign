@@ -16,6 +16,7 @@ jobs:
         dotnet-version: |
             8.0.x
             9.0.x
+            10.0.x
 
     - name: Restore dependencies
       run: dotnet restore
@@ -33,9 +34,9 @@ jobs:
         assemblyfilters: -*UnitTests*
 
     - name: Upload to Coveralls
-      uses: coverallsapp/github-action@master
+      uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         path-to-lcov: coverage/report/lcov.info
         flag-name: Unit
-        fail-on-error: false
+        fail-on-error: 'false'
