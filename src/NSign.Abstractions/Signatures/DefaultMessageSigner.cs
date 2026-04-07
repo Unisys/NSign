@@ -79,8 +79,13 @@ namespace NSign.Signatures
                 string? method = context.GetDerivedComponentValue(SignatureComponent.Method);
                 string? url = context.GetDerivedComponentValue(SignatureComponent.RequestTarget);
 
-                logger.LogDebug("Using signature-input '{input}' for signature '{sig}' of {type} '{method} {url}'.",
-                    sigInput, inputSpec.Name, messageType, method, url);
+                logger.LogDebug(
+                    "Using signature-input '{input}' for signature '{sig}' of {type} '{method} {url}'.",
+                    sigInput,
+                    inputSpec.Name,
+                    messageType,
+                    method.SanitizeBasicForLog(),
+                    url.SanitizeBasicForLog());
             }
 
             // It's time to add the 'signature-input' and 'signature' headers.
