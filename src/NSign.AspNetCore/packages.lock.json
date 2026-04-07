@@ -5,8 +5,8 @@
       "StructuredFieldValues": {
         "type": "Direct",
         "requested": "[0.*, )",
-        "resolved": "0.7.6",
-        "contentHash": "4cz+5Oxeb8pN19k0XqaACJYXwMAn25wxRw0h1KL+hcAXOAxGl9ArH7Jx0y3FyPao2VxSAbj0UJUkE8/i8XReoA=="
+        "resolved": "0.7.7",
+        "contentHash": "eqrFBXmowuor0M6KLjbkm8tfjADW9Jqy2rQi+SUrNkwU/AuDVHgHLAWmRhHiYVhq57QYzZNmdyKnsYWJTW0d/g=="
       },
       "nsign.abstractions": {
         "type": "Project",
@@ -19,8 +19,8 @@
       "StructuredFieldValues": {
         "type": "Direct",
         "requested": "[0.*, )",
-        "resolved": "0.7.6",
-        "contentHash": "4cz+5Oxeb8pN19k0XqaACJYXwMAn25wxRw0h1KL+hcAXOAxGl9ArH7Jx0y3FyPao2VxSAbj0UJUkE8/i8XReoA=="
+        "resolved": "0.7.7",
+        "contentHash": "eqrFBXmowuor0M6KLjbkm8tfjADW9Jqy2rQi+SUrNkwU/AuDVHgHLAWmRhHiYVhq57QYzZNmdyKnsYWJTW0d/g=="
       },
       "nsign.abstractions": {
         "type": "Project",
@@ -33,8 +33,8 @@
       "StructuredFieldValues": {
         "type": "Direct",
         "requested": "[0.*, )",
-        "resolved": "0.7.6",
-        "contentHash": "4cz+5Oxeb8pN19k0XqaACJYXwMAn25wxRw0h1KL+hcAXOAxGl9ArH7Jx0y3FyPao2VxSAbj0UJUkE8/i8XReoA=="
+        "resolved": "0.7.7",
+        "contentHash": "eqrFBXmowuor0M6KLjbkm8tfjADW9Jqy2rQi+SUrNkwU/AuDVHgHLAWmRhHiYVhq57QYzZNmdyKnsYWJTW0d/g=="
       },
       "nsign.abstractions": {
         "type": "Project",
