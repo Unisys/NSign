@@ -31,7 +31,7 @@ jobs:
     - name: Generate lcov
       uses: danielpalme/ReportGenerator-GitHub-Action@5
       with:
-        reports: coverage/temp/**/coverage.cobertura.xml
+        reports: coverage/temp/**/coverage.cobertura.*.xml
         targetdir: coverage/report/
         reporttypes: lcov
         assemblyfilters: -*UnitTests*
