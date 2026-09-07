@@ -6,14 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="coverlet.MTP" Version="$(CoverletCollectorVersionWildcard)" />
+    <PackageReference Include="Microsoft.Bcl.Cryptography" Version="10.*" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNetTestSdkVersionWildcard)" />
     <PackageReference Include="Moq" Version="$(MoqVersionWildcard)" />
     <PackageReference Include="xunit.v3" Version="$(XunitVersionWildcard)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualStudioVersionWildcard)">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="coverlet.collector" Version="$(CoverletCollectorVersionWildcard)">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

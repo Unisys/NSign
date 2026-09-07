@@ -22,7 +22,7 @@ fi
 
 find $BASE -iname $TEST_PROJECT_PATTERN \
     -exec dotnet test "{}" $TEST_PARAMS \
-        --collect:'XPlat Code Coverage;Format=opencover' \
+        --coverlet \
         --results-directory $TEMP_RESULTS_DIR \;
 
 reportgenerator \

@@ -13,7 +13,7 @@ Remove-Item -Recurse $tempResultsDir -EA SilentlyContinue
 
 Get-ChildItem -Path $base -Recurse -Filter $TestProjectPattern -Directory -Name |
     ForEach-Object {
-        dotnet test "$base/$_" $TestParams --collect:'XPlat Code Coverage' --results-directory $tempResultsDir
+        dotnet test "$base/$_" $TestParams --coverlet --results-directory $tempResultsDir
     }
 
 reportgenerator -reports:"$tempResultsDir/**/coverage.cobertura.xml" -reporttypes:'Html;Cobertura' `
