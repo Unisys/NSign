@@ -27,16 +27,16 @@
     <SystemDependencyVersionWildcard Condition="'$(TargetFramework)' == 'net10.0'">10.0.*</SystemDependencyVersionWildcard>
   </PropertyGroup>
 
-  <PropertyGroup Label="TestDependencyVersions">
+  <PropertyGroup Label="ExternalDependencyVersions">
     <StructuredFieldValuesVersionWildcard>0.*</StructuredFieldValuesVersionWildcard>
   </PropertyGroup>
 
   <PropertyGroup Label="TestDependencyVersions">
     <MicrosoftNetTestSdkVersionWildcard>18.*</MicrosoftNetTestSdkVersionWildcard>
     <MoqVersionWildcard>4.*</MoqVersionWildcard>
-    <XunitVersionWildcard>2.*</XunitVersionWildcard>
-    <XunitRunnerVisualStudioVersionWildcard>3.*</XunitRunnerVisualStudioVersionWildcard>
-    <CoverletCollectorVersionWildcard>8.*</CoverletCollectorVersionWildcard>
+    <XunitVersionWildcard>4.*</XunitVersionWildcard>
+    <XunitRunnerVisualStudioVersionWildcard>4.*</XunitRunnerVisualStudioVersionWildcard>
+    <CoverletCollectorVersionWildcard>10.*</CoverletCollectorVersionWildcard>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -34,7 +34,7 @@ namespace NSign.BouncyCastle.Providers
                 GetKeys("ed25519.nsign.test.local");
             EdDsaEdwards25519SignatureProvider provider = new EdDsaEdwards25519SignatureProvider(publicKey, "test-key-id");
             InvalidOperationException ex = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => provider.SignAsync(new byte[] { }, default));
+                () => provider.SignAsync(new byte[] { }, TestContext.Current.CancellationToken));
 
             Assert.Equal("Cannot sign without a private key. Please make sure the provider is created with a valid private key.", ex.Message);
         }
@@ -130,10 +130,9 @@ namespace NSign.BouncyCastle.Providers
                 "\"content-type\": application/json\n" +
                 "\"content-length\": 18\n" +
                 "\"@signature-params\": " + rawSigParams;
-            SignatureParamsComponent sigParams = new SignatureParamsComponent(rawSigParams);
-
             byte[] rawInput = Encoding.ASCII.GetBytes(input);
-            ReadOnlyMemory<byte> rawSignature = await provider.SignAsync(rawInput, default);
+            ReadOnlyMemory<byte> rawSignature = await provider.SignAsync(
+                rawInput, TestContext.Current.CancellationToken);
 
             string signatureBase64 = Convert.ToBase64String(rawSignature.Span);
             Assert.Equal("wqcAqbmYJ2ji2glfAMaRy4gruYYnx2nEFN2HN6jrnDnQCK1u02Gb04v9EDgwUPiu4A0w6vuQv5lIp5WPpBKRCw==", signatureBase64);
@@ -160,7 +159,7 @@ namespace NSign.BouncyCastle.Providers
                 sigParams,
                 Encoding.ASCII.GetBytes(input),
                 Convert.FromBase64String("wqcAqbmYJ2ji2glfAMaRy4gruYYnx2nEFN2HN6jrnDnQCK1u02Gb04v9EDgwUPiu4A0w6vuQv5lIp5WPpBKRCw=="),
-                default);
+                TestContext.Current.CancellationToken);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
@@ -176,10 +175,9 @@ namespace NSign.BouncyCastle.Providers
                 "\"@authority\": example.org\n" +
                 "\"accept\": application/json, */*\n" +
                 "\"@signature-params\": " + rawSigParams;
-            SignatureParamsComponent sigParams = new SignatureParamsComponent(rawSigParams);
-
             byte[] rawInput = Encoding.ASCII.GetBytes(input);
-            ReadOnlyMemory<byte> rawSignature = await provider.SignAsync(rawInput, default);
+            ReadOnlyMemory<byte> rawSignature = await provider.SignAsync(
+                rawInput, TestContext.Current.CancellationToken);
 
             string signatureBase64 = Convert.ToBase64String(rawSignature.Span);
             Assert.Equal("ZT1kooQsEHpZ0I1IjCqtQppOmIqlJPeo7DHR3SoMn0s5JZ1eRGS0A+vyYP9t/LXlh5QMFFQ6cpLt2m0pmj3NDA==", signatureBase64);
@@ -203,7 +201,7 @@ namespace NSign.BouncyCastle.Providers
                 sigParams,
                 Encoding.ASCII.GetBytes(input),
                 Convert.FromBase64String("ZT1kooQsEHpZ0I1IjCqtQppOmIqlJPeo7DHR3SoMn0s5JZ1eRGS0A+vyYP9t/LXlh5QMFFQ6cpLt2m0pmj3NDA=="),
-                default);
+                TestContext.Current.CancellationToken);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
@@ -229,7 +227,10 @@ MCowBQYDK2VwAyEAJrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=
             return (Ed25519PublicKeyParameters)reader.ReadObject();
         }
 
-        private (Ed25519PrivateKeyParameters? privateKey, Ed25519PublicKeyParameters publicKey) GetKeys(string pemBasePath)
+        private static (
+            Ed25519PrivateKeyParameters? privateKey,
+            Ed25519PublicKeyParameters publicKey
+            ) GetKeys(string pemBasePath)
         {
             Ed25519PrivateKeyParameters priv;
             Ed25519PublicKeyParameters pub;

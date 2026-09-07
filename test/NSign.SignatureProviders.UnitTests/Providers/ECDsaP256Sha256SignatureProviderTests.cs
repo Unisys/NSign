@@ -34,7 +34,7 @@ namespace NSign.Providers
                 sigParams,
                 Encoding.ASCII.GetBytes(input),
                 Convert.FromBase64String("JqzXLIjNd6VWVg/M7enbjWkOgsPmIK9vcoFQEkLD0SXNbFjR6d+olsof1dv7xC7ygF1q0YKjVrbV2QlCpDxrHg=="),
-                default);
+                TestContext.Current.CancellationToken);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
@@ -60,7 +60,7 @@ namespace NSign.Providers
                 sigParams,
                 Encoding.ASCII.GetBytes(input),
                 Convert.FromBase64String("hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g=="),
-                default);
+                TestContext.Current.CancellationToken);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
@@ -84,7 +84,7 @@ namespace NSign.Providers
                 sigParams,
                 Encoding.ASCII.GetBytes(input),
                 Convert.FromBase64String("0Ry6HsvzS5VmA6HlfBYS/fYYeNs7fYuA7s0tAdxfUlPGv0CSVuwrrzBOjcCFHTxVRJ01wjvSzM2BetJauj8dsw=="),
-                default);
+                TestContext.Current.CancellationToken);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
@@ -109,7 +109,7 @@ namespace NSign.Providers
                 sigParams,
                 Encoding.ASCII.GetBytes(input),
                 Convert.FromBase64String("xVMHVpawaAC/0SbHrKRs9i8I3eOs5RtTMGCWXm/9nvZzoHsIg6Mce9315T6xoklyy0yzhD9ah4JHRwMLOgmizw=="),
-                default);
+                TestContext.Current.CancellationToken);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
@@ -136,7 +136,7 @@ namespace NSign.Providers
                 sigParams,
                 Encoding.ASCII.GetBytes(input),
                 Convert.FromBase64String("9MG6AOgykOZTc/h2rnDc/g8L+/aXgdkV4hNDvpCxfbVrmLevWPfyvEC/8jBh+3XnVwBqqcJyhUXoFgWv1SMI7A=="),
-                default);
+                TestContext.Current.CancellationToken);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
@@ -166,7 +166,7 @@ namespace NSign.Providers
                 sigParams,
                 Encoding.ASCII.GetBytes(input),
                 Convert.FromBase64String("zU7zd1MN56WapeNxfVNleCx5rFxBhBcZngnX4d+MurOk3tNu3rFfTFnwhglZH8qNBoygvhVMfQq9wIvLqyVNog=="),
-                default);
+                TestContext.Current.CancellationToken);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
@@ -193,7 +193,7 @@ namespace NSign.Providers
                 sigParams,
                 Encoding.ASCII.GetBytes(input),
                 Convert.FromBase64String("dMT/A/76ehrdBTD/2Xx8QuKV6FoyzEP/I9hdzKN8LQJLNgzU4W767HK05rx1i8meNQQgQPgQp8wq2ive3tV5Ag=="),
-                default);
+                TestContext.Current.CancellationToken);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
@@ -223,7 +223,7 @@ namespace NSign.Providers
                 sigParams,
                 Encoding.ASCII.GetBytes(input),
                 Convert.FromBase64String("C73J41GVKc+TYXbSobvZf0CmNcptRiWN+NY1Or0A36ISg6ymdRN6ZgR2QfrtopFNzqAyv+CeWrMsNbcV2Ojsgg=="),
-                default);
+                TestContext.Current.CancellationToken);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
@@ -249,7 +249,7 @@ namespace NSign.Providers
                 sigParams,
                 Encoding.ASCII.GetBytes(input),
                 Convert.FromBase64String("X5spyd6CFnAG5QnDyHfqoSNICd+BUP4LYMz2Q0JXlb//4Ijpzp+kve2w4NIyqeAuM7jTDX+sNalzA8ESSaHD3A=="),
-                default);
+                TestContext.Current.CancellationToken);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
