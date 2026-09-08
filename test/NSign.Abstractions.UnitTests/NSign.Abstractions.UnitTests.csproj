@@ -4,20 +4,14 @@
     <IsPackable>false</IsPackable>
     <RootNamespace>NSign</RootNamespace>
     <NoWarn>0618</NoWarn>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNetTestSdkVersionWildcard)" />
+    <PackageReference Include="coverlet.collector" Version="$(CoverletCollectorVersionWildcard)" />
+    <PackageReference Include="coverlet.MTP" Version="$(CoverletCollectorVersionWildcard)" />
     <PackageReference Include="Moq" Version="$(MoqVersionWildcard)" />
-    <PackageReference Include="xunit" Version="$(XunitVersionWildcard)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualStudioVersionWildcard)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="coverlet.collector" Version="$(CoverletCollectorVersionWildcard)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="xunit.v3" Version="$(XunitVersionWildcard)" />
   </ItemGroup>
 
   <ItemGroup Label="netstandard target" Condition="'$(TestTargetsNetStandard)' == 'true'">

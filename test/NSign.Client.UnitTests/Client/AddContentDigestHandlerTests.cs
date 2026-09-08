@@ -24,9 +24,9 @@ namespace NSign.Client
 
         public AddContentDigestHandlerTests()
         {
-            mockInnerHandler.Protected().Setup("Dispose", ItExpr.Is<bool>(d => d == true));
+            mockInnerHandler.Protected().Setup("Dispose", ItExpr.Is<bool>(d => d));
 
-            options.WithHash(AddContentDigestOptions.Hash.Sha256).WithHash(AddContentDigestOptions.Hash.Sha512);
+            options.WithHash(Hash.Sha256).WithHash(Hash.Sha512);
 
             handler = new AddContentDigestHandler(new OptionsWrapper<AddContentDigestOptions>(options))
             {
@@ -43,10 +43,11 @@ namespace NSign.Client
 
             mockInnerHandler.Protected().Setup<Task<HttpResponseMessage>>("SendAsync",
                 ItExpr.Is<HttpRequestMessage>(r => r == request && !r.Headers.Contains("digest") && !r.Headers.Contains("content-digest")),
-                ItExpr.Is<CancellationToken>(c => c == CancellationToken.None))
+                ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(response);
 
-            Assert.Same(response, await invoker.SendAsync(request, default));
+            Assert.Same(response, await invoker.SendAsync(
+                request, TestContext.Current.CancellationToken));
 
             mockInnerHandler.Protected().Verify<Task<HttpResponseMessage>>(
                 "SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
@@ -100,10 +101,11 @@ namespace NSign.Client
 
             mockInnerHandler.Protected().Setup<Task<HttpResponseMessage>>("SendAsync",
                 ItExpr.Is<HttpRequestMessage>(r => r == request && VerifyDigestHeader(r, expectedValue)),
-                ItExpr.Is<CancellationToken>(c => c == CancellationToken.None))
+                ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(response);
 
-            Assert.Same(response, await invoker.SendAsync(request, default));
+            Assert.Same(response, await invoker.SendAsync(
+                request, TestContext.Current.CancellationToken));
 
             mockInnerHandler.Protected().Verify<Task<HttpResponseMessage>>(
                 "SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
@@ -137,10 +139,11 @@ namespace NSign.Client
 
             mockInnerHandler.Protected().Setup<Task<HttpResponseMessage>>("SendAsync",
                 ItExpr.Is<HttpRequestMessage>(r => r == request && VerifyDigestHeader(r, expectedValue1, expectedValue2)),
-                ItExpr.Is<CancellationToken>(c => c == CancellationToken.None))
+                ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(response);
 
-            Assert.Same(response, await invoker.SendAsync(request, default));
+            Assert.Same(response, await invoker.SendAsync(
+                request, TestContext.Current.CancellationToken));
 
             mockInnerHandler.Protected().Verify<Task<HttpResponseMessage>>(
                 "SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
@@ -159,7 +162,8 @@ namespace NSign.Client
             options.Hashes.Clear();
             options.WithHash(hash);
 
-            NotSupportedException ex = await Assert.ThrowsAsync<NotSupportedException>(() => invoker.SendAsync(request, default));
+            NotSupportedException ex = await Assert.ThrowsAsync<NotSupportedException>(
+                () => invoker.SendAsync(request, TestContext.Current.CancellationToken));
             Assert.Equal($"Hash algorithm '{hash}' is not supported.", ex.Message);
         }
 

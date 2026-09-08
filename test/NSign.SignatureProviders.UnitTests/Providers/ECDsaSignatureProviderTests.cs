@@ -24,7 +24,8 @@ namespace NSign.Providers
         {
             TestECDsa provider = Make(false);
             InvalidOperationException ex = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => provider.SignAsync(new byte[] { }, default));
+                () => provider.SignAsync(
+                    new byte[] { }, TestContext.Current.CancellationToken));
 
             Assert.Equal("Cannot sign using a certificate without a private key.", ex.Message);
         }

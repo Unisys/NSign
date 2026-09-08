@@ -26,7 +26,8 @@ namespace NSign.Providers
                 "\"forwarded\": for=192.0.2.123\n" +
                 "\"@signature-params\": (\"signature\";key=\"sig1\" \"forwarded\");created=1618884480;expires=1618884540;keyid=\"test-key-rsa\";alg=\"rsa-v1_5-sha256\"";
 
-            ReadOnlyMemory<byte> signature = await provider.SignAsync(Encoding.ASCII.GetBytes(input), default);
+            ReadOnlyMemory<byte> signature = await provider.SignAsync(
+                Encoding.ASCII.GetBytes(input), TestContext.Current.CancellationToken);
             string sigBase64 = Convert.ToBase64String(signature.Span);
             Assert.Equal(
                 "G1WLTL4/9PGSKEQbSAMypZNk+I2dpLJ6qvl2JISahlP31OO/QEUd8/HdO2O7vYLi5k3JIiAK3UPK4U+kvJZyIUidsiXlzRI+Y2se3SGo0D8dLfhG95bKr6ukYXl60QHpsGRTfSiwdtvYKXGpKNrMlISJYd+oGrGRyI9gbCy0aFhc6I/okIMLeK4g9PgzpC3YTwhUQ98KIBNLWHgREfBgJxjPbxFlsgJ9ykPviLj8GKJ81HwsK3XM9P7WaS7fMGOt8h1kSqgkZQB9YqiIo+WhHvJa7iPy8QrYFKzx9BBEY6AwfStZAsXXz3LobZseyxsYcLJLs8rY0wVA9NPsxKrHGA==",
@@ -49,7 +50,7 @@ namespace NSign.Providers
                 sigParams,
                 Encoding.ASCII.GetBytes(input),
                 Convert.FromBase64String("G1WLTL4/9PGSKEQbSAMypZNk+I2dpLJ6qvl2JISahlP31OO/QEUd8/HdO2O7vYLi5k3JIiAK3UPK4U+kvJZyIUidsiXlzRI+Y2se3SGo0D8dLfhG95bKr6ukYXl60QHpsGRTfSiwdtvYKXGpKNrMlISJYd+oGrGRyI9gbCy0aFhc6I/okIMLeK4g9PgzpC3YTwhUQ98KIBNLWHgREfBgJxjPbxFlsgJ9ykPviLj8GKJ81HwsK3XM9P7WaS7fMGOt8h1kSqgkZQB9YqiIo+WhHvJa7iPy8QrYFKzx9BBEY6AwfStZAsXXz3LobZseyxsYcLJLs8rY0wVA9NPsxKrHGA=="),
-                default);
+                TestContext.Current.CancellationToken);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
@@ -64,7 +65,8 @@ namespace NSign.Providers
                 "\"forwarded\": for=192.0.2.123\n" +
                 "\"@signature-params\": (\"signature\";key=\"sig1\" \"@authority\" \"forwarded\");created=1618884480;keyid=\"test-key-rsa\";alg=\"rsa-v1_5-sha256\";expires=1618884540";
 
-            ReadOnlyMemory<byte> signature = await provider.SignAsync(Encoding.ASCII.GetBytes(input), default);
+            ReadOnlyMemory<byte> signature = await provider.SignAsync(
+                Encoding.ASCII.GetBytes(input), TestContext.Current.CancellationToken);
             string sigBase64 = Convert.ToBase64String(signature.Span);
             Assert.Equal(
                 "YvYVO11F+Q+N4WZNeBdjFKluswwE3vQ4cTXpBwEiMz2hwu0J+wSJLRhHlIZ1N83epfnKDxY9cbNaVlbtr2UOLkw5O5Q5M5yrjx3s1mgDOsV7fuItD6iDyNISCiKRuevl+M+TyYBo10ubG83As5CeeoUdmrtI4G6QX7RqEeX0Xj/CYofHljr/dVzARxskjHEQbTztYVg4WD+LWo1zjx9w5fw26tsOMagfXLpDb4zb4/lgpgyNKoXFwG7c89KId5q+0BC+kryWuA35ZcQGaRPAz/NqzeKq/c7p7b/fmHS71fy1jOaFgWFmD+Z77bJLO8AVKuF0y2fpL3KUYHyITQHOsA==",
@@ -89,7 +91,7 @@ namespace NSign.Providers
                 Encoding.ASCII.GetBytes(input),
                 Convert.FromBase64String(
                     "YvYVO11F+Q+N4WZNeBdjFKluswwE3vQ4cTXpBwEiMz2hwu0J+wSJLRhHlIZ1N83epfnKDxY9cbNaVlbtr2UOLkw5O5Q5M5yrjx3s1mgDOsV7fuItD6iDyNISCiKRuevl+M+TyYBo10ubG83As5CeeoUdmrtI4G6QX7RqEeX0Xj/CYofHljr/dVzARxskjHEQbTztYVg4WD+LWo1zjx9w5fw26tsOMagfXLpDb4zb4/lgpgyNKoXFwG7c89KId5q+0BC+kryWuA35ZcQGaRPAz/NqzeKq/c7p7b/fmHS71fy1jOaFgWFmD+Z77bJLO8AVKuF0y2fpL3KUYHyITQHOsA=="),
-                default);
+                TestContext.Current.CancellationToken);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
@@ -109,7 +111,7 @@ namespace NSign.Providers
                 sigParams,
                 Encoding.ASCII.GetBytes(input),
                 Convert.FromBase64String("G1WLTL4/9PGSKEQbSAMypZNk+I2dpLJ6qvl2JISahlP31OO/QEUd8/HdO2O7vYLi5k3JIiAK3UPK4U+kvJZyIUidsiXlzRI+Y2se3SGo0D8dLfhG95bKr6ukYXl60QHpsGRTfSiwdtvYKXGpKNrMlISJYd+oGrGRyI9gbCy0aFhc6I/okIMLeK4g9PgzpC3YTwhUQ98KIBNLWHgREfBgJxjPbxFlsgJ9ykPviLj8GKJ81HwsK3XM9P7WaS7fMGOt8h1kSqgkZQB9YqiIo+WhHvJa7iPy8QrYFKzx9BBEY6AwfStZAsXXz3LobZseyxsYcLJLs8rY0wVA9NPsxKrHGA=="),
-                default);
+                TestContext.Current.CancellationToken);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
@@ -128,7 +130,8 @@ namespace NSign.Providers
                 "\"forwarded\": for=192.0.2.123;host=example.com;proto=https\n" +
                 "\"@signature-params\": (\"@method\" \"@authority\" \"@path\" \"content-digest\" \"content-type\" \"content-length\" \"forwarded\");created=1618884480;keyid=\"test-key-rsa\";alg=\"rsa-v1_5-sha256\";expires=1618884540";
 
-            ReadOnlyMemory<byte> signature = await provider.SignAsync(Encoding.ASCII.GetBytes(input), default);
+            ReadOnlyMemory<byte> signature = await provider.SignAsync(
+                Encoding.ASCII.GetBytes(input), TestContext.Current.CancellationToken);
             string sigBase64 = Convert.ToBase64String(signature.Span);
             Assert.Equal(
                 "S6ZzPXSdAMOPjN/6KXfXWNO/f7V6cHm7BXYUh3YD/fRad4BCaRZxP+JH+8XY1I6+8Cy+CM5g92iHgxtRPz+MjniOaYmdkDcnL9cCpXJleXsOckpURl49GwiyUpZ10KHgOEe11sx3G2gxI8S0jnxQB+Pu68U9vVcasqOWAEObtNKKZd8tSFu7LB5YAv0RAGhB8tmpv7sFnIm9y+7X5kXQfi8NMaZaA8i2ZHwpBdg7a6CMfwnnrtflzvZdXAsD3LH2TwevU+/PBPv0B6NMNk93wUs/vfJvye+YuI87HU38lZHowtznbLVdp770I6VHR6WfgS9ddzirrswsE1w5o0LV/g==",
@@ -156,7 +159,7 @@ namespace NSign.Providers
                 sigParams,
                 Encoding.ASCII.GetBytes(input),
                 Convert.FromBase64String("S6ZzPXSdAMOPjN/6KXfXWNO/f7V6cHm7BXYUh3YD/fRad4BCaRZxP+JH+8XY1I6+8Cy+CM5g92iHgxtRPz+MjniOaYmdkDcnL9cCpXJleXsOckpURl49GwiyUpZ10KHgOEe11sx3G2gxI8S0jnxQB+Pu68U9vVcasqOWAEObtNKKZd8tSFu7LB5YAv0RAGhB8tmpv7sFnIm9y+7X5kXQfi8NMaZaA8i2ZHwpBdg7a6CMfwnnrtflzvZdXAsD3LH2TwevU+/PBPv0B6NMNk93wUs/vfJvye+YuI87HU38lZHowtznbLVdp770I6VHR6WfgS9ddzirrswsE1w5o0LV/g=="),
-                default);
+                TestContext.Current.CancellationToken);
             Assert.Equal(VerificationResult.SuccessfullyVerified, result);
         }
 
