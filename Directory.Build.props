@@ -32,10 +32,8 @@
   </PropertyGroup>
 
   <PropertyGroup Label="TestDependencyVersions">
-    <MicrosoftNetTestSdkVersionWildcard>18.*</MicrosoftNetTestSdkVersionWildcard>
     <MoqVersionWildcard>4.*</MoqVersionWildcard>
     <XunitVersionWildcard>4.*</XunitVersionWildcard>
-    <XunitRunnerVisualStudioVersionWildcard>4.*</XunitRunnerVisualStudioVersionWildcard>
     <CoverletCollectorVersionWildcard>10.*</CoverletCollectorVersionWildcard>
   </PropertyGroup>
 

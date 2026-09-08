@@ -6,7 +6,7 @@ TEMP_RESULTS_DIR="$COVERAGE_DIR/temp"
 HISTORY_DIR="$COVERAGE_DIR/history"
 
 TEST_PROJECT_PATTERN=${TEST_PROJECT_PATTERN-'*.UnitTests.csproj'}
-TEST_PARAMS=${TEST_PARAMS-"--nologo --no-restore"}
+TEST_PARAMS=${TEST_PARAMS-"--no-restore"}
 GENERATOR_PARAMS=${GENERATOR_PARAMS-"-filefilters:-*.g.cs"}
 
 rm -rf $TEMP_RESULTS_DIR || true
@@ -26,10 +26,10 @@ find $BASE -iname $TEST_PROJECT_PATTERN \
         --results-directory $TEMP_RESULTS_DIR \;
 
 reportgenerator \
-    -reports:"$TEMP_RESULTS_DIR/**/coverage.opencover.xml" \
+    -reports:"$TEMP_RESULTS_DIR/**/coverage.cobertura*.xml" \
     -reporttypes:'Html;Cobertura' \
     -targetdir:"$COVERAGE_DIR" \
-    -assemblyfilters:"-$TEST_PROJECT_PATTERN" \
+    -assemblyfilters:"-Moq;-StructuredFieldValues;-$TEST_PROJECT_PATTERN" \
     -verbosity:Warning \
     -historydir:"$HISTORY_DIR" \
     "$GENERATOR_PARAMS"

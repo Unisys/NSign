@@ -34,7 +34,7 @@ jobs:
         reports: coverage/temp/**/coverage.cobertura.*.xml
         targetdir: coverage/report/
         reporttypes: lcov
-        assemblyfilters: -*UnitTests*
+        assemblyfilters: -Moq;-StructuredFieldValues;-*UnitTests*
 
     - name: Upload to Coveralls
       uses: coverallsapp/github-action@v2
