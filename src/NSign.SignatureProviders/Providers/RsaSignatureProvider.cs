@@ -23,7 +23,7 @@ namespace NSign.Providers
         private readonly RSA publicKey;
 
         /// <summary>
-        /// The name of the symmetric signature algorithm provided by this instance.
+        /// The name of the asymmetric signature algorithm provided by this instance.
         /// </summary>
         private readonly string algorithmName;
 

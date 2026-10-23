@@ -34,7 +34,7 @@ namespace NSign.AspNetCore
         public int MissingSignatureResponseStatus { get; set; } = 400;
 
         /// <summary>
-        /// Gest or sets the status code to use when errors/issues with signature inputs were encountered. Defaults to
+        /// Gets or sets the status code to use when errors/issues with signature inputs were encountered. Defaults to
         /// <c>400 (Bad Request)</c>.
         /// </summary>
         public int SignatureInputErrorResponseStatus { get; set; } = 400;
@@ -103,7 +103,7 @@ namespace NSign.AspNetCore
 
         /// <summary>
         /// Provides the default implementation for the OnSignatureVerificationSucceeded handler. Always invokes the
-        /// next middle
+        /// next middleware.
         /// </summary>
         /// <param name="context">
         /// The <see cref="MessageContext"/> that defines the context for which signature verification succeeded.
