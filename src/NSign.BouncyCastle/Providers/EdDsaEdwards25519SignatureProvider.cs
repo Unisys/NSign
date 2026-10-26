@@ -15,7 +15,7 @@ namespace NSign.BouncyCastle.Providers
     public sealed class EdDsaEdwards25519SignatureProvider : SignatureProvider
     {
         /// <summary>
-        /// The algorithm name define in the standard.
+        /// The algorithm name defined in the standard.
         /// </summary>
         private const string AlgorithmName = "ed25519";
 

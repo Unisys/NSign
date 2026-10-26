@@ -187,7 +187,7 @@
         public static class SignatureAlgorithms
         {
             /// <summary>
-            /// The name for signatues using RSA with PSS signature padding and SHA-512 signature hashes.
+            /// The name for signatures using RSA with PSS signature padding and SHA-512 signature hashes.
             /// </summary>
             public const string RsaPssSha512 = "rsa-pss-sha512";
 

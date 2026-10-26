@@ -67,7 +67,7 @@ namespace NSign.Client
 
             // We must use HttpContent.CopyToAsync to get a copy of the stream without breaking the request pipeline
             // because the content stream would otherwise be closed by the time it needs to be sent over the wire. The
-            // easiest way to achieve is is to use a pipe where the content stream is written to, and in parallel read
+            // easiest way to achieve this is to use a pipe where the content stream is written to, and in parallel read
             // from for hashing.
             Pipe contentPipe = new Pipe();
             Task writeBody = WriteHttpContentAsync(content, contentPipe);
