@@ -21,7 +21,7 @@ then
 fi
 
 find $BASE -iname $TEST_PROJECT_PATTERN \
-    -exec dotnet test "{}" $TEST_PARAMS \
+    -exec dotnet test --project "{}" $TEST_PARAMS \
         --coverlet \
         --results-directory $TEMP_RESULTS_DIR \;
 
