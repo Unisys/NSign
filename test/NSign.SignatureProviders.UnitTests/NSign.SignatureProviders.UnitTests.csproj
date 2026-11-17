@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="$(CoverletCollectorVersionWildcard)" />
     <PackageReference Include="coverlet.MTP" Version="$(CoverletCollectorVersionWildcard)" />
     <PackageReference Include="Microsoft.Bcl.Cryptography" Version="10.*" />
     <PackageReference Include="Moq" Version="$(MoqVersionWildcard)" />

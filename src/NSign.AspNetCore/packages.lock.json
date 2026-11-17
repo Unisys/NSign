@@ -5,8 +5,8 @@
       "StructuredFieldValues": {
         "type": "Direct",
         "requested": "[0.*, )",
-        "resolved": "0.7.7",
-        "contentHash": "eqrFBXmowuor0M6KLjbkm8tfjADW9Jqy2rQi+SUrNkwU/AuDVHgHLAWmRhHiYVhq57QYzZNmdyKnsYWJTW0d/g=="
+        "resolved": "0.8.1",
+        "contentHash": "mvN5XXwqeN8BJyuZZXGNPIRb2Wq5L9HQhATxcJeTUPuMs9QaF7a44r9SusRWoTfz4aZN5mb6ovOQyzB20mTbGA=="
       },
       "nsign.abstractions": {
         "type": "Project",
@@ -15,26 +15,12 @@
         }
       }
     },
-    "net8.0": {
+    "net11.0": {
       "StructuredFieldValues": {
         "type": "Direct",
         "requested": "[0.*, )",
-        "resolved": "0.7.7",
-        "contentHash": "eqrFBXmowuor0M6KLjbkm8tfjADW9Jqy2rQi+SUrNkwU/AuDVHgHLAWmRhHiYVhq57QYzZNmdyKnsYWJTW0d/g=="
-      },
-      "nsign.abstractions": {
-        "type": "Project",
-        "dependencies": {
-          "StructuredFieldValues": "[0.*, )"
-        }
-      }
-    },
-    "net9.0": {
-      "StructuredFieldValues": {
-        "type": "Direct",
-        "requested": "[0.*, )",
-        "resolved": "0.7.7",
-        "contentHash": "eqrFBXmowuor0M6KLjbkm8tfjADW9Jqy2rQi+SUrNkwU/AuDVHgHLAWmRhHiYVhq57QYzZNmdyKnsYWJTW0d/g=="
+        "resolved": "0.8.1",
+        "contentHash": "mvN5XXwqeN8BJyuZZXGNPIRb2Wq5L9HQhATxcJeTUPuMs9QaF7a44r9SusRWoTfz4aZN5mb6ovOQyzB20mTbGA=="
       },
       "nsign.abstractions": {
         "type": "Project",
