@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="$(CoverletCollectorVersionWildcard)" />
     <PackageReference Include="coverlet.MTP" Version="$(CoverletCollectorVersionWildcard)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(SystemDependencyVersionWildcard)" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="$(SystemDependencyVersionWildcard)" />

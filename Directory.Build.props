@@ -3,12 +3,12 @@
   <PropertyGroup>
     <DotnetLatestLtsVersion>10.0</DotnetLatestLtsVersion>
     <NetStandardTarget>netstandard2.0</NetStandardTarget>
-    <SupportedDotnetVersions>net8.0;net9.0;net10.0</SupportedDotnetVersions>
-    <LibraryTargetFrameworks>$(NetStandardTarget);$(SupportedDotnetVersions)</LibraryTargetFrameworks>
+    <SupportedDotnetVersions>net10.0;net11.0</SupportedDotnetVersions>
+    <LibraryTargetFrameworks>$(SupportedDotnetVersions);$(NetStandardTarget)</LibraryTargetFrameworks>
     <AspNetCoreTargetFrameworks>$(SupportedDotnetVersions)</AspNetCoreTargetFrameworks>
     <TestTargetFrameworks>$(SupportedDotnetVersions)</TestTargetFrameworks>
     <!-- Use the following target framework to test the netstandard targeted versions of the libraries -->
-    <NetStandardTestTargetFramework>net9.0</NetStandardTestTargetFramework>
+    <NetStandardTestTargetFramework>net11.0</NetStandardTestTargetFramework>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -21,10 +21,9 @@
   </PropertyGroup>
 
   <PropertyGroup Label="SystemDependencyVersions">
-    <SystemDependencyVersionWildcard Condition="'$(TargetFramework)' == '$(NetStandardTarget)'">8.0.*</SystemDependencyVersionWildcard>
-    <SystemDependencyVersionWildcard Condition="'$(TargetFramework)' == 'net8.0'">8.0.*</SystemDependencyVersionWildcard>
-    <SystemDependencyVersionWildcard Condition="'$(TargetFramework)' == 'net9.0'">9.0.*</SystemDependencyVersionWildcard>
+    <SystemDependencyVersionWildcard Condition="'$(TargetFramework)' == '$(NetStandardTarget)'">10.0.*</SystemDependencyVersionWildcard>
     <SystemDependencyVersionWildcard Condition="'$(TargetFramework)' == 'net10.0'">10.0.*</SystemDependencyVersionWildcard>
+    <SystemDependencyVersionWildcard Condition="'$(TargetFramework)' == 'net11.0'">11.0.*</SystemDependencyVersionWildcard>
   </PropertyGroup>
 
   <PropertyGroup Label="ExternalDependencyVersions">
